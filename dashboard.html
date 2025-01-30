@@ -1161,30 +1161,120 @@
         const USER_CACHE_KEY = 'userData';
         const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
 
-        // التحقق من حالة تسجيل الدخول قبل أي شيء
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                // إذا لم يكن المستخدم مسجل، قم بتوجيهه لصفحة تسجيل الدخول
-                window.location.href = 'login.html';
-                return;
-            }
+        // إضافة دالة للتحقق من المصادقة
+        async function checkAuth() {
+            return new Promise((resolve, reject) => {
+                // تحديد مهلة زمنية للتحقق
+                const timeout = setTimeout(() => {
+                    reject(new Error('Auth timeout'));
+                }, 5000); // 5 ثواني كحد أقصى
 
+                const unsubscribe = auth.onAuthStateChanged(async (user) => {
+                    clearTimeout(timeout);
+                    unsubscribe(); // إلغاء الاشتراك بعد أول استجابة
+
+                    if (!user) {
+                        window.location.href = 'login.html';
+                        reject(new Error('No user'));
+                        return;
+                    }
+
+                    try {
+                        // تحديث التوكن
+                        const newToken = await user.getIdToken();
+                        localStorage.setItem('authToken', newToken);
+                        localStorage.setItem('userId', user.uid);
+                        
+                        // تهيئة المراقبة المستمرة للتوكن
+                        initTokenRefresh(user);
+                        
+                        resolve(user);
+                    } catch (error) {
+                        console.error('Auth error:', error);
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        // دالة لمراقبة تحديث التوكن
+        function initTokenRefresh(user) {
+            auth.onIdTokenChanged(async (updatedUser) => {
+                if (updatedUser) {
+                    try {
+                        const newToken = await updatedUser.getIdToken();
+                        localStorage.setItem('authToken', newToken);
+                    } catch (error) {
+                        console.error('Token refresh error:', error);
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                    }
+                } else {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        // تحميل البيانات وعرضها
+        async function initializeApp(user) {
             try {
-                // تحديث التوكن
-                const newToken = await user.getIdToken();
-                localStorage.setItem('authToken', newToken);
-                localStorage.setItem('userId', user.uid);
-                
-                // عرض المحتوى المخزن مؤقتاً
+                // عرض البيانات المخزنة مؤقتاً أولاً
                 showCachedContent();
                 
-                // تحديث البيانات في الخلفية
-                updateDataInBackground(user.uid);
+                // تحديث البيانات من السيرفر
+                await updateDataInBackground(user.uid);
+                
+                // إخفاء شاشة التحميل
+                document.getElementById('loadingOverlay')?.classList.add('hidden');
+                document.querySelector('.dashboard-container')?.classList.add('loaded');
             } catch (error) {
-                console.error('Error initializing:', error);
-                window.location.href = 'login.html';
+                console.error('Initialization error:', error);
+                showToast('حدث خطأ في تحميل البيانات', true);
+            }
+        }
+
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const user = await checkAuth();
+                if (user) {
+                    await initializeApp(user);
+                }
+            } catch (error) {
+                console.error('Startup error:', error);
+                if (!window.location.href.includes('login.html')) {
+                    window.location.href = 'login.html';
+                }
             }
         });
+
+        // تحديث دالة تسجيل الخروج
+        window.confirmLogout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('حدث خطأ أثناء تسجيل الخروج', true);
+            }
+        };
+
+        // دالة مساعدة لعرض الإشعارات
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true
+            }).showToast();
+        }
 
         // تحديث دالة تهيئة Firebase
         async function initializeFirebase() {
@@ -1306,19 +1396,6 @@
         window.closeLogoutModal = function() {
             const logoutModal = document.getElementById('logoutModal');
             logoutModal.style.display = 'none';
-        };
-
-        // دالة تأكيد تسجيل الخروج
-        window.confirmLogout = async function() {
-            try {
-                const auth = getAuth();
-                await signOut(auth);
-                localStorage.clear(); // مسح كل البيانات المخزنة
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error(error);
-                showToast('حدث خطأ أثناء تسجيل الخروج', true);
-            }
         };
 
         // إغلاق النافذة عند النقر خارجها
