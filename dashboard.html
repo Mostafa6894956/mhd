@@ -1221,15 +1221,19 @@
         // تحميل البيانات وعرضها
         async function initializeApp(user) {
             try {
+                // إخفاء التحميل بعد 500 مللي ثانية بغض النظر عن النتيجة
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay')?.classList.add('hidden');
+                    document.querySelector('.dashboard-container')?.classList.add('loaded');
+                }, 500);
+
                 // عرض البيانات المخزنة مؤقتاً أولاً
                 showCachedContent();
                 
-                // تحديث البيانات من السيرفر
-                await updateDataInBackground(user.uid);
-                
-                // إخفاء شاشة التحميل
-                document.getElementById('loadingOverlay')?.classList.add('hidden');
-                document.querySelector('.dashboard-container')?.classList.add('loaded');
+                // تحديث البيانات من السيرفر في الخلفية
+                updateDataInBackground(user.uid).catch(error => {
+                    console.error('Background update error:', error);
+                });
             } catch (error) {
                 console.error('Initialization error:', error);
                 showToast('حدث خطأ في تحميل البيانات', true);
@@ -1304,16 +1308,17 @@
                 
                 if (cachedUserData) {
                     const userData = JSON.parse(cachedUserData);
-                    document.getElementById('userNameSpan').textContent = userData.name || '';
-                    document.getElementById('userInstitute').textContent = userData.azharInstitute || '';
+                    requestAnimationFrame(() => {
+                        document.getElementById('userNameSpan').textContent = userData.name || '';
+                        document.getElementById('userInstitute').textContent = userData.azharInstitute || '';
+                    });
                 }
 
                 if (cachedSections) {
-                    updateUI(JSON.parse(cachedSections));
+                    requestAnimationFrame(() => {
+                        updateUI(JSON.parse(cachedSections));
+                    });
                 }
-
-                document.querySelector('.dashboard-container')?.classList.add('loaded');
-                document.getElementById('loadingOverlay')?.classList.add('hidden');
             } catch (error) {
                 console.error('Error loading cached content:', error);
             }
@@ -1324,16 +1329,20 @@
             if (!userId) return;
 
             try {
-                const userSnapshot = await get(ref(database, 'users/' + userId));
+                // تنفيذ الطلبات بالتوازي
+                const [userSnapshot, sectionsStatus] = await Promise.all([
+                    get(ref(database, 'users/' + userId)),
+                    fetchSectionsStatus(userId)
+                ]);
+
                 if (userSnapshot.exists()) {
                     const userData = userSnapshot.val();
                     localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
-                    updateUserUI(userData);
+                    requestAnimationFrame(() => updateUserUI(userData));
                 }
 
-                const sectionsStatus = await fetchSectionsStatus(userId);
                 localStorage.setItem(SECTIONS_CACHE_KEY, JSON.stringify(sectionsStatus));
-                updateUI(sectionsStatus);
+                requestAnimationFrame(() => updateUI(sectionsStatus));
             } catch (error) {
                 console.error('Background update error:', error);
             }
@@ -1419,7 +1428,7 @@
             });
         }
 
-        // دالة جلب حالة الأقسام
+        // تحديث دالة جلب حالة الأقسام
         async function fetchSectionsStatus(userId) {
             const sections = [
                 'hierarchy', 'leadership-meetings', 'supervisor-meetings',
@@ -1427,15 +1436,16 @@
                 'general-photos', 'results', 'attendance', 'domains'
             ];
 
-            const sectionsStatus = {};
-            
-            for (const section of sections) {
-                const sectionRef = ref(database, `users/${userId}/images/${section}`);
-                const snapshot = await get(sectionRef);
-                sectionsStatus[section] = snapshot.exists();
-            }
-            
-            return sectionsStatus;
+            // تنفيذ كل الطلبات بالتوازي
+            const snapshots = await Promise.all(
+                sections.map(section => 
+                    get(ref(database, `users/${userId}/images/${section}`))
+            );
+
+            return sections.reduce((acc, section, index) => {
+                acc[section] = snapshots[index].exists();
+                return acc;
+            }, {});
         }
 
         // دوال التحميل
