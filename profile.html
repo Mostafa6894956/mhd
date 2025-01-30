@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - نظام مراجعة الوثائق</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f43f5e;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            padding-top: 5rem;
+        }
+
+        /* تحسين شاشة التحميل */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--light);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(59, 130, 246, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* تحسين تصميم الحاوية */
+        .profile-container {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 0 auto;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        /* تحسين رأس الصفحة */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            padding-top: 2rem;
+        }
+
+        .profile-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        /* تحسين عرض البيانات */
+        .profile-data {
+            display: grid;
+            gap: 1.5rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .profile-data.hidden {
+            display: none;
+        }
+
+        .data-group {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .data-group:hover {
+            transform: translateY(-2px);
+        }
+
+        .data-group label {
+            color: var(--gray);
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .data-group .value {
+            color: var(--dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: var(--light);
+        }
+
+        /* تحسين الأزرار */
+        .edit-button, .save-button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .edit-button {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .edit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .save-button {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cancel-button {
+            background: var(--gray) !important;
+        }
+
+        /* تحسين نموذج التعديل */
+        .profile-form {
+            display: none;
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .profile-form.active {
+            display: grid;
+            gap: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .form-group input:disabled {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        /* إضافة الأنيميشن */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* إضافة أنيميشن الظهور */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ستايل زر الحفظ أثناء التحميل */
+        .save-button.loading {
+            position: relative;
+            background: var(--primary-dark);
+            cursor: not-allowed;
+        }
+
+        .button-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* تعديل ستايل الأزرار المعطلة */
+        .edit-button:disabled,
+        .save-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* تحسين أنيميشن التحول */
+        .profile-form, .profile-data {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .profile-form.active,
+        .profile-data:not(.hidden) {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .profile-form:not(.active),
+        .profile-data.hidden {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        /* تحديث ستايل زر العودة */
+        .back-button {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--white);
+            color: var(--primary);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            z-index: 100;
+        }
+
+        .back-button i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .back-button:hover i {
+            transform: translateX(-3px);
+        }
+
+        /* تعديل padding الصفحة لتجنب تداخل الزر */
+        body {
+            padding-top: 5rem;
+        }
+
+        /* تحسين responsive للزر */
+        @media (max-width: 768px) {
+            .back-button {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .back-button i {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- تعديل شاشة التحميل -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">جاري تحميل البيانات...</div>
+    </div>
+
+    <div class="profile-container">
+        <button class="back-button" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-chevron-right"></i>
+            العودة للرئيسية
+        </button>
+
+        <div class="profile-header">
+            <h1>الملف الشخصي</h1>
+            <p>بياناتك الشخصية</p>
+        </div>
+        
+        <!-- عرض البيانات -->
+        <div class="profile-data" id="profileData">
+            <div class="data-group">
+                <label>الاسم الكامل</label>
+                <div class="value" id="nameValue"></div>
+            </div>
+            
+            <div class="data-group">
+                <label>رقم الهاتف</label>
+                <div class="value" id="phoneValue"></div>
+            </div>
+            
+            <div class="data-group">
+                <label>المحافظة</label>
+                <div class="value" id="governorateValue"></div>
+            </div>
+            
+            <div class="data-group">
+                <label>الإدارة</label>
+                <div class="value" id="administrationValue"></div>
+            </div>
+            
+            <div class="data-group">
+                <label>المعهد الأزهري</label>
+                <div class="value" id="instituteValue"></div>
+            </div>
+
+            <button class="edit-button" onclick="toggleEditMode()">
+                <i class="fas fa-edit"></i>
+                تعديل البيانات
+            </button>
+        </div>
+        
+        <!-- نموذج التعديل -->
+        <form class="profile-form" id="profileForm">
+            <div class="form-group">
+                <label>الاسم الكامل</label>
+                <input type="text" id="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label>رقم الهاتف</label>
+                <input type="tel" id="phone" disabled>
+            </div>
+            
+            <div class="form-group">
+                <label>المحافظة</label>
+                <input type="text" id="governorate" required>
+            </div>
+            
+            <div class="form-group">
+                <label>الإدارة</label>
+                <input type="text" id="administration" required>
+            </div>
+            
+            <div class="form-group">
+                <label>المعهد الأزهري</label>
+                <input type="text" id="institute" required>
+            </div>
+
+            <button type="submit" class="save-button">حفظ التغييرات</button>
+            <button type="button" class="edit-button cancel-button" onclick="toggleEditMode()">
+                <i class="fas fa-times"></i>
+                إلغاء التعديل
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // تحميل بيانات المستخدم
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    
+                    const snapshot = await get(ref(db, `users/${user.uid}`));
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        
+                        // تحديث حقول النموذج
+                        document.getElementById('name').value = userData.name || '';
+                        document.getElementById('phone').value = userData.phone || '';
+                        document.getElementById('governorate').value = userData.governorate || '';
+                        document.getElementById('administration').value = userData.administration || '';
+                        document.getElementById('institute').value = userData.institute || '';
+
+                        // تحديث عرض البيانات
+                        document.getElementById('nameValue').textContent = userData.name || 'غير محدد';
+                        document.getElementById('phoneValue').textContent = userData.phone || 'غير محدد';
+                        document.getElementById('governorateValue').textContent = userData.governorate || 'غير محدد';
+                        document.getElementById('administrationValue').textContent = userData.administration || 'غير محدد';
+                        document.getElementById('instituteValue').textContent = userData.institute || 'غير محدد';
+                    }
+                } catch (error) {
+                    console.error("Error loading user data:", error);
+                    showToast('حدث خطأ في تحميل البيانات', true);
+                } finally {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }
+            } else {
+                window.location.href = 'index.html?reason=not_authenticated';
+            }
+        });
+
+        // تعديل معالج النموذج
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveButton = e.target.querySelector('.save-button');
+            const cancelButton = e.target.querySelector('.cancel-button');
+            
+            // تفعيل حالة التحميل
+            saveButton.disabled = true;
+            cancelButton.disabled = true;
+            saveButton.classList.add('loading');
+            saveButton.innerHTML = '<div class="button-spinner"></div>';
+
+            try {
+                const user = auth.currentUser;
+                if (!user) throw new Error('User not authenticated');
+
+                const updates = {
+                    name: document.getElementById('name').value,
+                    governorate: document.getElementById('governorate').value,
+                    administration: document.getElementById('administration').value,
+                    institute: document.getElementById('institute').value
+                };
+
+                // تحديث البيانات في Firebase
+                await update(ref(db, `users/${user.uid}`), updates);
+                
+                // تحديث البيانات المعروضة
+                document.getElementById('nameValue').textContent = updates.name;
+                document.getElementById('governorateValue').textContent = updates.governorate;
+                document.getElementById('administrationValue').textContent = updates.administration;
+                document.getElementById('instituteValue').textContent = updates.institute;
+                
+                // تحديث localStorage
+                localStorage.setItem('userName', updates.name);
+                
+                showToast('تم حفظ التغييرات بنجاح');
+                
+                // العودة لوضع العرض
+                toggleEditMode();
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                showToast('حدث خطأ في حفظ التغييرات', true);
+            } finally {
+                // إعادة الأزرار لحالتها الطبيعية
+                saveButton.disabled = false;
+                cancelButton.disabled = false;
+                saveButton.classList.remove('loading');
+                saveButton.innerHTML = 'حفظ التغييرات';
+            }
+        });
+
+        // دالة التبديل بين العرض والتعديل
+        window.toggleEditMode = function() {
+            const form = document.getElementById('profileForm');
+            const data = document.getElementById('profileData');
+            
+            if (form.classList.contains('active')) {
+                // العودة لوضع العرض
+                form.classList.remove('active');
+                setTimeout(() => {
+                    data.classList.remove('hidden');
+                }, 100);
+            } else {
+                // الانتقال لوضع التعديل
+                data.classList.add('hidden');
+                setTimeout(() => {
+                    form.classList.add('active');
+                }, 100);
+            }
+        }
+
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true
+            }).showToast();
+        }
+    </script>
+</body>
+</html> 
