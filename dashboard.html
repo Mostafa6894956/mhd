@@ -1161,70 +1161,47 @@
         const USER_CACHE_KEY = 'userData';
         const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
 
-        // عرض المحتوى فوراً من الكاش
-        document.addEventListener('DOMContentLoaded', () => {
-            // تحقق من وجود توكن وID المستخدم
-            const cachedToken = localStorage.getItem('authToken');
-            const cachedUserId = localStorage.getItem('userId');
-            
-            if (!cachedToken || !cachedUserId) {
-                // إذا لم يكن هناك توكن أو ID، توجيه المستخدم لصفحة تسجيل الدخول
+        // التحقق من حالة تسجيل الدخول قبل أي شيء
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                // إذا لم يكن المستخدم مسجل، قم بتوجيهه لصفحة تسجيل الدخول
                 window.location.href = 'login.html';
                 return;
             }
 
-            showCachedContent();
-            initializeFirebase();
+            try {
+                // تحديث التوكن
+                const newToken = await user.getIdToken();
+                localStorage.setItem('authToken', newToken);
+                localStorage.setItem('userId', user.uid);
+                
+                // عرض المحتوى المخزن مؤقتاً
+                showCachedContent();
+                
+                // تحديث البيانات في الخلفية
+                updateDataInBackground(user.uid);
+            } catch (error) {
+                console.error('Error initializing:', error);
+                window.location.href = 'login.html';
+            }
         });
 
         // تحديث دالة تهيئة Firebase
         async function initializeFirebase() {
             try {
-                const auth = getAuth();
-                
-                // التحقق من حالة تسجيل الدخول
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        try {
-                            // تحديث التوكن
-                            const newToken = await user.getIdToken();
-                            localStorage.setItem('authToken', newToken);
-                            localStorage.setItem('userId', user.uid);
-                            
-                            // تحديث البيانات في الخلفية
-                            updateDataInBackground(user.uid);
-                        } catch (error) {
-                            console.error('Error refreshing token:', error);
-                            // في حالة حدوث خطأ في تحديث التوكن
-                            localStorage.removeItem('authToken');
-                            localStorage.removeItem('userId');
-                            window.location.href = 'login.html';
-                        }
-                    } else {
-                        // المستخدم غير مسجل
-                        localStorage.removeItem('authToken');
-                        localStorage.removeItem('userId');
-                        window.location.href = 'login.html';
-                    }
-                });
-
                 // إضافة مستمع لتحديث التوكن
                 auth.onIdTokenChanged(async (user) => {
                     if (user) {
                         const newToken = await user.getIdToken();
                         localStorage.setItem('authToken', newToken);
                     } else {
-                        localStorage.removeItem('authToken');
-                        localStorage.removeItem('userId');
+                        localStorage.clear();
                         window.location.href = 'login.html';
                     }
                 });
-
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                // في حالة حدوث خطأ في التهيئة
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userId');
+                localStorage.clear();
                 window.location.href = 'login.html';
             }
         }
@@ -1237,16 +1214,16 @@
                 
                 if (cachedUserData) {
                     const userData = JSON.parse(cachedUserData);
-                    document.getElementById('userNameSpan').textContent = userData.name;
-                    document.getElementById('userInstitute').textContent = userData.azharInstitute;
+                    document.getElementById('userNameSpan').textContent = userData.name || '';
+                    document.getElementById('userInstitute').textContent = userData.azharInstitute || '';
                 }
 
                 if (cachedSections) {
                     updateUI(JSON.parse(cachedSections));
                 }
 
-                document.querySelector('.dashboard-container').classList.add('loaded');
-                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.querySelector('.dashboard-container')?.classList.add('loaded');
+                document.getElementById('loadingOverlay')?.classList.add('hidden');
             } catch (error) {
                 console.error('Error loading cached content:', error);
             }
@@ -1257,17 +1234,14 @@
             if (!userId) return;
 
             try {
-                const [userSnapshot, sectionsStatus] = await Promise.all([
-                    get(ref(database, 'users/' + userId)),
-                    fetchSectionsStatus(userId)
-                ]);
-
+                const userSnapshot = await get(ref(database, 'users/' + userId));
                 if (userSnapshot.exists()) {
                     const userData = userSnapshot.val();
                     localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
                     updateUserUI(userData);
                 }
 
+                const sectionsStatus = await fetchSectionsStatus(userId);
                 localStorage.setItem(SECTIONS_CACHE_KEY, JSON.stringify(sectionsStatus));
                 updateUI(sectionsStatus);
             } catch (error) {
