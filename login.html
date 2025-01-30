@@ -408,6 +408,31 @@
             return /^01[0125][0-9]{8}$/.test(phone);
         }
 
+        // دالة لتخزين البيانات مع تاريخ انتهاء صلاحية
+        function setStorageWithExpiry(key, value, months = 6) {
+            const now = new Date();
+            const item = {
+                value: value,
+                expiry: now.setMonth(now.getMonth() + months),
+            }
+            localStorage.setItem(key, JSON.stringify(item));
+        }
+
+        // دالة للحصول على البيانات المخزنة مع التحقق من الصلاحية
+        function getStorageWithExpiry(key) {
+            const itemStr = localStorage.getItem(key);
+            if (!itemStr) return null;
+
+            const item = JSON.parse(itemStr);
+            const now = new Date();
+
+            if (now.getTime() > item.expiry) {
+                localStorage.removeItem(key);
+                return null;
+            }
+            return item.value;
+        }
+
         // معالجة تسجيل الدخول
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -444,15 +469,24 @@
                 const userData = snapshot.val();
                 const token = await userCredential.user.getIdToken();
                 
-                localStorage.setItem('authToken', token);
-                localStorage.setItem('userName', userData.name);
+                // تخزين البيانات مع تاريخ انتهاء صلاحية 6 أشهر
+                setStorageWithExpiry('authToken', token);
+                setStorageWithExpiry('userName', userData.name);
+
+                // التأكد من حفظ البيانات قبل التوجيه
+                await new Promise(resolve => {
+                    const checkStorage = () => {
+                        if (getStorageWithExpiry('authToken') && getStorageWithExpiry('userName')) {
+                            resolve();
+                        } else {
+                            setTimeout(checkStorage, 100);
+                        }
+                    };
+                    checkStorage();
+                });
 
                 showToast('تم تسجيل الدخول بنجاح');
-                
-                // التوجيه للداشبورد
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                window.location.href = 'dashboard.html';
 
             } catch (error) {
                 console.error('Login Error:', error);
