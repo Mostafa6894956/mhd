@@ -477,11 +477,20 @@
                 localStorage.setItem('authToken', token);
                 localStorage.setItem('userName', name);
 
+                // التأكد من حفظ البيانات قبل التوجيه
+                await new Promise(resolve => {
+                    const checkStorage = () => {
+                        if (localStorage.getItem('authToken') && localStorage.getItem('userName')) {
+                            resolve();
+                        } else {
+                            setTimeout(checkStorage, 100);
+                        }
+                    };
+                    checkStorage();
+                });
+
                 showToast('تم إنشاء الحساب بنجاح');
-                
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                window.location.href = 'dashboard.html';
 
             } catch (error) {
                 console.error('Signup Error:', error);
