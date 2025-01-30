@@ -1163,6 +1163,16 @@
 
         // عرض المحتوى فوراً من الكاش
         document.addEventListener('DOMContentLoaded', () => {
+            // تحقق من وجود توكن وID المستخدم
+            const cachedToken = localStorage.getItem('authToken');
+            const cachedUserId = localStorage.getItem('userId');
+            
+            if (!cachedToken || !cachedUserId) {
+                // إذا لم يكن هناك توكن أو ID، توجيه المستخدم لصفحة تسجيل الدخول
+                window.location.href = 'login.html';
+                return;
+            }
+
             showCachedContent();
             initializeFirebase();
         });
@@ -1173,44 +1183,49 @@
                 const auth = getAuth();
                 
                 // التحقق من حالة تسجيل الدخول
-                const cachedToken = localStorage.getItem('authToken');
-                const cachedUserId = localStorage.getItem('userId');
-                
-                if (!cachedToken || !cachedUserId) {
-                    // إذا لم يكن هناك توكن محفوظ، انتظر حالة المصادقة
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            // تحديث التوكن والمعرف
-                            user.getIdToken().then(token => {
-                                localStorage.setItem('authToken', token);
-                                localStorage.setItem('userId', user.uid);
-                                updateDataInBackground(user.uid);
-                            });
-                        } else {
-                            window.location.href = 'login.html';
-                        }
-                    });
-                } else {
-                    // استخدام المعرف المحفوظ لتحديث البيانات
-                    updateDataInBackground(cachedUserId);
-                    
-                    // التحقق من صلاحية التوكن في الخلفية
-                    auth.onIdTokenChanged(async (user) => {
-                        if (user) {
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        try {
+                            // تحديث التوكن
                             const newToken = await user.getIdToken();
                             localStorage.setItem('authToken', newToken);
-                        } else {
-                            // إذا انتهت صلاحية التوكن
+                            localStorage.setItem('userId', user.uid);
+                            
+                            // تحديث البيانات في الخلفية
+                            updateDataInBackground(user.uid);
+                        } catch (error) {
+                            console.error('Error refreshing token:', error);
+                            // في حالة حدوث خطأ في تحديث التوكن
                             localStorage.removeItem('authToken');
                             localStorage.removeItem('userId');
                             window.location.href = 'login.html';
                         }
-                    });
-                }
+                    } else {
+                        // المستخدم غير مسجل
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('userId');
+                        window.location.href = 'login.html';
+                    }
+                });
+
+                // إضافة مستمع لتحديث التوكن
+                auth.onIdTokenChanged(async (user) => {
+                    if (user) {
+                        const newToken = await user.getIdToken();
+                        localStorage.setItem('authToken', newToken);
+                    } else {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('userId');
+                        window.location.href = 'login.html';
+                    }
+                });
+
             } catch (error) {
                 console.error('Firebase initialization error:', error);
-                // عدم توجيه المستخدم للوجين إذا كان هناك خطأ في التهيئة
-                // فقط سجل الخطأ واستمر في عرض البيانات المخزنة محلياً
+                // في حالة حدوث خطأ في التهيئة
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userId');
+                window.location.href = 'login.html';
             }
         }
 
@@ -1220,15 +1235,6 @@
                 const cachedUserData = localStorage.getItem(USER_CACHE_KEY);
                 const cachedSections = localStorage.getItem(SECTIONS_CACHE_KEY);
                 
-                if (!cachedUserData && !cachedSections) {
-                    // إذا لم تكن هناك بيانات مخزنة على الإطلاق
-                    const cachedToken = localStorage.getItem('authToken');
-                    if (!cachedToken) {
-                        window.location.href = 'login.html';
-                        return;
-                    }
-                }
-
                 if (cachedUserData) {
                     const userData = JSON.parse(cachedUserData);
                     document.getElementById('userNameSpan').textContent = userData.name;
