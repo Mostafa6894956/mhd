@@ -59,8 +59,19 @@
         }
 
         .user-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             font-weight: 600;
-            color: var(--dark);
+        }
+
+        .user-name .welcome {
+            color: var(--gray);
+        }
+
+        .user-name .name {
+            color: var(--primary);
+            font-weight: 700;
         }
 
         .institute-name {
@@ -758,108 +769,6 @@
         .close-modal:hover {
             color: var(--primary);
         }
-
-        /* إضافة نافذة تأكيد تسجيل الخروج */
-        .logout-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logout-modal-content {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            animation: modalFadeIn 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .logout-icon {
-            font-size: 3rem;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-            animation: iconBounce 0.5s ease;
-        }
-
-        .logout-modal h3 {
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            font-size: 1.4rem;
-        }
-
-        .logout-modal p {
-            color: var(--gray);
-            margin-bottom: 1.5rem;
-        }
-
-        .logout-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .logout-buttons button {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .logout-confirm {
-            background: var(--secondary);
-            color: var(--white);
-        }
-
-        .logout-cancel {
-            background: var(--light);
-            color: var(--dark);
-        }
-
-        .logout-confirm:hover {
-            background: #e11d48;
-            transform: translateY(-2px);
-        }
-
-        .logout-cancel:hover {
-            background: #e2e8f0;
-            transform: translateY(-2px);
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes iconBounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
     </style>
 </head>
 <body>
@@ -867,7 +776,10 @@
         <header class="header">
             <div class="header-content">
                 <div class="user-info">
-                    <div class="user-name" id="userNameSpan"></div>
+                    <div class="user-name">
+                        <span class="welcome">مرحباً،</span>
+                        <span class="name" id="userNameSpan"></span>
+                    </div>
                     <div class="institute-name" id="userInstitute"></div>
                 </div>
                 <button class="menu-btn" id="menuBtn">
@@ -1115,25 +1027,6 @@
             
             <p>نحن هنا لمساعدتك في أي وقت!</p>
         </div>
-
-        <!-- إضافة نافذة تأكيد تسجيل الخروج -->
-        <div id="logoutModal" class="logout-modal">
-            <div class="logout-modal-content">
-                <i class="fas fa-sign-out-alt logout-icon"></i>
-                <h3>تأكيد تسجيل الخروج</h3>
-                <p>هل أنت متأكد من رغبتك في تسجيل الخروج؟</p>
-                <div class="logout-buttons">
-                    <button class="logout-confirm" onclick="confirmLogout()">
-                        <i class="fas fa-check"></i>
-                        تأكيد
-                    </button>
-                    <button class="logout-cancel" onclick="closeLogoutModal()">
-                        <i class="fas fa-times"></i>
-                        إلغاء
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script type="module">
@@ -1152,324 +1045,137 @@
             measurementId: "G-SCSBHBQM08"
         };
 
+        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const database = getDatabase(app);
+        const db = getDatabase(app);
 
-        // إضافة ثوابت للكاش
-        const SECTIONS_CACHE_KEY = 'sections_status';
-        const USER_CACHE_KEY = 'userData';
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
-
-        // عرض المحتوى فوراً من الكاش
-        document.addEventListener('DOMContentLoaded', () => {
-            showCachedContent();
-            initializeFirebase();
+        // عرض اسم المستخدم فوراً من التخزين المحلي
+        document.getElementById('userNameSpan').textContent = localStorage.getItem('userName') || 'مستخدم';
+        
+        // التحقق من حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // إخفاء عنصر اسم المعهد
+                document.getElementById('userInstitute').style.display = 'none';
+                
+                // تحديث البيانات في الخلفية
+                getUserData(user.uid);
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.querySelector('.dashboard-container').classList.add('loaded');
+            } else {
+                window.location.href = 'index.html';
+            }
         });
 
-        // تحديث دالة تهيئة Firebase
-        async function initializeFirebase() {
+        // جلب بيانات المستخدم
+        async function getUserData(uid) {
             try {
-                const auth = getAuth();
+                const userRef = ref(db, `users/${uid}`);
+                const snapshot = await get(userRef);
                 
-                // التحقق من حالة تسجيل الدخول
-                const cachedToken = localStorage.getItem('authToken');
-                const cachedUserId = localStorage.getItem('userId');
-                
-                if (!cachedToken || !cachedUserId) {
-                    // إذا لم يكن هناك توكن محفوظ، انتظر حالة المصادقة
-                    onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            // تحديث التوكن والمعرف
-                            user.getIdToken().then(token => {
-                                localStorage.setItem('authToken', token);
-                                localStorage.setItem('userId', user.uid);
-                                updateDataInBackground(user.uid);
-                            });
-                        } else {
-                            window.location.href = 'login.html';
-                        }
-                    });
-                } else {
-                    // استخدام المعرف المحفوظ لتحديث البيانات
-                    updateDataInBackground(cachedUserId);
-                    
-                    // التحقق من صلاحية التوكن في الخلفية
-                    auth.onIdTokenChanged(async (user) => {
-                        if (user) {
-                            const newToken = await user.getIdToken();
-                            localStorage.setItem('authToken', newToken);
-                        } else {
-                            // إذا انتهت صلاحية التوكن
-                            localStorage.removeItem('authToken');
-                            localStorage.removeItem('userId');
-                            window.location.href = 'login.html';
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Firebase initialization error:', error);
-                // عدم توجيه المستخدم للوجين إذا كان هناك خطأ في التهيئة
-                // فقط سجل الخطأ واستمر في عرض البيانات المخزنة محلياً
-            }
-        }
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    const serverUserName = userData.name || 'مستخدم';
 
-        // تحديث دالة showCachedContent
-        function showCachedContent() {
-            try {
-                const cachedUserData = localStorage.getItem(USER_CACHE_KEY);
-                const cachedSections = localStorage.getItem(SECTIONS_CACHE_KEY);
-                
-                if (!cachedUserData && !cachedSections) {
-                    // إذا لم تكن هناك بيانات مخزنة على الإطلاق
-                    const cachedToken = localStorage.getItem('authToken');
-                    if (!cachedToken) {
-                        window.location.href = 'login.html';
-                        return;
+                    // تحديث اسم المستخدم فقط إذا كان مختلفاً
+                    const localUserName = localStorage.getItem('userName');
+                    if (serverUserName !== localUserName) {
+                        localStorage.setItem('userName', serverUserName);
+                        document.getElementById('userNameSpan').textContent = serverUserName;
                     }
                 }
-
-                if (cachedUserData) {
-                    const userData = JSON.parse(cachedUserData);
-                    document.getElementById('userNameSpan').textContent = userData.name;
-                    document.getElementById('userInstitute').textContent = userData.azharInstitute;
-                }
-
-                if (cachedSections) {
-                    updateUI(JSON.parse(cachedSections));
-                }
-
-                document.querySelector('.dashboard-container').classList.add('loaded');
-                document.getElementById('loadingOverlay').classList.add('hidden');
             } catch (error) {
-                console.error('Error loading cached content:', error);
+                console.error("Error fetching user data:", error);
+                // في حالة الخطأ، نستمر باستخدام البيانات المحلية
             }
         }
 
-        // تحديث دالة تحديث البيانات في الخلفية
-        async function updateDataInBackground(userId) {
-            if (!userId) return;
-
+        // تسجيل الخروج
+        window.logout = async function() {
             try {
-                const [userSnapshot, sectionsStatus] = await Promise.all([
-                    get(ref(database, 'users/' + userId)),
-                    fetchSectionsStatus(userId)
-                ]);
-
-                if (userSnapshot.exists()) {
-                    const userData = userSnapshot.val();
-                    localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
-                    updateUserUI(userData);
-                }
-
-                localStorage.setItem(SECTIONS_CACHE_KEY, JSON.stringify(sectionsStatus));
-                updateUI(sectionsStatus);
-            } catch (error) {
-                console.error('Background update error:', error);
-            }
-        }
-
-        // دالة تحديث واجهة المستخدم
-        function updateUserUI(userData) {
-            const currentName = document.getElementById('userNameSpan').textContent;
-            const currentInstitute = document.getElementById('userInstitute').textContent;
-
-            if (userData.name !== currentName) {
-                document.getElementById('userNameSpan').textContent = userData.name;
-            }
-            if (userData.azharInstitute !== currentInstitute) {
-                document.getElementById('userInstitute').textContent = userData.azharInstitute;
-            }
-        }
-
-        // تحديث دالة التنقل
-        window.navigateToSection = function(section) {
-            const cachedToken = localStorage.getItem('authToken');
-            const cachedUserId = localStorage.getItem('userId');
-            
-            if (!cachedToken || !cachedUserId) {
-                // تحقق من حالة المصادقة الحالية قبل التوجيه للوجين
-                const auth = getAuth();
-                const currentUser = auth.currentUser;
-                
-                if (!currentUser) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-            }
-
-            const cachedSections = localStorage.getItem(SECTIONS_CACHE_KEY);
-            if (cachedSections) {
-                const sectionsData = JSON.parse(cachedSections);
-                window.location.href = sectionsData[section] ? 
-                    `gallery.html?section=${section}` : 
-                    `upload.html?section=${section}`;
-            } else {
-                window.location.href = `upload.html?section=${section}`;
-            }
-        };
-
-        // نقل الدوال للنافذة العامة
-        window.reportIssue = function() {
-            const modal = document.getElementById('reportModal');
-            const overlay = document.getElementById('sidebarOverlay');
-            modal.style.display = 'block';
-            overlay.style.display = 'block';
-        };
-
-        window.logout = function() {
-            const logoutModal = document.getElementById('logoutModal');
-            logoutModal.style.display = 'flex';
-        };
-
-        // دالة إغلاق نافذة تسجيل الخروج
-        window.closeLogoutModal = function() {
-            const logoutModal = document.getElementById('logoutModal');
-            logoutModal.style.display = 'none';
-        };
-
-        // دالة تأكيد تسجيل الخروج
-        window.confirmLogout = async function() {
-            try {
-                const auth = getAuth();
                 await signOut(auth);
-                localStorage.clear(); // مسح كل البيانات المخزنة
+                // مسح البيانات المحلية عند تسجيل الخروج
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userInstitute');
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error(error);
-                showToast('حدث خطأ أثناء تسجيل الخروج', true);
-            }
-        };
-
-        // إغلاق النافذة عند النقر خارجها
-        document.getElementById('logoutModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeLogoutModal();
-            }
-        });
-
-        // دالة تحديث واجهة المستخدم
-        function updateUI(sectionsStatus) {
-            Object.entries(sectionsStatus).forEach(([section, hasFiles]) => {
-                const card = document.querySelector(`[style="--i:${section}"]`);
-                if (card) {
-                    if (hasFiles) {
-                        card.classList.add('has-files');
-                    } else {
-                        card.classList.remove('has-files');
-                    }
-                }
-            });
-        }
-
-        // دالة جلب حالة الأقسام
-        async function fetchSectionsStatus(userId) {
-            const sections = [
-                'hierarchy', 'leadership-meetings', 'supervisor-meetings',
-                'family-meetings', 'social-specialist', 'librarian', 'sports',
-                'general-photos', 'results', 'attendance', 'domains'
-            ];
-
-            const sectionsStatus = {};
-            
-            for (const section of sections) {
-                const sectionRef = ref(database, `users/${userId}/images/${section}`);
-                const snapshot = await get(sectionRef);
-                sectionsStatus[section] = snapshot.exists();
-            }
-            
-            return sectionsStatus;
-        }
-
-        // دوال التحميل
-        function showLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) {
-                overlay.classList.remove('hidden');
+                console.error("Error signing out:", error);
+                showToast('حدث خطأ أثناء تسجيل الخروج', 'error');
             }
         }
 
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-            }
-        }
-
-        // إضافة CSS للأقسام التي تحتوي على ملفات
-        const style = document.createElement('style');
-        style.textContent = `
-            .dashboard-card.has-files {
-                border-top: 3px solid var(--primary);
-            }
-            .dashboard-card.has-files i {
-                color: var(--primary);
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.getElementById('menuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const closeSidebarBtn = document.getElementById('closeSidebar');
-
-            function toggleSidebar() {
-                if (sidebar.classList.contains('active')) {
-                    sidebar.classList.remove('active');
-                    sidebarOverlay.style.display = 'none';
-                } else {
-                    sidebar.classList.add('active');
-                    sidebarOverlay.style.display = 'block';
-                }
-            }
-
-            // إضافة معالجات الأحداث
-            menuBtn.addEventListener('click', toggleSidebar);
-            closeSidebarBtn.addEventListener('click', toggleSidebar);
-            sidebarOverlay.addEventListener('click', toggleSidebar);
-
-            // معالجات أحداث الأزرار في الشريط الجانبي
-            document.querySelector('.menu-item.danger').addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleSidebar();
-                window.logout();
-            });
-
-            document.querySelector('.menu-item:not(.danger)').addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleSidebar();
-                window.reportIssue();
-            });
-        });
-
-        // تحديث دوال التنقل
-        function navigateToUpload(section) {
+        // التنقل إلى صفحة رفع الملفات
+        window.navigateToUpload = function(section) {
             window.location.href = `upload.html?section=${section}`;
         }
 
-        function navigateToGallery(section) {
+        // التنقل إلى صفحة المعرض
+        window.navigateToGallery = function(section) {
             window.location.href = `gallery.html?section=${section}`;
         }
 
-        // دالة إغلاق النافذة المنبثقة
-        window.closeReportModal = function() {
-            const modal = document.getElementById('reportModal');
-            const overlay = document.getElementById('sidebarOverlay');
-            modal.style.display = 'none';
-            overlay.style.display = 'none';
-        };
+        // إظهار رسالة توست
+        window.showToast = function(message, type = 'info') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: 'left',
+                backgroundColor: type === 'error' ? '#ef4444' : '#3b82f6',
+                className: "rtl"
+            }).showToast();
+        }
 
-        // دالة الاتصال بالرقم
+        // التحكم في القائمة الجانبية
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.style.display = 'block';
+        });
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.style.display = 'none';
+        }
+
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // الإبلاغ عن مشكلة
+        window.reportIssue = function() {
+            document.getElementById('reportModal').style.display = 'block';
+            sidebarOverlay.style.display = 'block';
+        }
+
+        window.closeReportModal = function() {
+            document.getElementById('reportModal').style.display = 'none';
+            sidebarOverlay.style.display = 'none';
+        }
+
+        // الاتصال بالرقم
         window.callPhone = function(phoneNumber) {
             window.location.href = `tel:${phoneNumber}`;
-        };
+        }
 
-        // إغلاق النافذة المنبثقة عند النقر على الخلفية
-        document.getElementById('sidebarOverlay').addEventListener('click', function() {
-            closeReportModal();
+        // إغلاق النافذة المنبثقة عند النقر خارجها
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('reportModal');
+            if (e.target === sidebarOverlay && modal.style.display === 'block') {
+                closeReportModal();
+            }
+        });
+
+        // تحميل الصفحة
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.querySelector('.dashboard-container').classList.add('loaded');
+            }, 300);
         });
     </script>
 </body>
