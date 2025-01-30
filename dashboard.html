@@ -1050,12 +1050,22 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // عرض اسم المستخدم فوراً من التخزين المحلي
-        document.getElementById('userNameSpan').textContent = localStorage.getItem('userName') || 'مستخدم';
-        
         // التحقق من حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // التحقق من وجود التوكن
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    // إذا لم يكن هناك توكن، نقوم بتسجيل الخروج
+                    signOut(auth).then(() => {
+                        window.location.href = 'index.html?reason=no_token';
+                    });
+                    return;
+                }
+
+                // عرض اسم المستخدم فوراً من التخزين المحلي
+                document.getElementById('userNameSpan').textContent = localStorage.getItem('userName') || 'مستخدم';
+                
                 // إخفاء عنصر اسم المعهد
                 document.getElementById('userInstitute').style.display = 'none';
                 
@@ -1064,7 +1074,8 @@
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 document.querySelector('.dashboard-container').classList.add('loaded');
             } else {
-                window.location.href = 'index.html';
+                // المستخدم غير مسجل دخول
+                window.location.href = 'index.html?reason=not_authenticated';
             }
         });
 
@@ -1095,13 +1106,13 @@
         window.logout = async function() {
             try {
                 await signOut(auth);
-                // مسح البيانات المحلية عند تسجيل الخروج
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userInstitute');
-                window.location.href = 'index.html';
+                // مسح كل البيانات المحلية
+                localStorage.clear();
+                window.location.href = 'index.html?reason=user_logout';
             } catch (error) {
                 console.error("Error signing out:", error);
                 showToast('حدث خطأ أثناء تسجيل الخروج', 'error');
+                window.location.href = 'index.html?reason=logout_error';
             }
         }
 
