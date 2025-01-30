@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفع الملفات - نظام مراجعة الوثائق</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --gray: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        .header {
+            background: var(--white);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+        }
+
+        .upload-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .welcome-section p {
+            color: var(--white);
+            opacity: 0.9;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--white);
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--primary);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+
+        .file-upload:hover {
+            background: var(--white);
+            transform: translateY(-2px);
+            border-color: var(--primary-dark);
+        }
+
+        .file-upload p {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .preview-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: var(--light);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        #progressText {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .upload-btn.disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        @media (max-width: 639px) {
+            body {
+                padding-top: 40px;
+            }
+
+            .header {
+                height: 50px;
+                padding: 0 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .upload-container {
+                margin: 0.5rem auto;
+                padding: 0 0.75rem;
+            }
+
+            .back-btn {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+
+            .welcome-section {
+                padding: 1.5rem;
+                margin: 1rem 0;
+            }
+
+            .welcome-section h1 {
+                font-size: 1.4rem;
+            }
+
+            .welcome-section p {
+                font-size: 0.95rem;
+            }
+
+            .form-group {
+                padding: 1.2rem;
+            }
+
+            .file-upload {
+                padding: 2rem 1rem;
+            }
+
+            .file-upload p {
+                font-size: 0.9rem;
+            }
+
+            .preview-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .preview-item {
+                border-radius: 8px;
+            }
+
+            .preview-item img {
+                height: 140px;
+            }
+
+            .remove-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 1rem;
+            }
+
+            .upload-btn {
+                padding: 0.9rem;
+                font-size: 1rem;
+                border-radius: 8px;
+                margin-top: 1rem;
+            }
+
+            .loading {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <div class="header">
+            <h1 id="sectionTitle">رفع الملفات</h1>
+            <a href="dashboard.html" class="back-btn">عودة للوحة التحكم</a>
+        </div>
+
+        <div class="welcome-section">
+            <h1>رفع الملفات</h1>
+            <p id="sectionDescription">يمكنك رفع الصور والملفات الخاصة بكل منطقة أو قسم من المعهد</p>
+        </div>
+
+        <form id="uploadForm">
+            <div class="form-group" id="subsectionContainer" style="display: none;">
+                <label for="subsection">اختر القسم الفرعي</label>
+                <select id="subsection" name="subsection">
+                    <option value="">اختر القسم الفرعي</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">عنوان الملف</label>
+                <input type="text" id="title" required placeholder="أدخل عنواناً وصفياً للملف">
+            </div>
+
+            <div class="file-upload" id="dropZone">
+                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                <p>اسحب الصور هنا أو اضغط للاختيار</p>
+            </div>
+
+            <div class="preview-container" id="previewContainer"></div>
+
+            <div class="loading" id="loadingIndicator" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="progressText">0%</p>
+            </div>
+
+            <button type="submit" class="upload-btn" id="uploadBtn">رفع الملفات</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+
+        // تعريف الأقسام الفرعية
+        const subsections = {
+            'leadership-meetings': [
+                'اجتماعات شيخ المعهد',
+                'متابعات الوكيل الشرعي والعربي',
+                'متابعات الوكيل الثقافي'
+            ],
+            'supervisor-meetings': [
+                'مشرف القرآن الكريم',
+                'مشرف الرياضيات',
+                'مشرف التربية الفنية'
+            ],
+            'family-meetings': [
+                'اسرة القرآن الكريم',
+                'اسرة اللغة العربية',
+                'اسرة الرياضيات',
+                'اسرة العلوم',
+                'اسرة الدراسات',
+                'اسرة اللغة الانجليزية',
+                'اسرة التربية الفنية',
+                'اسرة التربية الرياضية'
+            ],
+            'social-specialist': [
+                'الندوات',
+                'المسابقات',
+                'الابحاث',
+                'المحاضرات',
+                'الكشافة',
+                'الارشاد النفسي والتربوي'
+            ],
+            'librarian': [
+                'الندوات',
+                'المسابقات',
+                'الابحاث',
+                'المحاضرات',
+                'المناظرات',
+                'سجل الاستعارة',
+                'سجل المترددين'
+            ],
+            'sports': [
+                'النشاط الداخلي',
+                'النشاط الخارجي',
+                'أنشطة اخرى'
+            ],
+            'domains': [
+                'رؤية ورسالة',
+                'قيادة وحوكمة',
+                'موارد بشرية ومادية',
+                'مشاركة مجتمعية',
+                'ضمان الجودة والمسائلة',
+                'متعلم',
+                'معلم',
+                'منهج',
+                'مناخ تربوي'
+            ]
+        };
+
+        // الحصول على القسم من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+
+        // تحديث عنوان الصفحة والوصف
+        const sectionTitle = document.getElementById('sectionTitle');
+        const sectionDescription = document.getElementById('sectionDescription');
+        const subsectionContainer = document.getElementById('subsectionContainer');
+        const subsectionSelect = document.getElementById('subsection');
+
+        if (section) {
+            sectionTitle.textContent = getSectionTitle(section);
+            sectionDescription.textContent = getSectionDescription(section);
+            
+            // إظهار وملء الأقسام الفرعية إذا كانت موجودة
+            if (subsections[section] && subsections[section].length > 0) {
+                subsectionContainer.style.display = 'block';
+                subsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي</option>';
+                subsections[section].forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub;
+                    option.textContent = sub;
+                    subsectionSelect.appendChild(option);
+                });
+                // إضافة خاصية required فقط إذا كان هناك أقسام فرعية
+                subsectionSelect.setAttribute('required', 'required');
+            } else {
+                subsectionContainer.style.display = 'none';
+                subsectionSelect.removeAttribute('required');
+            }
+        } else {
+            window.location.href = 'dashboard.html';
+        }
+
+        // إعداد منطقة سحب الملفات
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4CAF50';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#ddd';
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ddd';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const preview = document.createElement('div');
+                        preview.className = 'preview-item';
+                        preview.innerHTML = `
+                            <img src="${e.target.result}">
+                            <button type="button" class="remove-btn">&times;</button>
+                        `;
+                        preview.querySelector('.remove-btn').onclick = () => preview.remove();
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // إضافة دالة رفع الصورة إلى imgbb
+        async function uploadToImgbb(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('key', '3475f087530c84c6406536284cf1b5aa');
+
+            try {
+                const response = await fetch('https://api.imgbb.com/1/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        url: data.data.url,
+                        delete_url: data.data.delete_url,
+                        thumbnail: data.data.thumb?.url || data.data.url
+                    };
+                } else {
+                    throw new Error(data.error?.message || 'فشل رفع الصورة');
+                }
+            } catch (error) {
+                console.error('خطأ في رفع الصورة:', error);
+                throw error;
+            }
+        }
+
+        // تحديث معالج النموذج
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const docId = urlParams.get('docId');
+            const section = urlParams.get('section');
+            const subsection = subsectionSelect.value || urlParams.get('subsection');
+            const title = document.getElementById('title').value.trim();
+            const previews = previewContainer.querySelectorAll('.preview-item img');
+            const user = auth.currentUser;
+            
+            if ((!mode && !title) || previews.length === 0 || (subsectionSelect.hasAttribute('required') && !subsection)) {
+                showToast('الرجاء إكمال جميع البيانات المطلوبة', true);
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('disabled');
+            loadingIndicator.style.display = 'block';
+            
+            try {
+                const userSnapshot = await get(ref(database, 'users/' + user.uid));
+                const userData = userSnapshot.val();
+
+                if (!userData) {
+                    throw new Error('لم يتم العثور على بيانات المستخدم');
+                }
+
+                // تحويل صور المعاينة إلى ملفات
+                const files = await Promise.all(Array.from(previews).map(async (preview) => {
+                    const response = await fetch(preview.src);
+                    const blob = await response.blob();
+                    return new File([blob], 'image.jpg', { type: 'image/jpeg' });
+                }));
+
+                const totalFiles = files.length;
+                let completedFiles = 0;
+                const uploadedImages = {};
+
+                // رفع كل صورة على حدة
+                for (let i = 0; i < files.length; i++) {
+                    const result = await uploadToImgbb(files[i]);
+                    uploadedImages[i] = result.url;
+                    
+                    completedFiles++;
+                    const progress = (completedFiles / totalFiles) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${Math.round(progress)}%`;
+                }
+
+                if (mode === 'append' && docId) {
+                    // الحصول على المستند الحالي
+                    const docRef = ref(database, `users/${user.uid}/images/${section}/${docId}`);
+                    const docSnapshot = await get(docRef);
+                    const currentDoc = docSnapshot.val();
+
+                    if (!currentDoc) {
+                        throw new Error('لم يتم العثور على المستند');
+                    }
+
+                    // حساب عدد الصور الحالية
+                    const currentImagesCount = Object.keys(currentDoc).filter(key => 
+                        typeof currentDoc[key] === 'string' && currentDoc[key].startsWith('http')
+                    ).length;
+
+                    // إضافة الصور الجديدة مع ترقيم تسلسلي
+                    const updatedImages = {};
+                    Object.entries(uploadedImages).forEach(([_, url], index) => {
+                        updatedImages[currentImagesCount + index] = url;
+                    });
+
+                    // تحديث المستند
+                    await set(docRef, {
+                        ...currentDoc,
+                        ...updatedImages
+                    });
+                } else {
+                    // إنشاء مستند جديد
+                    const imagesRef = ref(database, `users/${user.uid}/images/${section}`);
+                    const newImageRef = push(imagesRef);
+                    await set(newImageRef, {
+                        title: title,
+                        section: section,
+                        subsection: subsection || null,
+                        ...uploadedImages,
+                        uploadedAt: new Date().toISOString(),
+                        status: 'pending',
+                        institute: userData.azharInstitute,
+                        governorate: userData.governorate
+                    });
+                }
+
+                showToast('تم رفع الملفات بنجاح');
+                setTimeout(() => {
+                    window.location.href = 'gallery.html?section=' + section + (subsection ? '&subsection=' + subsection : '');
+                }, 2000);
+
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'حدث خطأ أثناء رفع الملفات', true);
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('disabled');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        });
+
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        function getSectionTitle(section) {
+            const titles = {
+                'hierarchy': 'الهيكل التنظيمي',
+                'leadership-meetings': 'اجتماعات القيادة',
+                'supervisor-meetings': 'اجتماعات المشرفين',
+                'family-meetings': 'اجتماعات الأسر',
+                'social-specialist': 'الأخصائي الاجتماعي',
+                'librarian': 'أمين المكتبة',
+                'sports': 'سجل التربية الرياضية',
+                'general-photos': 'صور عامة ولوحات المعهد',
+                'results': 'النتيجة',
+                'attendance': 'الغياب',
+                'domains': 'المجالات'
+            };
+            return titles[section] || 'رفع الملفات';
+        }
+
+        
+        function getSectionDescription(section) {
+            const descriptions = {
+                'hierarchy': 'رفع صور الهيكل التنظيمي للمعهد',
+                'leadership-meetings': 'توثيق اجتماعات ومتابعات قيادة المعهد',
+                'supervisor-meetings': 'توثيق اجتماعات المشرفين',
+                'family-meetings': 'توثيق اجتماعات الأسر التعليمية',
+                'social-specialist': 'توثيق أنشطة الأخصائي الاجتماعي',
+                'librarian': 'توثيق أنشطة وسجلات المكتبة',
+                'sports': 'توثيق الأنشطة الرياضية',
+                'general-photos': 'رفع الصور العامة ولوحات المعهد',
+                'results': 'رفع صور النتائج والإحصائيات',
+                'attendance': 'رفع صور الغياب والتواجد',
+                'domains': 'رفع صور المجالات والأهداف'
+            };
+            return descriptions[section] || '';
+        }
+
+        // التحقق من تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // إضافة تحقق من البيئة
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const docId = urlParams.get('docId');
+
+            if (mode === 'append' && docId) {
+                // تغيير العنوان والوصف
+                document.querySelector('.welcome-section h1').textContent = 'إضافة صور للمستند';
+                document.querySelector('#sectionDescription').textContent = 'يمكنك إضافة المزيد من الصور إلى المستند الحالي';
+                
+                // إخفاء حقل العنوان والقسم الفرعي وإزالة خاصية required
+                const titleInput = document.querySelector('#title');
+                titleInput.parentElement.style.display = 'none';
+                titleInput.removeAttribute('required');
+                
+                document.querySelector('#subsectionContainer').style.display = 'none';
+                
+                // تغيير نص زر الرفع
+                document.querySelector('#uploadBtn').textContent = 'إضافة الصور';
+            }
+        });
+    </script>
+</body>
+</html> 

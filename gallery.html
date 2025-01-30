@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معرض الصور - نظام مراجعة الوثائق</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f43f5e;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        .header {
+            background: var(--white);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .upload-btn {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            min-width: max-content;
+        }
+
+        .upload-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .upload-btn.home-btn {
+            background: var(--gray);
+            order: -1;
+            margin-right: auto;
+        }
+
+        .upload-btn.home-btn:hover {
+            background: #475569;
+        }
+
+        .gallery-layout {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 70px;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar h3 {
+            color: var(--dark);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .nav-section {
+            margin-bottom: 1rem;
+        }
+
+        .nav-section-title {
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .nav-items {
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            color: var(--dark);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .content {
+            flex: 1;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            text-align: center;
+        }
+
+        .welcome-section h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .document-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .document-images {
+            position: relative;
+            height: 180px;
+        }
+
+        .document-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .document-card:hover .document-images img {
+            transform: scale(1.05);
+        }
+
+        .image-count {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: rgba(0,0,0,0.6);
+            color: var(--white);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .document-info {
+            padding: 1rem;
+        }
+
+        .document-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .document-meta {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.8rem;
+        }
+
+        .document-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            color: white;
+        }
+
+        .view-btn {
+            background: var(--primary);
+        }
+
+        .view-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .delete-btn {
+            background: var(--secondary);
+        }
+
+        .delete-btn:hover {
+            background: #d61f69;
+        }
+
+        .comments-btn {
+            background: #4CAF50;
+        }
+
+        .comments-btn:hover {
+            background: #388E3C;
+        }
+
+        .add-images-btn {
+            background: #FF9800;
+        }
+
+        .add-images-btn:hover {
+            background: #F57C00;
+        }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 480px) {
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .action-btn i {
+                font-size: 0.9rem;
+            }
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--dark);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 0.8rem;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+                order: 1;
+                flex-grow: 1;
+                text-align: center;
+            }
+
+            .menu-btn {
+                display: block;
+            }
+
+            .gallery-layout {
+                padding: 0.8rem;
+            }
+
+            .sidebar {
+                position: fixed;
+                right: -280px;
+                top: 60px;
+                bottom: 0;
+                z-index: 99;
+                border-radius: 0;
+                transition: right 0.3s ease;
+            }
+
+            .sidebar.active {
+                right: 0;
+            }
+
+            .welcome-section {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.2rem;
+            }
+
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .document-card {
+                margin-bottom: 0.8rem;
+            }
+
+            .document-images {
+                height: 200px;
+            }
+
+            .upload-btn.home-btn {
+                order: 0;
+                margin-right: auto;
+            }
+            
+            .upload-btn.home-btn span {
+                display: none;
+            }
+            
+            .upload-btn.home-btn i {
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header {
+                gap: 5px;
+            }
+            
+            .upload-btn {
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* تحسينات إضافية للموبايل */
+        @media (max-width: 480px) {
+            .upload-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .document-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        /* إضافة تنسيقات التحميل والأنيميشن */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--dark);
+            font-size: 1.1rem;
+            animation: pulse 1.5s ease infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* تنسيقات أنيميشن ظهور البطاقات */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* إضافة تنسيقات نافذة العرض */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        .image-viewer .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .image-viewer button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* تحسين تنسيقات نافذة التعليقات */
+        .comments-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .comments-dialog.active {
+            display: block;
+        }
+
+        .comments-dialog h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comments-dialog h3 .close-btn {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+
+        .comments-list {
+            margin-bottom: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .comment-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item.my-comment {
+            background: var(--primary);
+            color: white;
+        }
+
+        .comment-item.my-comment .comment-date,
+        .comment-item.my-comment .comment-user {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .comment-user {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .comment-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .comment-text {
+            line-height: 1.4;
+        }
+
+        .comment-form {
+            position: relative;
+            margin-top: 20px;
+            border-top: 1px solid var(--light);
+            padding-top: 20px;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light);
+            border-radius: 8px;
+            resize: none;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        .add-comment-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .add-comment-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .add-comment-btn i {
+            transition: all 0.3s ease;
+        }
+
+        .add-comment-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        .add-comment-btn.loading {
+            background: var(--primary-dark);
+        }
+
+        /* تحسين scrollbar */
+        .comments-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .comments-list::-webkit-scrollbar-track {
+            background: var(--light);
+            border-radius: 3px;
+        }
+
+        .comments-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* تنسيقات نافذة التأكيد */
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .confirm-dialog.active {
+            display: block;
+        }
+
+        .confirm-dialog h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .confirm-dialog .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .confirm-dialog button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .confirm-dialog .confirm-btn {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .confirm-dialog .cancel-btn {
+            background: var(--gray);
+            color: white;
+        }
+
+        /* تنسيقات نافذة إضافة الصور */
+        .add-images-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .add-images-dialog.active {
+            display: block;
+        }
+
+        .add-images-dialog h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--primary);
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            background: var(--light);
+        }
+
+        .file-upload-area i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .selected-files {
+            margin: 15px 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .selected-file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: var(--light);
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
+        .upload-progress {
+            height: 4px;
+            background: var(--light);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        /* تحديث تنسيقات الأزرار */
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .comment-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item.my-comment {
+            background: var(--primary);
+            color: white;
+        }
+
+        .comment-item.my-comment .comment-date,
+        .comment-item.my-comment .comment-user,
+        .comment-item.my-comment .user-email {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .comment-user {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-right: 5px;
+        }
+
+        .comment-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .comment-text {
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .add-images-dialog {
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .dialog-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-header h3 {
+            margin: 0;
+            color: var(--dark);
+            font-size: 1.2rem;
+        }
+
+        .dialog-content {
+            padding: 20px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--primary);
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--light);
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area:hover {
+            background: white;
+            border-color: var(--primary-dark);
+        }
+
+        .file-upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .selected-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .image-preview {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .upload-progress {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            height: 6px;
+            background: var(--light);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .upload-images-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-images-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .upload-images-btn.disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .empty-state h3 {
+            color: var(--dark);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .add-first-doc {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-first-doc:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .add-first-doc i {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 639px) {
+            .empty-state {
+                padding: 2rem 1rem;
+                margin: 1rem;
+            }
+
+            .empty-state-icon {
+                font-size: 3rem;
+            }
+
+            .empty-state h3 {
+                font-size: 1.2rem;
+            }
+
+            .empty-state p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* أنماط حالة المراجعة */
+        .doc-status {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .status-pending {
+            background: rgba(255, 165, 0, 0.9);
+            color: var(--white);
+        }
+
+        .status-approved {
+            background: rgba(0, 128, 0, 0.9);
+            color: var(--white);
+        }
+
+        .status-rejected {
+            background: rgba(220, 38, 38, 0.9);
+            color: var(--white);
+        }
+
+        /* تنسيقات زر العودة */
+        .back-to-dashboard {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow);
+        }
+
+        .back-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .back-btn i {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .back-btn i {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-to-dashboard {
+                margin: 1.5rem 0;
+            }
+            
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+        <div class="header">
+        <button class="menu-btn" id="menuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <h1 id="sectionTitle">معرض الصور</h1>
+        <a href="#" class="upload-btn" id="uploadBtn">
+            <i class="fas fa-plus"></i>
+            رفع مستند
+        </a>
+        <a href="dashboard.html" class="upload-btn home-btn">
+            <i class="fa fa-backward"></i>
+            رجوع
+        </a>
+        </div>
+
+        <div class="gallery-layout">
+        <aside class="sidebar" id="sidebar">
+                <h3>الأقسام</h3>
+                <nav>
+                    <div class="nav-section">
+                        <a href="?section=hierarchy" class="nav-link">الهيكل التنظيمي</a>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">اجتماعات القيادة</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=leadership-meetings&subsection=اجتماعات شيخ المعهد" class="nav-link">اجتماعات شيخ المعهد</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=leadership-meetings&subsection=متابعات الوكيل الشرعي والعربي" class="nav-link">متابعات الوكيل الشرعي والعربي</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=leadership-meetings&subsection=متابعات الوكيل الثقافي" class="nav-link">متابعات الوكيل الثقافي</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">اجتماعات المشرفين</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف القرآن الكريم" class="nav-link">مشرف القرآن الكريم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف الرياضيات" class="nav-link">مشرف الرياضيات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف التربية الفنية" class="nav-link">مشرف التربية الفنية</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">اجتماعات الأسر</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة القرآن الكريم" class="nav-link">اسرة القرآن الكريم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة اللغة العربية" class="nav-link">اسرة اللغة العربية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة الرياضيات" class="nav-link">اسرة الرياضيات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة العلوم" class="nav-link">اسرة العلوم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة الدراسات" class="nav-link">اسرة الدراسات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة اللغة الانجليزية" class="nav-link">اسرة اللغة الانجليزية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة التربية الفنية" class="nav-link">اسرة التربية الفنية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=family-meetings&subsection=اسرة التربية الرياضية" class="nav-link">اسرة التربية الرياضية</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">الأخصائي الاجتماعي</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=الندوات" class="nav-link">الندوات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=المسابقات" class="nav-link">المسابقات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=الابحاث" class="nav-link">الابحاث</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=المحاضرات" class="nav-link">المحاضرات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=الكشافة" class="nav-link">الكشافة</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=الارشاد النفسي والتربوي" class="nav-link">الارشاد النفسي والتربوي</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">أمين المكتبة</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=الندوات" class="nav-link">الندوات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=المسابقات" class="nav-link">المسابقات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=الابحاث" class="nav-link">الابحاث</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=المحاضرات" class="nav-link">المحاضرات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=المناظرات" class="nav-link">المناظرات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=سجل الاستعارة" class="nav-link">سجل الاستعارة</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=librarian&subsection=سجل المترددين" class="nav-link">سجل المترددين</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">سجل التربية الرياضية</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=sports&subsection=النشاط الداخلي" class="nav-link">النشاط الداخلي</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=sports&subsection=النشاط الخارجي" class="nav-link">النشاط الخارجي</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=sports&subsection=أنشطة اخرى" class="nav-link">أنشطة اخرى</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <a href="?section=general-photos" class="nav-link">صور عامة ولوحات المعهد</a>
+                    </div>
+
+                    <div class="nav-section">
+                        <a href="?section=results" class="nav-link">النتيجة</a>
+                    </div>
+
+                    <div class="nav-section">
+                        <a href="?section=attendance" class="nav-link">الغياب</a>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">المجالات</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=رؤية ورسالة" class="nav-link">رؤية ورسالة</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=قيادة وحوكمة" class="nav-link">قيادة وحوكمة</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=موارد بشرية ومادية" class="nav-link">موارد بشرية ومادية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=مشاركة مجتمعية" class="nav-link">مشاركة مجتمعية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=ضمان الجودة والمسائلة" class="nav-link">ضمان الجودة والمسائلة</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=متعلم" class="nav-link">متعلم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=معلم" class="nav-link">معلم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=منهج" class="nav-link">منهج</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=domains&subsection=مناخ تربوي" class="nav-link">مناخ تربوي</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </aside>
+
+            <main class="content">
+            <section class="welcome-section">
+                <h2>معرض الوثائق والصور</h2>
+                <p>استعرض وإدارة جميع الوثائق والصور الخاصة بالمعهد</p>
+            </section>
+
+            <div class="documents-grid" id="documentsGrid">
+                <!-- سيتم إضافة البطاقات ديناميكياً -->
+                </div>
+
+                
+            </main>
+        </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- إضافة السكريبت الخاص بالموبايل -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            menuBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // إغلاق السايدبار عند اختيار قسم (للموبايل)
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- إضافة قسم التحميل -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">جاري تحميل المعرض...</p>
+        </div>
+    </div>
+
+    <!-- إضافة نافذة عرض الصور -->
+    <div class="image-viewer" id="imageViewer">
+        <img id="viewerImage" src="" alt="">
+        <div class="controls">
+            <button id="prevImage"><i class="fas fa-chevron-left"></i></button>
+            <button id="nextImage"><i class="fas fa-chevron-right"></i></button>
+            <button id="closeViewer"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <!-- إضافة نافذة تأكيد الحذف -->
+    <div class="confirm-dialog" id="deleteDialog">
+        <h3>تأكيد الحذف</h3>
+        <p>هل أنت متأكد من حذف هذا المستند؟</p>
+        <div class="buttons">
+            <button class="confirm-btn" id="confirmDelete">نعم، احذف</button>
+            <button class="cancel-btn" id="cancelDelete">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- إضافة نافذة إضافة الصور -->
+    <div class="add-images-dialog" id="addImagesDialog">
+        <h3>إضافة صور للمستند</h3>
+        <div class="file-upload-area" id="dropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>اسحب الصور هنا أو انقر للاختيار</p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        </div>
+        <div class="selected-files" id="selectedFiles"></div>
+        <div class="upload-progress">
+            <div class="progress-bar" id="uploadProgress"></div>
+        </div>
+        <div class="dialog-buttons">
+            <button class="action-btn upload-btn" id="uploadImagesBtn">
+                <i class="fas fa-upload"></i>
+                رفع الصور
+            </button>
+            <button class="action-btn cancel-btn" onclick="closeAddImagesDialog()">
+                <i class="fas fa-times"></i>
+                إلغاء
+            </button>
+        </div>
+    </div>
+
+    <!-- إضافة نافذة التعليقات -->
+    <div class="comments-dialog" id="commentsDialog">
+        <h3>
+            التعليقات
+            <i class="fas fa-times close-btn" onclick="closeCommentsDialog()"></i>
+        </h3>
+        <div class="comments-list" id="commentsList">
+            <!-- سيتم إضافة التعليقات هنا -->
+        </div>
+        <div class="comment-form">
+            <textarea 
+                class="comment-input" 
+                placeholder="اكتب تعليقك هنا..." 
+                id="commentInput"
+                rows="3"
+            ></textarea>
+            <button class="add-comment-btn" id="addCommentBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span>إضافة تعليق</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    // إضافة هذه الدالة العامة قبل script module
+    function showAddImages(docId) {
+        const currentSection = new URLSearchParams(window.location.search).get('section');
+        const currentSubsection = new URLSearchParams(window.location.search).get('subsection');
+        
+        const uploadUrl = `upload.html?section=${currentSection}${currentSubsection ? '&subsection=' + currentSubsection : ''}&docId=${docId}&mode=append`;
+        window.location.href = uploadUrl;
+    }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, onValue, remove, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // تحديث كلاس LocalStorage
+        class LocalStorage {
+            static setData(key, data) {
+                try {
+                    const item = {
+                        data: data,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(key, JSON.stringify(item));
+                } catch (error) {
+                    console.error('خطأ في حفظ البيانات المحلية:', error);
+                }
+            }
+
+            static getData(key) {
+                try {
+                    const item = localStorage.getItem(key);
+                    if (!item) return null;
+
+                    const parsedItem = JSON.parse(item);
+                    // التحقق من صلاحية البيانات (24 ساعة)
+                    if (Date.now() - parsedItem.timestamp > 86400000) {
+                        localStorage.removeItem(key);
+                        return null;
+                    }
+                    return parsedItem;
+                } catch (error) {
+                    console.error('خطأ في قراءة البيانات المحلية:', error);
+                    return null;
+                }
+            }
+
+            static removeData(key) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (error) {
+                    console.error('خطأ في حذف البيانات المحلية:', error);
+                }
+            }
+
+            static clearExpiredData() {
+                try {
+                    const keys = Object.keys(localStorage);
+                    const now = Date.now();
+                    
+                    keys.forEach(key => {
+                        try {
+                            const item = localStorage.getItem(key);
+                            if (!item) return;
+                            
+                            // محاولة تحليل البيانات
+                            const stored = JSON.parse(item);
+                            
+                            // التحقق من أن البيانات تحتوي على timestamp
+                            if (stored && stored.timestamp && (now - stored.timestamp > 86400000)) {
+                                localStorage.removeItem(key);
+                            }
+                        } catch (parseError) {
+                            // إذا كانت البيانات غير صالحة، قم بحذفها
+                            localStorage.removeItem(key);
+                        }
+                    });
+                } catch (error) {
+                    console.error('خطأ في تنظيف البيانات المنتهية:', error);
+                }
+            }
+        }
+
+        // تحديث كلاس GalleryManager
+        class GalleryManager {
+            constructor() {
+                this.documentsGrid = document.getElementById('documentsGrid');
+                this.loadingOverlay = document.getElementById('loadingOverlay');
+                this.currentSection = new URLSearchParams(window.location.search).get('section');
+                this.currentSubsection = new URLSearchParams(window.location.search).get('subsection');
+                this.uploadBtn = document.getElementById('uploadBtn');
+                this.cachedData = null;
+                this.isFirstLoad = true;
+                this.initialize();
+                this.setupRealtimeUpdates();
+
+                // إضافة مستمع للتغيير في URL
+                window.addEventListener('popstate', () => this.handleUrlChange());
+            }
+
+            async initialize() {
+                const storedData = LocalStorage.getData('galleryData');
+                
+                if (storedData && storedData.data) {
+                    // عرض البيانات المخزنة فوراً
+                    this.cachedData = storedData.data;
+                    this.renderDocuments(this.cachedData);
+                    this.setupEventListeners();
+                    this.hideLoading();
+                    
+                    // تحميل البيانات من Firebase في الخلفية بدون إظهار التحميل
+                    this.silentUpdate();
+                } else {
+                    // فقط في حالة عدم وجود بيانات محلية
+                    this.showLoading();
+                    await this.loadData();
+                }
+            }
+
+            async silentUpdate() {
+                try {
+                    const user = auth.currentUser;
+                    if (!user) return;
+
+                    const dataRef = ref(database, `users/${user.uid}/images`);
+                    const snapshot = await get(dataRef);
+                    const newData = snapshot.val();
+                    
+                    if (newData) {
+                        // مقارنة البيانات الجديدة مع المخزنة
+                        const hasChanges = this.hasDataChanged(newData);
+                        
+                        if (hasChanges) {
+                            // تحديث التخزين المحلي والعرض فقط إذا كان هناك تغيير
+                            LocalStorage.setData('galleryData', newData);
+                            this.cachedData = newData;
+                            this.renderDocuments(newData);
+                            console.log('تم تحديث البيانات من السيرفر لوجود تغييرات');
+                        } else {
+                            console.log('لا يوجد تغييرات في البيانات');
+                        }
+                    }
+                } catch (error) {
+                    console.error('خطأ في التحديث الصامت:', error);
+                }
+            }
+
+            hasDataChanged(newData) {
+                if (!this.cachedData) return true;
+                if (!this.currentSection) return false;
+
+                // مقارنة القسم الحالي فقط
+                const currentSectionData = newData[this.currentSection];
+                const cachedSectionData = this.cachedData[this.currentSection];
+
+                // إذا كان أحد القسمين غير موجود
+                if (!currentSectionData || !cachedSectionData) {
+                    return currentSectionData !== cachedSectionData;
+                }
+
+                // مقارنة عميقة للبيانات في القسم الحالي
+                try {
+                    const currentJson = JSON.stringify(currentSectionData);
+                    const cachedJson = JSON.stringify(cachedSectionData);
+                    return currentJson !== cachedJson;
+                } catch (error) {
+                    console.error('خطأ في مقارنة البيانات:', error);
+                    return true; // في حالة الخطأ، نفترض وجود تغييرات
+                }
+            }
+
+            handleUrlChange() {
+                // تحديث القسم الحالي
+                this.currentSection = new URLSearchParams(window.location.search).get('section');
+                this.currentSubsection = new URLSearchParams(window.location.search).get('subsection');
+                
+                if (this.cachedData) {
+                    // إذا كانت البيانات موجودة، نعرضها فوراً
+                    this.renderDocuments(this.cachedData);
+                    this.setupEventListeners();
+                }
+            }
+
+            // تحسين التنقل بين الأقسام
+            setupNavigation() {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = link.getAttribute('href');
+                        window.history.pushState({}, '', href);
+                        this.handleUrlChange();
+                    });
+                });
+            }
+
+            // تحسين عرض البيانات
+            renderDocuments(data) {
+                if (!this.currentSection) return;
+
+                const sectionData = data[this.currentSection];
+                if (!sectionData) {
+                    this.documentsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <h3>لا توجد مستندات بعد</h3>
+                            <p>لم يتم إضافة أي مستندات في هذا القسم حتى الآن. يمكنك البدء بإضافة أول مستند.</p>
+                            <a href="upload.html?section=${this.currentSection}${this.currentSubsection ? '&subsection=' + this.currentSubsection : ''}" class="add-first-doc">
+                                <i class="fas fa-plus"></i>
+                                إضافة مستند جديد
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let documents = [];
+                Object.entries(sectionData).forEach(([id, doc]) => {
+                    if (!this.currentSubsection || doc.subsection === this.currentSubsection) {
+                        documents.push({ id, ...doc });
+                    }
+                });
+
+                documents.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+                // تحسين الأداء باستخدام DocumentFragment
+                const fragment = document.createDocumentFragment();
+                const container = document.createElement('div');
+                container.innerHTML = documents.map((doc, index) => 
+                    this.createDocumentCard(doc, index)
+                ).join('');
+
+                while (container.firstChild) {
+                    fragment.appendChild(container.firstChild);
+                }
+
+                this.documentsGrid.innerHTML = '';
+                this.documentsGrid.appendChild(fragment);
+            }
+
+            createDocumentCard(doc, index) {
+                const delay = index * 0.1;
+                const images = doc.images || doc;
+                
+                const imageCount = Object.entries(images)
+                    .filter(([key, value]) => {
+                        return (typeof value === 'string' && value.startsWith('http')) || 
+                               (value && typeof value === 'object' && value.url && value.url.startsWith('http'));
+                    }).length;
+                
+                const status = doc.status || 'pending';
+                
+                return `
+                    <div class="document-card" style="animation-delay: ${delay}s">
+                        <div class="document-images" onclick="viewDocument('${doc.id}', 0)">
+                            <img src="${images[0]?.url || images[0]}" alt="${doc.title}">
+                            <span class="image-count">
+                                <i class="fas fa-images"></i>
+                                ${imageCount}
+                            </span>
+                            <span class="doc-status status-${status}">
+                                ${this.getStatusArabic(status)}
+                            </span>
+                        </div>
+                        <div class="document-info">
+                            <h3 class="document-title">${doc.title}</h3>
+                            <div class="document-meta">
+                                <p><i class="far fa-clock"></i> ${new Date(doc.uploadedAt).toLocaleDateString('ar-EG')}</p>
+                            </div>
+                            <div class="document-actions">
+                                <div class="action-row">
+                                    <button class="action-btn view-btn" onclick="viewDocument('${doc.id}', 0)">
+                                        <i class="fas fa-eye"></i>
+                                        عرض
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="confirmDelete('${doc.id}')">
+                                        <i class="fas fa-trash-alt"></i>
+                                        حذف
+                                    </button>
+                                </div>
+                                <div class="action-row">
+                                    <button class="action-btn comments-btn" onclick="showComments('${doc.id}')">
+                                        <i class="fas fa-comments"></i>
+                                        التعليقات
+                                    </button>
+                                    <button class="action-btn add-images-btn" onclick="showAddImages('${doc.id}')">
+                                        <i class="fas fa-plus"></i>
+                                        إضافة صور
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            setupEventListeners() {
+                // تحديث زر الرفع
+                if (this.uploadBtn) {
+                    this.uploadBtn.href = `upload.html?section=${this.currentSection}${this.currentSubsection ? '&subsection=' + this.currentSubsection : ''}`;
+                }
+
+                // تحديث العنوان
+                const sectionTitle = document.getElementById('sectionTitle');
+                if (sectionTitle) {
+                    sectionTitle.textContent = this.getSectionTitle();
+                }
+
+                // تحسين التنقل بين الأقسام
+                this.setupNavigation();
+            }
+
+            getSectionTitle() {
+            const titles = {
+                'hierarchy': 'الهيكل التنظيمي',
+                'leadership-meetings': 'اجتماعات القيادة',
+                'supervisor-meetings': 'اجتماعات المشرفين',
+                'family-meetings': 'اجتماعات الأسر',
+                'social-specialist': 'الأخصائي الاجتماعي',
+                'librarian': 'أمين المكتبة',
+                'sports': 'سجل التربية الرياضية',
+                'general-photos': 'صور عامة ولوحات المعهد',
+                'results': 'النتيجة',
+                'attendance': 'الغياب',
+                'domains': 'المجالات'
+            };
+                return this.currentSubsection || titles[this.currentSection] || 'معرض الصور';
+            }
+
+            showLoading() {
+                // إظهار التحميل بشكل تدريجي
+                this.loadingOverlay.style.display = 'flex';
+                this.loadingOverlay.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    this.loadingOverlay.style.opacity = '1';
+                });
+            }
+
+            hideLoading() {
+                this.loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    this.loadingOverlay.style.display = 'none';
+                }, 300);
+            }
+
+            async loadData() {
+                try {
+                    const user = auth.currentUser;
+                    if (!user) return;
+
+                    const dataRef = ref(database, `users/${user.uid}/images`);
+                    const snapshot = await get(dataRef);
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        LocalStorage.setData('galleryData', data);
+                        this.cachedData = data;
+                        this.renderDocuments(data);
+                    }
+                    this.hideLoading();
+                } catch (error) {
+                    console.error('خطأ في تحميل البيانات:', error);
+                    this.hideLoading();
+                    showToast('حدث خطأ في تحميل البيانات', true);
+                }
+            }
+
+            // إضافة دالة لمراقبة التغييرات في الوقت الفعلي
+            setupRealtimeUpdates() {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const dataRef = ref(database, `users/${user.uid}/images`);
+                onValue(dataRef, (snapshot) => {
+                    const newData = snapshot.val();
+                    if (!newData) return;
+
+                    // التحقق من وجود تغييرات قبل التحديث
+                    if (this.hasDataChanged(newData)) {
+                        LocalStorage.setData('galleryData', newData);
+                        this.cachedData = newData;
+                        this.renderDocuments(newData);
+                        console.log('تم تحديث البيانات من السيرفر');
+                    }
+                });
+            }
+
+            // إضافة دالة حذف المستند
+            async deleteDocument(docId) {
+                try {
+                    const user = auth.currentUser;
+                    if (!user) throw new Error('لم يتم تسجيل الدخول');
+
+                    // حذف المستند من Firebase
+                    const docRef = ref(database, `users/${user.uid}/images/${this.currentSection}/${docId}`);
+                    await remove(docRef);
+
+                    // حذف البيانات المحلية
+                    if (this.cachedData && this.cachedData[this.currentSection]) {
+                        delete this.cachedData[this.currentSection][docId];
+                        LocalStorage.setData('galleryData', this.cachedData);
+                    }
+
+                    // حذف التعليقات المحلية
+                    LocalStorage.removeData(`comments_${docId}`);
+
+                    showToast('تم حذف المستند بنجاح');
+                    
+                    // تحديث العرض
+                    this.renderDocuments(this.cachedData);
+                } catch (error) {
+                    console.error('خطأ في حذف المستند:', error);
+                    throw error;
+                }
+            }
+
+            getStatusArabic(status) {
+                const statusMap = {
+                    pending: 'قيد المراجعة',
+                    approved: 'مقبول',
+                    rejected: 'مرفوض'
+                };
+                return statusMap[status] || 'قيد المراجعة';
+            }
+        }
+
+        // بدء تشغيل المعرض عند تحميل الصفحة
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.galleryManager = new GalleryManager();
+                } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // تعريف الدوال العامة
+        let currentImages = [];
+        let currentImageIndex = 0;
+        let currentDocId = null;
+
+        window.viewDocument = function(docId, imageIndex) {
+            const viewer = document.getElementById('imageViewer');
+            const viewerImage = document.getElementById('viewerImage');
+            const doc = window.galleryManager.cachedData[window.galleryManager.currentSection][docId];
+            
+            // تصحيح فلترة الصور
+            currentImages = Object.entries(doc.images || doc)
+                .filter(([key, value]) => {
+                    return (typeof value === 'string' && value.startsWith('http')) || 
+                           (value && typeof value === 'object' && value.url && value.url.startsWith('http'));
+                })
+                .map(([key, value]) => value.url || value);
+            
+            currentImageIndex = imageIndex;
+            currentDocId = docId;
+            
+            viewerImage.src = currentImages[currentImageIndex];
+            viewer.classList.add('active');
+        };
+
+        window.confirmDelete = function(docId) {
+            currentDocId = docId;
+            document.getElementById('deleteDialog').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        };
+
+        // إضافة مستمعي الأحداث
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewer = document.getElementById('imageViewer');
+            const prevBtn = document.getElementById('prevImage');
+            const nextBtn = document.getElementById('nextImage');
+            const closeBtn = document.getElementById('closeViewer');
+            const confirmBtn = document.getElementById('confirmDelete');
+            const cancelBtn = document.getElementById('cancelDelete');
+            const deleteDialog = document.getElementById('deleteDialog');
+
+            prevBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                document.getElementById('viewerImage').src = currentImages[currentImageIndex];
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                document.getElementById('viewerImage').src = currentImages[currentImageIndex];
+            });
+
+            closeBtn.addEventListener('click', () => {
+                viewer.classList.remove('active');
+            });
+
+            confirmBtn.addEventListener('click', async () => {
+                try {
+                    await window.galleryManager.deleteDocument(currentDocId);
+                    deleteDialog.classList.remove('active');
+                    document.getElementById('overlay').classList.remove('active');
+                } catch (error) {
+                    console.error('خطأ في حذف المستند:', error);
+                    showToast('حدث خطأ أثناء حذف المستند', true);
+                }
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                deleteDialog.classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+            });
+
+            // إغلاق العارض عند النقر خارج الصورة
+            viewer.addEventListener('click', (e) => {
+                if (e.target === viewer) {
+                    viewer.classList.remove('active');
+                }
+            });
+        });
+
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        // تنظيف البيانات المنتهية عند تحميل الصفحة
+        LocalStorage.clearExpiredData();
+
+        // إضافة الدوال الجديدة
+        window.showComments = function(docId) {
+            const commentsDialog = document.getElementById('commentsDialog');
+            const commentsList = document.getElementById('commentsList');
+            currentDocId = docId;
+
+            // عرض التعليقات المحلية أولاً
+            const localComments = LocalStorage.getData(`comments_${docId}`);
+            if (localComments) {
+                renderComments(localComments.data);
+            }
+
+            // جلب التعليقات من Firebase ومقارنتها
+            const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`);
+            onValue(commentsRef, (snapshot) => {
+                const serverComments = snapshot.val() || {};
+                
+                // مقارنة التعليقات من السيرفر مع المحلية
+                if (hasCommentsChanged(serverComments, localComments?.data)) {
+                    LocalStorage.setData(`comments_${docId}`, serverComments);
+                    renderComments(serverComments);
+                }
+            });
+
+            commentsDialog.classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('commentInput').focus();
+        };
+
+        // دالة لمقارنة التعليقات
+        function hasCommentsChanged(newComments, oldComments) {
+            if (!oldComments) return true;
+            try {
+                return JSON.stringify(newComments) !== JSON.stringify(oldComments);
+            } catch (error) {
+                console.error('خطأ في مقارنة التعليقات:', error);
+                return true;
+            }
+        }
+
+        // دالة لعرض التعليقات
+        function renderComments(comments) {
+            const commentsList = document.getElementById('commentsList');
+            const currentUserId = auth.currentUser.uid;
+            
+            commentsList.innerHTML = Object.entries(comments || {})
+                .sort(([,a], [,b]) => b.timestamp - a.timestamp)
+                .map(([key, comment]) => {
+                    const isMyComment = comment.userId === currentUserId;
+                    const userName = comment.userName || 'مستخدم';
+                    const commentDate = new Date(comment.timestamp).toLocaleString('ar-EG');
+                    
+                    return `
+                        <div class="comment-item ${isMyComment ? 'my-comment' : ''}">
+                            <div class="comment-header">
+                                <span class="comment-user">
+                                    ${isMyComment ? 'أنا' : userName}
+                                    ${comment.userEmail ? `<span class="user-email">(${comment.userEmail})</span>` : ''}
+                                </span>
+                                <span class="comment-date">${commentDate}</span>
+                            </div>
+                            <p class="comment-text">${comment.text}</p>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        // تحديث دالة إضافة التعليق
+        document.addEventListener('DOMContentLoaded', function() {
+            const addCommentBtn = document.getElementById('addCommentBtn');
+            const commentInput = document.getElementById('commentInput');
+
+            addCommentBtn.addEventListener('click', async () => {
+                const text = commentInput.value.trim();
+                if (!text) return;
+
+                try {
+                    addCommentBtn.disabled = true;
+                    addCommentBtn.classList.add('loading');
+                    addCommentBtn.querySelector('span').textContent = 'جاري الإضافة...';
+
+                    const user = auth.currentUser;
+                    const commentsRef = ref(database, `users/${user.uid}/images/${window.galleryManager.currentSection}/${currentDocId}/comments`);
+                    const newCommentRef = push(commentsRef);
+                    
+                    const newComment = {
+                        text,
+                        timestamp: Date.now(),
+                        userId: user.uid,
+                        userName: user.displayName || user.email.split('@')[0],
+                        userEmail: user.email
+                    };
+
+                    // حفظ التعليق في Firebase
+                    await set(newCommentRef, newComment);
+
+                    // تحديث التخزين المحلي
+                    const localComments = LocalStorage.getData(`comments_${currentDocId}`)?.data || {};
+                    localComments[newCommentRef.key] = newComment;
+                    LocalStorage.setData(`comments_${currentDocId}`, localComments);
+
+                    commentInput.value = '';
+                    showToast('تم إضافة التعليق بنجاح');
+                } catch (error) {
+                    console.error('خطأ في إضافة التعليق:', error);
+                    showToast('حدث خطأ أثناء إضافة التعليق', true);
+                } finally {
+                    addCommentBtn.disabled = false;
+                    addCommentBtn.classList.remove('loading');
+                    addCommentBtn.querySelector('span').textContent = 'إضافة تعليق';
+                }
+            });
+
+            // إضافة التعليق عند الضغط على Enter
+            commentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addCommentBtn.click();
+                }
+            });
+        });
+
+        // دوال إغلاق النوافذ
+        window.closeCommentsDialog = function() {
+            document.getElementById('commentsDialog').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        };
+    </script>
+</body>
+</html> 

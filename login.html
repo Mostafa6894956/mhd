@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - نظام مراجعة الوثائق</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f43f5e;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --white: #ffffff;
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .login-container {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--dark);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.7rem;
+            color: var(--gray);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .register-link p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: var(--primary-dark);
+        }
+
+        .home-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .home-link:hover {
+            color: var(--primary);
+        }
+
+        .home-link i {
+            font-size: 1.1rem;
+        }
+
+        /* تحسينات للموبايل */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            input {
+                padding: 0.9rem;
+            }
+
+            button {
+                padding: 0.9rem;
+            }
+        }
+
+        /* تأثيرات الإشعارات */
+        .toast-success {
+            background: linear-gradient(to right, #00b09b, #96c93d) !important;
+        }
+        
+        .toast-error {
+            background: linear-gradient(to right, #ff5f6d, #ffc371) !important;
+        }
+
+        /* تحسين نمط حقول كلمة المرور */
+        .password-field {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-field input {
+            width: 100%;
+            padding: 1rem;
+            padding-left: 45px !important;
+            padding-right: 12px !important;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        /* تعديل موضع وأنماط زر العين */
+        .toggle-password {
+            position: absolute;
+            left: 12px;
+            top: 25%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 8px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: none;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
+        /* إزالة الأنماط غير المطلوبة */
+        .toggle-password:hover {
+            transform: translateY(-50%); /* تثبيت الموضع عند التحويم */
+            box-shadow: none;
+        }
+
+        /* تحسين أنيميشن زر التحميل */
+        button[type="submit"] {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.95);
+        }
+
+        button[type="submit"].loading {
+            pointer-events: none;
+            background: linear-gradient(90deg, 
+                var(--primary), 
+                var(--primary-dark), 
+                var(--primary)
+            ) !important;
+            background-size: 200% 100% !important;
+            animation: gradient-shift 2s ease infinite;
+        }
+
+        button[type="submit"].loading .button-text {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        button[type="submit"].loading::after {
+            content: "";
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            top: 50%;
+            right: 50%;
+            transform: translate(50%, -50%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* تأثير الموجة عند الضغط */
+        button[type="submit"]::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease-out, height 0.6s ease-out;
+        }
+
+        button[type="submit"]:active::before {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+        }
+
+        /* تحسين تأثير التحويم */
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        button[type="submit"]:not(.loading):hover {
+            background: linear-gradient(90deg,
+                var(--primary-dark),
+                var(--primary),
+                var(--primary-dark)
+            );
+            background-size: 200% 100%;
+            animation: gradient-hover 2s ease infinite;
+        }
+
+        @keyframes gradient-hover {
+            0% {
+                background-position: 100% 50%;
+            }
+            50% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>تسجيل الدخول</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="phone">رقم الهاتف</label>
+                <input type="tel" id="phone" maxlength="11" required>
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <div class="password-field">
+                    <input type="password" id="password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit">
+                <span class="button-text">تسجيل الدخول</span>
+            </button>
+        </form>
+        <div class="register-link">
+            <p>ليس لديك حساب؟ <a href="signup.html">سجل الآن</a></p>
+            <p style="margin-top: 1rem;">
+                <a href="index.html" style="color: #666;">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للصفحة الرئيسية
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // تعديل التحقق من حالة تسجيل الدخول
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    // التحقق من وجود توكن صالح في التخزين المحلي
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        // إذا لم يكن هناك توكن، قم بتسجيل الخروج
+                        await signOut(auth);
+                        return;
+                    }
+                    // المستخدم مسجل دخول بالفعل، توجيه للداشبورد
+                    window.location.href = 'dashboard.html';
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                    // في حالة حدوث خطأ، قم بتسجيل الخروج
+                    await signOut(auth);
+                }
+            }
+        });
+
+        // دالة لعرض الإشعارات
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true,
+                onClick: function(){}
+            }).showToast();
+        }
+
+        // دالة للتحقق من صحة رقم الهاتف
+        function validatePhone(phone) {
+            const phoneRegex = /^01[0125][0-9]{8}$/;
+            return phoneRegex.test(phone);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button[type="submit"]');
+            const buttonText = button.querySelector('.button-text');
+            
+            // تجميد الزر وإظهار التحميل
+            button.classList.add('loading');
+            button.disabled = true;
+
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                // التحقق من إدخال رقم الهاتف
+                if (!phone) {
+                    throw { code: 'custom/empty-phone', message: 'من فضلك أدخل رقم الهاتف' };
+                }
+
+                // التحقق من صحة رقم الهاتف
+                if (!validatePhone(phone)) {
+                    throw { code: 'custom/invalid-phone', message: 'رقم الهاتف غير صحيح، يجب أن يبدأ بـ 01 ويتكون من 11 رقم' };
+                }
+
+                // التحقق من إدخال كلمة المرور
+                if (!password) {
+                    throw { code: 'custom/empty-password', message: 'من فضلك أدخل كلمة المرور' };
+                }
+
+                // محاولة تسجيل الدخول
+                const userCredential = await signInWithEmailAndPassword(auth, `${phone}@domain.com`, password);
+                const user = userCredential.user;
+                
+                const userSnapshot = await get(ref(database, 'users/' + user.uid));
+                
+                if (userSnapshot.exists()) {
+                    showToast('تم تسجيل الدخول بنجاح! جاري تحويلك للوحة التحكم...');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    throw { code: 'custom/user-not-found', message: 'لم يتم العثور على بيانات المستخدم' };
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                let errorMessage = '';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'رقم الهاتف غير مسجل';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'كلمة المرور غير صحيحة';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'تم تجاوز عدد المحاولات المسموح بها، يرجى المحاولة لاحقاً';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = 'حدث خطأ في الاتصال بالشبكة، يرجى التحقق من اتصالك بالإنترنت';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = 'بيانات الدخول غير صحيحة، يرجى التأكد من رقم الهاتف وكلمة المرور';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'تم تعطيل هذا الحساب، يرجى التواصل مع الدعم';
+                        break;
+                    default:
+                        if (error.code?.startsWith('custom/')) {
+                            errorMessage = error.message;
+                        } else {
+                            errorMessage = 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
+                        }
+                }
+                
+                showToast(errorMessage, true);
+            } finally {
+                // إعادة الزر لحالته الطبيعية
+                button.classList.remove('loading');
+                button.disabled = false;
+            }
+        });
+
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html> 
