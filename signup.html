@@ -377,9 +377,8 @@
     </div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -393,33 +392,12 @@
             measurementId: "G-SCSBHBQM08"
         };
 
-        // Initialize Firebase
+        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const database = getDatabase(app);
+        const db = getDatabase(app);
 
-        // إضافة التحقق من حالة تسجيل الدخول
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                try {
-                    // التحقق من وجود توكن صالح في التخزين المحلي
-                    const token = localStorage.getItem('authToken');
-                    if (!token) {
-                        // إذا لم يكن هناك توكن، قم بتسجيل الخروج
-                        await signOut(auth);
-                        return;
-                    }
-                    // المستخدم مسجل دخول بالفعل، توجيه للداشبورد
-                    window.location.href = 'dashboard.html';
-                } catch (error) {
-                    console.error('Auth check error:', error);
-                    // في حالة حدوث خطأ، قم بتسجيل الخروج
-                    await signOut(auth);
-                }
-            }
-        });
-
-        // دالة لعرض الإشعارات
+        // دالة عرض رسائل التنبيه
         function showToast(message, isError = false) {
             Toastify({
                 text: message,
@@ -427,132 +405,97 @@
                 gravity: "top",
                 position: "center",
                 className: isError ? "toast-error" : "toast-success",
-                stopOnFocus: true,
-                onClick: function(){}
+                stopOnFocus: true
             }).showToast();
         }
 
-        // دالة للتحقق من صحة رقم الهاتف
+        // دالة التحقق من صحة رقم الهاتف
         function validatePhone(phone) {
-            // التحقق من أن الرقم يبدأ بـ 01 ويتكون من 11 رقم
-            const phoneRegex = /^01[0125][0-9]{8}$/;
-            return phoneRegex.test(phone);
+            return /^01[0125][0-9]{8}$/.test(phone);
         }
 
-        // دالة للتحقق من صحة الاسم
+        // دالة التحقق من صحة الاسم
         function validateName(name) {
-            // التحقق من أن الاسم يحتوي على حروف عربية فقط وأكثر من كلمتين
-            const nameRegex = /^[\u0600-\u06FF\s]{5,}$/;
-            const words = name.trim().split(/\s+/);
-            return nameRegex.test(name) && words.length >= 2;
+            return /^[\u0600-\u06FF\s]{5,}$/.test(name) && name.trim().split(/\s+/).length >= 2;
         }
 
-        // تعديل دالة التحقق من كلمة المرور
-        function validatePassword(password) {
-            return password.length >= 6;
-        }
-
+        // معالجة إنشاء الحساب
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const submitButton = e.target.querySelector('button[type="submit"]');
-            submitButton.classList.add('loading');
-            submitButton.disabled = true;
-
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const governorate = document.getElementById('governorate').value;
-            const administration = document.getElementById('administration').value.trim();
-            const azharInstitute = document.getElementById('azharInstitute').value.trim();
+            const button = e.target.querySelector('button[type="submit"]');
+            button.classList.add('loading');
+            button.disabled = true;
 
             try {
-                // التحقق من صحة الاسم
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const governorate = document.getElementById('governorate').value;
+                const administration = document.getElementById('administration').value.trim();
+                const institute = document.getElementById('azharInstitute').value.trim();
+
+                // التحقق من المدخلات
+                if (!name || !phone || !password || !confirmPassword || !governorate || !administration || !institute) {
+                    throw { code: 'custom/empty-fields', message: 'يرجى ملء جميع الحقول' };
+                }
+
                 if (!validateName(name)) {
-                    throw { 
-                        code: 'custom/invalid-name', 
-                        message: 'يجب أن يكون ان تكتب اسمك بالكامل ويكون باللغة العربية' 
-                    };
+                    throw { code: 'custom/invalid-name', message: 'يجب إدخال الاسم الكامل باللغة العربية' };
                 }
 
-                // التحقق من صحة رقم الهاتف
                 if (!validatePhone(phone)) {
-                    throw { 
-                        code: 'custom/invalid-phone', 
-                        message: 'رقم الهاتف غير صحيح، يجب أن يبدأ بـ 01 ويتكون من 11 رقم' 
-                    };
+                    throw { code: 'custom/invalid-phone', message: 'رقم الهاتف غير صحيح' };
                 }
 
-                // التحقق من كلمة المرور
-                if (!validatePassword(password)) {
-                    throw { 
-                        code: 'custom/weak-password', 
-                        message: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل' 
-                    };
+                if (password.length < 6) {
+                    throw { code: 'custom/weak-password', message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' };
                 }
 
-                // التحقق من تطابق كلمتي المرور
                 if (password !== confirmPassword) {
-                    throw { 
-                        code: 'custom/password-mismatch', 
-                        message: 'كلمات المرور غير متطابقة' 
-                    };
+                    throw { code: 'custom/password-mismatch', message: 'كلمتا المرور غير متطابقتين' };
                 }
 
-                // التحقق من اختيار المحافظة
-                if (!governorate) {
-                    throw { code: 'custom/no-governorate', message: 'من فضلك اختر المحافظة' };
-                }
-
-                // التحقق من الإدارة والمعهد
-                if (!administration || administration.length < 3) {
-                    throw { code: 'custom/invalid-administration', message: 'من فضلك أدخل اسم الإدارة بشكل صحيح' };
-                }
-
-                if (!azharInstitute || azharInstitute.length < 3) {
-                    throw { code: 'custom/invalid-institute', message: 'من فضلك أدخل اسم المعهد بشكل صحيح' };
-                }
-
-                // إنشاء المستخدم باستخدام رقم الهاتف
+                // إنشاء حساب المستخدم
                 const userCredential = await createUserWithEmailAndPassword(auth, `${phone}@domain.com`, password);
                 const user = userCredential.user;
 
-                // حفظ معلومات المستخدم في قاعدة البيانات
-                await set(ref(database, 'users/' + user.uid), {
-                    name: name,
-                    phone: phone,
-                    governorate: governorate,
-                    administration: administration,
-                    azharInstitute: azharInstitute,
+                // حفظ بيانات المستخدم في قاعدة البيانات
+                await set(ref(db, 'users/' + user.uid), {
+                    name,
+                    phone,
+                    governorate,
+                    administration,
+                    institute,
                     userType: 'user',
                     createdAt: new Date().toISOString()
                 });
 
-                showToast('تم التسجيل بنجاح! جاري تحويلك للوحة التحكم...');
+                // تخزين بيانات المستخدم محلياً
+                const token = await user.getIdToken();
+                localStorage.setItem('authToken', token);
+                localStorage.setItem('userName', name);
+
+                showToast('تم إنشاء الحساب بنجاح');
+                
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 2000);
+                }, 1000);
 
             } catch (error) {
-                console.error('Error:', error);
-                let errorMessage = '';
-                
+                console.error('Signup Error:', error);
+                let errorMessage;
+
                 switch (error.code) {
                     case 'auth/email-already-in-use':
                         errorMessage = 'رقم الهاتف مسجل بالفعل';
                         break;
-                    case 'auth/invalid-phone':
-                        errorMessage = 'رقم الهاتف غير صحيح';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = 'تسجيل المستخدمين غير مفعل حالياً';
-                        break;
                     case 'auth/network-request-failed':
-                        errorMessage = 'حدث خطأ في الاتصال بالشبكة، يرجى التحقق من اتصالك بالإنترنت';
+                        errorMessage = 'خطأ في الاتصال بالإنترنت';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'تم تجاوز عدد المحاولات المسموح بها';
                         break;
                     default:
                         if (error.code?.startsWith('custom/')) {
@@ -561,45 +504,27 @@
                             errorMessage = 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
                         }
                 }
-                
+
                 showToast(errorMessage, true);
             } finally {
-                submitButton.classList.remove('loading');
-                submitButton.disabled = false;
+                button.classList.remove('loading');
+                button.disabled = false;
             }
         });
 
-        // نقل دالة togglePassword إلى النطاق العام
+        // دالة إظهار/إخفاء كلمة المرور
         window.togglePassword = function(inputId) {
             const input = document.getElementById(inputId);
             const icon = event.currentTarget.querySelector('i');
             
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
-
-        // تعديل دالة تسجيل الخروج في dashboard.html
-        window.confirmLogout = async function() {
-            try {
-                const auth = getAuth();
-                await signOut(auth);
-                // مسح كل البيانات المخزنة
-                localStorage.clear();
-                sessionStorage.clear();
-                // توجيه المستخدم لصفحة تسجيل الدخول
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error(error);
-                showToast('حدث خطأ أثناء تسجيل الخروج', true);
-            }
-        };
     </script>
 </body>
 </html> 
