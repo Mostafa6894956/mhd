@@ -590,6 +590,10 @@
                     throw new Error('لم يتم العثور على بيانات المستخدم');
                 }
 
+                // التحقق من وجود البيانات المطلوبة
+                const institute = userData.azharInstitute || 'غير محدد';
+                const governorate = userData.governorate || 'غير محدد';
+
                 // تحويل صور المعاينة إلى ملفات
                 const files = await Promise.all(Array.from(previews).map(async (preview) => {
                     const response = await fetch(preview.src);
@@ -649,8 +653,8 @@
                         ...uploadedImages,
                         uploadedAt: new Date().toISOString(),
                         status: 'pending',
-                        institute: userData.azharInstitute,
-                        governorate: userData.governorate
+                        institute: institute,
+                        governorate: governorate
                     });
                 }
 
