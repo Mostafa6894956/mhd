@@ -769,18 +769,32 @@
         .close-modal:hover {
             color: var(--primary);
         }
+
+        .app-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .welcome-text {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .app-name {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
     <div class="layout">
         <header class="header">
             <div class="header-content">
-                <div class="user-info">
-                    <div class="user-name">
-                        <span class="welcome">مرحباً،</span>
-                        <span class="name" id="userNameSpan"></span>
-                    </div>
-                    <div class="institute-name" id="userInstitute"></div>
+                <div class="app-info">
+                    <div class="welcome-text">مرحباً بكم</div>
+
                 </div>
                 <button class="menu-btn" id="menuBtn">
                     <i class="fas fa-bars"></i>
@@ -790,7 +804,7 @@
 
         <div class="dashboard-container">
             <section class="welcome-section">
-                <h1>مرحباً بك في نظام مراجعة الوثائق</h1>
+                <h1>نظام مراجعة الوثائق</h1>
                 <p>اختر أحد الأقسام للبدء في إدارة الوثائق والصور</p>
             </section>
 
@@ -987,6 +1001,10 @@
                 </button>
             </div>
             <div class="sidebar-menu">
+                <a href="profile.html" class="menu-item">
+                    <i class="fas fa-user"></i>
+                    <span>الملف الشخصي</span>
+                </a>
                 <a href="#" class="menu-item" onclick="reportIssue()">
                     <i class="fas fa-exclamation-circle"></i>
                     الإبلاغ عن مشكلة
@@ -1054,7 +1072,7 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // التحقق من وجود التوكن
-                const token = localStorage.getItem('authToken');
+                const token = getStorageWithExpiry('authToken');
                 if (!token) {
                     // إذا لم يكن هناك توكن، نقوم بتسجيل الخروج
                     signOut(auth).then(() => {
@@ -1064,7 +1082,7 @@
                 }
 
                 // عرض اسم المستخدم فوراً من التخزين المحلي
-                document.getElementById('userNameSpan').textContent = localStorage.getItem('userName') || 'مستخدم';
+                document.getElementById('userNameSpan').textContent = getStorageWithExpiry('userName') || 'مستخدم';
                 
                 // إخفاء عنصر اسم المعهد
                 document.getElementById('userInstitute').style.display = 'none';
