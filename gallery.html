@@ -2654,28 +2654,26 @@
         // دالة لعرض التعليقات
         function renderComments(comments) {
             const commentsList = document.getElementById('commentsList');
-            const currentUserId = auth.currentUser.uid;
             
-            commentsList.innerHTML = Object.entries(comments || {})
-                .sort(([,a], [,b]) => b.timestamp - a.timestamp)
-                .map(([key, comment]) => {
-                    const isMyComment = comment.userId === currentUserId;
-                    const userName = comment.userName || 'مستخدم';
-                    const commentDate = new Date(comment.timestamp).toLocaleString('ar-EG');
-                    
-                    return `
-                        <div class="comment-item ${isMyComment ? 'my-comment' : ''}">
-                            <div class="comment-header">
-                                <span class="comment-user">
-                                    ${isMyComment ? 'أنا' : userName}
-                                    ${comment.userEmail ? `<span class="user-email">(${comment.userEmail})</span>` : ''}
-                                </span>
-                                <span class="comment-date">${commentDate}</span>
-                            </div>
-                            <p class="comment-text">${comment.text}</p>
+            if (Object.keys(comments).length === 0) {
+                commentsList.innerHTML = '<p class="no-comments">لا توجد تعليقات</p>';
+                return;
+            }
+
+            commentsList.innerHTML = Object.entries(comments)
+                .sort(([,a], [,b]) => a.timestamp - b.timestamp) // تغيير الترتيب ليكون تصاعدياً
+                .map(([key, comment]) => `
+                    <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''}">
+                        <div class="comment-header">
+                            <span>${comment.isAdmin ? 'المشرف' : 'المستخدم'}</span>
+                            <span>${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
                         </div>
-                    `;
-                }).join('');
+                        <div class="comment-text">${comment.text}</div>
+                    </div>
+                `).join('');
+            
+            // تحريك السكرول إلى آخر التعليقات بعد إضافة تعليق جديد
+            commentsList.scrollTop = commentsList.scrollHeight;
         }
 
         // تحديث دالة إضافة التعليق
