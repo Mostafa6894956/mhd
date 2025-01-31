@@ -1424,6 +1424,33 @@
             min-width: 20px;
             text-align: center;
         }
+
+        .comments-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .comments-loading .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .comments-loading p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -1913,6 +1940,85 @@
 
                 // إضافة مستمع للتغيير في URL
                 window.addEventListener('popstate', () => this.handleUrlChange());
+
+                // التحقق من وجود معلمات URL للإشعارات
+                const urlParams = new URLSearchParams(window.location.search);
+                const docId = urlParams.get('documentId'); // تغيير من docId إلى documentId
+                const showComments = urlParams.get('showComments');
+
+                if (docId && docId !== 'undefined') {
+                    // إذا كان هناك طلب لعرض التعليقات، نتجاهل البيانات المحلية
+                    if (showComments === 'true') {
+                        this.showLoading();
+                        this.loadDataFromServer().then((data) => {
+                            if (!data || !data[this.currentSection] || !data[this.currentSection][docId]) {
+                                console.error('لم يتم العثور على المستند:', docId);
+                                showToast('لم يتم العثور على المستند', true);
+                                this.hideLoading();
+                                return;
+                            }
+                            
+                            // فتح نافذة التعليقات مع إظهار حالة التحميل
+                            const commentsDialog = document.getElementById('commentsDialog');
+                            const commentsList = document.getElementById('commentsList');
+                            
+                            // إظهار حالة التحميل
+                            commentsList.innerHTML = `
+                                <div class="comments-loading">
+                                    <div class="loading-spinner"></div>
+                                    <p>جاري تحميل التعليقات...</p>
+                                </div>
+                            `;
+                            
+                            // عرض نافذة التعليقات
+                            commentsDialog.classList.add('active');
+                            document.getElementById('overlay').classList.add('active');
+                            
+                            // جلب التعليقات من Firebase
+                            const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${this.currentSection}/${docId}/comments`);
+                            onValue(commentsRef, (snapshot) => {
+                                console.log('تم استلام التعليقات:', snapshot.val());
+                                const serverComments = snapshot.val() || {};
+                                renderComments(serverComments);
+                                document.getElementById('commentInput').focus();
+                            }, (error) => {
+                                console.error('خطأ في جلب التعليقات:', error);
+                                commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل التعليقات</p>';
+                            });
+                        });
+                    } else {
+                        // انتظر تحميل البيانات ثم اعرض المستند
+                        this.loadData().then(() => {
+                            viewDocument(docId, 0);
+                        });
+                    }
+                } else if (docId === 'undefined') {
+                    console.error('معرف المستند غير صالح');
+                    showToast('معرف المستند غير صالح', true);
+                }
+            }
+
+            async loadDataFromServer() {
+                try {
+                    const user = auth.currentUser;
+                    if (!user) return null;
+
+                    const dataRef = ref(database, `users/${user.uid}/images`);
+                    const snapshot = await get(dataRef);
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        this.cachedData = data;
+                        this.renderDocuments(data);
+                    }
+                    this.hideLoading();
+                    return data;
+                } catch (error) {
+                    console.error('خطأ في تحميل البيانات من السيرفر:', error);
+                    this.hideLoading();
+                    showToast('حدث خطأ في تحميل البيانات', true);
+                    return null;
+                }
             }
 
             async initialize() {
@@ -2675,27 +2781,25 @@
             const commentsList = document.getElementById('commentsList');
             currentDocId = docId;
 
-            // عرض التعليقات المحلية أولاً
-            const localComments = LocalStorage.getData(`comments_${docId}`);
-            if (localComments) {
-                renderComments(localComments.data);
-            }
+            // إظهار حالة التحميل
+            commentsList.innerHTML = `
+                <div class="comments-loading">
+                    <div class="loading-spinner"></div>
+                    <p>جاري تحميل التعليقات...</p>
+                </div>
+            `;
 
-            // جلب التعليقات من Firebase ومقارنتها
+            // عرض نافذة التعليقات
+            commentsDialog.classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+
+            // جلب التعليقات من Firebase
             const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`);
             onValue(commentsRef, (snapshot) => {
                 const serverComments = snapshot.val() || {};
-                
-                // مقارنة التعليقات من السيرفر مع المحلية
-                if (hasCommentsChanged(serverComments, localComments?.data)) {
-                    LocalStorage.setData(`comments_${docId}`, serverComments);
-                    renderComments(serverComments);
-                }
+                renderComments(serverComments);
+                document.getElementById('commentInput').focus();
             });
-
-            commentsDialog.classList.add('active');
-            document.getElementById('overlay').classList.add('active');
-            document.getElementById('commentInput').focus();
         };
 
         // دالة لمقارنة التعليقات
