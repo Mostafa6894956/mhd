@@ -352,8 +352,8 @@
             }
 
             .hero-icon {
-                width: 180px;
-                height: 180px;
+                width: 200px;
+                height: 200px;
                 margin-bottom: 0.8rem;
             }
 
@@ -403,11 +403,12 @@
                 <div class="hero-icon">
                     <div class="hero-glow"></div>
                     <div class="hero-icon-wrapper">
-                        <img src="https://i.ibb.co/JWWx0dR0/5-1.png" alt="شعار النظام">
+                        <img src="https://i.ibb.co/JjG671Y1/Screenshot-2025-01-31-071428.png" alt="شعار النظام" height="250" width="250">
+                        
                     </div>
                 </div>
-                <h1>نظام إدارة الوثائق المتطور</h1>
-                <p>منصة متكاملة لإدارة وتنظيم الوثائق والصور بكفاءة عالية</p>
+                <h1>تطبيق ادارة الجودة</h1>
+                <p>إدارة الجودة بأسلوب جديد – سهولة في المتابعة، دقة في الإنجاز!</p>
             </section>
 
             <div class="auth-container">
@@ -427,7 +428,7 @@
         </main>
 
         <footer class="footer">
-            تم التطوير بواسطة <span>MHD</span> | جميع الحقوق محفوظة © 2024
+            تم التطوير بواسطة <span>MHD</span> 
         </footer>
     </div>
 
@@ -453,26 +454,14 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // إخفاء محتوى الصفحة مبدئياً
-        document.body.style.display = 'none';
-
-        // التحقق الفوري من حالة تسجيل الدخول
-        const checkAuth = new Promise((resolve) => {
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                unsubscribe(); // إلغاء الاشتراك بعد أول استجابة
-                if (user) {
-                    window.location.href = 'dashboard.html';
-                } else {
-                    document.body.style.display = ''; // إظهار المحتوى إذا لم يكن مسجل
-                }
-                resolve();
-            });
+        // التحقق من حالة تسجيل الدخول بعد تحميل الصفحة
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
         });
 
-        // انتظار اكتمال التحقق قبل تنفيذ باقي الكود
-        await checkAuth;
-
-        // باقي الكود للجزيئات وتأثيرات الأزرار
+        // إضافة الجزيئات
         const particlesContainer = document.querySelector('.floating-particles');
         for (let i = 0; i < 50; i++) {
             const particle = document.createElement('div');
@@ -490,8 +479,8 @@
                 const rect = button.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
-                button.querySelector('.button-glow').style.setProperty('--x', `${x}%`);
-                button.querySelector('.button-glow').style.setProperty('--y', `${y}%`);
+                button.querySelector('.button-glow')?.style.setProperty('--x', `${x}%`);
+                button.querySelector('.button-glow')?.style.setProperty('--y', `${y}%`);
             });
         });
     </script>
