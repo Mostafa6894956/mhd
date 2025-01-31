@@ -334,7 +334,7 @@
     <div class="upload-container">
         <div class="header">
             <h1 id="sectionTitle">رفع الملفات</h1>
-            <a href="dashboard.html" class="back-btn">عودة للصفحة الرئسية</a>
+            <a href="dashboard.html" class="back-btn">عودة للوحة التحكم</a>
         </div>
 
         <div class="welcome-section">
@@ -513,29 +513,92 @@
             handleFiles(fileInput.files);
         });
 
-        function handleFiles(files) {
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const preview = document.createElement('div');
-                        preview.className = 'preview-item';
-                        preview.innerHTML = `
-                            <img src="${e.target.result}">
-                            <button type="button" class="remove-btn">&times;</button>
-                        `;
-                        preview.querySelector('.remove-btn').onclick = () => preview.remove();
-                        previewContainer.appendChild(preview);
+        // إضافة دالة لضغط الصور
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // زيادة الحد الأقصى للأبعاد إلى 1600
+                        const MAX_SIZE = 1600;
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height = Math.round((height * MAX_SIZE) / width);
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width = Math.round((width * MAX_SIZE) / height);
+                                height = MAX_SIZE;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // زيادة جودة الضغط إلى 0.85
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, {
+                                type: 'image/jpeg',
+                            }));
+                        }, 'image/jpeg', 0.85);
                     };
-                    reader.readAsDataURL(file);
-                }
+                };
             });
         }
 
-        // إضافة دالة رفع الصورة إلى imgbb
+        // تعديل دالة معالجة الملفات
+        async function handleFiles(files) {
+            for (const file of Array.from(files)) {
+                if (file.type.startsWith('image/')) {
+                    // إضافة مؤشر تحميل مؤقت
+                    const tempPreview = document.createElement('div');
+                    tempPreview.className = 'preview-item';
+                    tempPreview.innerHTML = `
+                        <div style="width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                            <div>جاري المعالجة...</div>
+                        </div>
+                    `;
+                    previewContainer.appendChild(tempPreview);
+
+                    try {
+                        // ضغط الصورة
+                        const compressedFile = await compressImage(file);
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            tempPreview.innerHTML = `
+                                <img src="${e.target.result}">
+                                <button type="button" class="remove-btn">&times;</button>
+                            `;
+                            tempPreview.querySelector('.remove-btn').onclick = () => tempPreview.remove();
+                        };
+                        reader.readAsDataURL(compressedFile);
+                    } catch (error) {
+                        tempPreview.remove();
+                        console.error('خطأ في معالجة الصورة:', error);
+                        showToast('حدث خطأ في معالجة الصورة', true);
+                    }
+                }
+            }
+        }
+
+        // تعديل دالة رفع الصور
         async function uploadToImgbb(file) {
+            // ضغط الصورة قبل الرفع
+            const compressedFile = await compressImage(file);
+            
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('image', compressedFile);
             formData.append('key', '3475f087530c84c6406536284cf1b5aa');
 
             try {
