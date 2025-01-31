@@ -434,7 +434,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -453,14 +453,26 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // التحقق من حالة تسجيل الدخول
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // المستخدم مسجل دخول بالفعل، توجيه للداشبورد
-                window.location.href = 'dashboard.html';
-            }
+        // إخفاء محتوى الصفحة مبدئياً
+        document.body.style.display = 'none';
+
+        // التحقق الفوري من حالة تسجيل الدخول
+        const checkAuth = new Promise((resolve) => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                unsubscribe(); // إلغاء الاشتراك بعد أول استجابة
+                if (user) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    document.body.style.display = ''; // إظهار المحتوى إذا لم يكن مسجل
+                }
+                resolve();
+            });
         });
 
+        // انتظار اكتمال التحقق قبل تنفيذ باقي الكود
+        await checkAuth;
+
+        // باقي الكود للجزيئات وتأثيرات الأزرار
         const particlesContainer = document.querySelector('.floating-particles');
         for (let i = 0; i < 50; i++) {
             const particle = document.createElement('div');
