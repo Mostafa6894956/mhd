@@ -1406,6 +1406,24 @@
             min-width: 20px;
             text-align: center;
         }
+
+        .comment-btn[data-count="0"]::after {
+            display: none;
+        }
+
+        .comment-btn[data-count]:not([data-count="0"])::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            min-width: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -1453,6 +1471,18 @@
                         <ul class="nav-items">
                             <li class="nav-item">
                                 <a href="?section=supervisor-meetings&subsection=مشرف القرآن الكريم" class="nav-link">مشرف القرآن الكريم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف اللغة العربية" class="nav-link">مشرف اللغة العربية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف العلوم" class="nav-link">مشرف العلوم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف الدراسات" class="nav-link">مشرف الدراسات</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=supervisor-meetings&subsection=مشرف اللغة الانجليزية" class="nav-link">مشرف اللغة الانجليزية</a>
                             </li>
                             <li class="nav-item">
                                 <a href="?section=supervisor-meetings&subsection=مشرف الرياضيات" class="nav-link">مشرف الرياضيات</a>
@@ -1602,6 +1632,11 @@
                                 <a href="?section=domains&subsection=مناخ تربوي" class="nav-link">مناخ تربوي</a>
                             </li>
                         </ul>
+                    </div>
+
+                    <!-- إضافة قسم الملاحظات -->
+                    <div class="nav-section">
+                        <a href="?section=notes" class="nav-link">الملاحظات</a>
                     </div>
                 </nav>
             </aside>
@@ -2001,6 +2036,10 @@
                     ],
                     'supervisor-meetings': [
                         'مشرف القرآن الكريم',
+                        'مشرف اللغة العربية',
+                        'مشرف العلوم',
+                        'مشرف الدراسات',
+                        'مشرف اللغة الانجليزية',
                         'مشرف الرياضيات',
                         'مشرف التربية الفنية'
                     ],
@@ -2205,7 +2244,8 @@
                 'general-photos': 'صور عامة ولوحات المعهد',
                 'results': 'النتيجة',
                 'attendance': 'الغياب',
-                'domains': 'المجالات'
+                'domains': 'المجالات',
+                'notes': 'الملاحظات'
             };
                 return this.currentSubsection || titles[this.currentSection] || 'معرض الصور';
             }
