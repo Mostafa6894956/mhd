@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المشرف - نظام مراجعة الوثائق</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #f43f5e;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: var(--light);
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        .header {
+            background: var(--white);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            box-shadow: var(--shadow);
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--light);
+            padding: 0.3rem;
+            border-radius: 8px;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-toggle button.active {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .main-container {
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Users View Styles */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .user-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+        }
+
+        .user-info h3 {
+            color: var(--dark);
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .stat-item .number {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .stat-item .label {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .view-btn {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .view-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Documents View Styles */
+        .documents-container {
+            display: none;
+            padding: 1rem;
+        }
+
+        .documents-container.active {
+            display: block;
+        }
+
+        .filters-bar {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.8rem;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .document-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .document-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .document-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .document-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .document-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--white);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: var(--warning);
+        }
+
+        .status-approved {
+            background: var(--success);
+        }
+
+        .status-rejected {
+            background: var(--danger);
+        }
+
+        .document-info {
+            padding: 1rem;
+        }
+
+        .document-info h3 {
+            color: var(--dark);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .document-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .document-actions button {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .approve-btn {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .reject-btn {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .view-images-btn {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            margin: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--light);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .user-details {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .user-details h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .user-details p {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .user-details strong {
+            color: var(--gray);
+            margin-left: 0.5rem;
+        }
+
+        .section-documents {
+            margin-bottom: 2rem;
+        }
+
+        .section-documents h4 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .image-item {
+            position: relative;
+            padding-bottom: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .image-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1rem;
+            }
+
+            .view-toggle {
+                display: none;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-bar {
+                flex-direction: column;
+            }
+
+            .filter-group {
+            width: 100%;
+        }
+        }
+
+        /* تنسيقات شاشة التحميل */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 1rem;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* تنسيق تحميل البطاقات */
+        .user-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* تحسين تصميم نافذة المستندات */
+        .documents-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-button {
+            padding: 0.8rem 1.2rem;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            color: var(--gray);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e2e8f0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .document-card {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .document-thumbnail {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .document-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .document-details {
+            flex: 1;
+        }
+
+        .document-title {
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .document-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .info-label {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-approved {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تحديث تنسيقات نافذة الصور */
+        .modal-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 10;
+        }
+
+        .images-modal .close-modal {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .images-modal .close-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .images-viewer {
+            position: relative;
+            display: flex;
+                flex-direction: column;
+            gap: 1rem;
+        }
+
+        .main-image {
+            position: relative;
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .main-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .image-controls {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prev-btn { right: 1rem; }
+        .next-btn { left: 1rem; }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .thumbnails-container {
+            overflow: hidden;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .thumbnails-track {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .thumbnail.active {
+            opacity: 1;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .thumbnail:hover {
+            opacity: 0.8;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-info {
+            text-align: center;
+            color: var(--white);
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+
+        /* تحسين التمرير */
+        .thumbnails-track::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .thumbnails-track::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .thumbnails-track::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* تنسيقات التعليقات */
+        .comments-container {
+            padding: 1rem;
+        }
+
+        .comments-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+
+        .comment-item {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .comment-text {
+            color: var(--dark);
+        }
+
+        .add-comment {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .add-comment textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--light);
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .add-comment textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .admin-comment {
+            background: #f0f7ff;
+            border-right: 3px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">جاري تحميل البيانات...</p>
+    </div>
+
+    <header class="header">
+        <h1>لوحة تحكم المشرف</h1>
+        
+    </header>
+
+    <div class="main-container">
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>المحافظة</label>
+                <select id="governorateFilter">
+                    <option value="">الكل</option>
+                    <!-- سيتم تحميل المحافظات ديناميكياً -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>الإدارة</label>
+                <select id="administrationFilter">
+                    <option value="">الكل</option>
+                    <!-- سيتم تحميل الإدارات ديناميكياً -->
+                </select>
+        </div>
+            <div class="filter-group">
+                <label>المعهد</label>
+                <select id="instituteFilter">
+                    <option value="">الكل</option>
+                    <!-- سيتم تحميل المعاهد ديناميكياً -->
+                    </select>
+            </div>
+            <div class="filter-group">
+                <label>حالة المستندات</label>
+                <select id="documentsFilter">
+                    <option value="">الكل</option>
+                    <option value="hasDocuments">لديهم مستندات</option>
+                    <option value="noDocuments">لا يوجد مستندات</option>
+                    <option value="hasPending">لديهم مستندات قيد المراجعة</option>
+                    <option value="hasApproved">لديهم مستندات تمت الموافقة عليها</option>
+                    <option value="hasRejected">لديهم مستندات مرفوضة</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>بحث</label>
+                <input type="text" id="searchFilter" placeholder="ابحث عن مستخدم...">
+            </div>
+                    </div>
+        <div class="users-grid" id="usersGrid">
+            <!-- سيتم إضافة بطاقات المستخدمين هنا -->
+            </div>
+        </div>
+
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('userModal')">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="userModalContent">
+                <!-- سيتم إضافة محتوى المستخدم هنا -->
+                </div>
+            </div>
+        </div>
+
+    <div class="modal images-modal" id="imagesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal" onclick="closeModal('imagesModal')">
+                    <i class="fas fa-times"></i>
+                        </button>
+            </div>
+            <div class="images-viewer">
+                <div class="main-image">
+                    <img id="currentImage" src="" alt="الصورة الحالية">
+                    <div class="image-controls">
+                        <button onclick="zoomIn()" class="control-btn">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button onclick="zoomOut()" class="control-btn">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button onclick="resetZoom()" class="control-btn">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button onclick="rotateImage()" class="control-btn">
+                            <i class="fas fa-redo"></i>
+                        </button>
+        </div>
+                    <button class="nav-btn prev-btn" onclick="prevImage()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="nav-btn next-btn" onclick="nextImage()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    </div>
+                <div class="thumbnails-container">
+                    <div id="thumbnailsTrack" class="thumbnails-track">
+                        <!-- الصور المصغرة ستضاف هنا -->
+                </div>
+                    </div>
+                <div class="image-info">
+                    <span id="imageCounter">1 / 1</span>
+                </div>
+                    </div>
+                </div>
+            </div>
+            
+    <!-- إضافة نافذة التعليقات -->
+    <div class="modal" id="commentsModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('commentsModal')">
+                <i class="fas fa-times"></i>
+                        </button>
+            <div class="comments-container">
+                <h3>التعليقات</h3>
+                <div id="commentsList" class="comments-list">
+                    <!-- سيتم إضافة التعليقات هنا -->
+                    </div>
+                <div class="add-comment">
+                    <textarea id="commentInput" placeholder="اكتب تعليقك هنا..." rows="3"></textarea>
+                    <button onclick="addComment()" class="action-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        إضافة تعليق
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, get, update, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // التحقق من صلاحيات المشرف
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = ref(db, `users/${user.uid}`);
+                const snapshot = await get(userRef);
+                const userData = snapshot.val();
+                
+                if (!userData || userData.userType !== 'admin') {
+                loadUsers();
+            } else {
+                loadUsers();
+            }        
+            } else {
+                loadUsers();
+            }
+        });
+
+        // إضافة المتغيرات العامة للتصفية
+        let allUsers = {};
+        let filters = {
+            governorate: '',
+            administration: '',
+            institute: '',
+            documents: '',
+            search: ''
+        };
+
+        // متغيرات عامة لمعرض الصور
+        let currentImages = [];
+        let currentImageIndex = 0;
+        let currentZoom = 1;
+        let currentRotation = 0;
+
+        // متغيرات عامة للتعليقات
+        let currentDocumentData = null;
+
+        // تحديث دالة تحميل المستخدمين
+        async function loadUsers() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+
+            try {
+                const usersRef = ref(db, 'users');
+                const snapshot = await get(usersRef);
+                allUsers = snapshot.val() || {};
+
+                // تحميل قوائم التصفية
+                await loadFilterOptions();
+                
+                // تحويل المستخدمين إلى مصفوفة مع حساب آخر نشاط
+                let usersArray = await Promise.all(
+                    Object.entries(allUsers)
+                        .filter(([_, user]) => user.userType === 'user')
+                        .map(async ([uid, user]) => {
+                            const imagesRef = ref(db, `users/${uid}/images`);
+                            const imagesSnapshot = await get(imagesRef);
+                            const images = imagesSnapshot.val() || {};
+                            
+                            let lastActivity = 0;
+                            Object.values(images).forEach(section => {
+                                Object.values(section).forEach(doc => {
+                                    const uploadTime = new Date(doc.uploadedAt).getTime();
+                                    if (uploadTime > lastActivity) {
+                                        lastActivity = uploadTime;
+                                    }
+                                });
+                            });
+
+                            return {
+                                uid,
+                                user,
+                                lastActivity: lastActivity || 0
+                            };
+                        })
+                );
+
+                // ترتيب المستخدمين حسب آخر نشاط
+                usersArray.sort((a, b) => b.lastActivity - a.lastActivity);
+
+                // إضافة مستمعي الأحداث للفلاتر
+                setupFilterListeners();
+                
+                // تطبيق الفلاتر على المصفوفة المرتبة
+                await applyFilters(usersArray);
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showToast('حدث خطأ في تحميل البيانات', true);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // دالة تحميل خيارات التصفية
+        async function loadFilterOptions() {
+            const governorates = new Set();
+            const administrations = new Set();
+            const institutes = new Set();
+
+            Object.values(allUsers).forEach(user => {
+                if (user.userType === 'user') {
+                    if (user.governorate) governorates.add(user.governorate);
+                    if (user.administration) administrations.add(user.administration);
+                    if (user.institute) institutes.add(user.institute);
+                }
+            });
+
+            updateSelectOptions('governorateFilter', Array.from(governorates));
+            updateSelectOptions('administrationFilter', Array.from(administrations));
+            updateSelectOptions('instituteFilter', Array.from(institutes));
+        }
+
+        // تحديث دالة تطبيق الفلاتر
+        async function applyFilters(usersArray) {
+            const usersGrid = document.getElementById('usersGrid');
+            usersGrid.innerHTML = '<div class="loading-text">جاري تطبيق الفلاتر...</div>';
+
+            // تأخير صغير لإظهار حالة التحميل
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            let filteredUsers = usersArray.filter(({user}) => {
+                // تطبيق الفلاتر
+                if (filters.governorate && user.governorate !== filters.governorate) return false;
+                if (filters.administration && user.administration !== filters.administration) return false;
+                if (filters.institute && user.institute !== filters.institute) return false;
+
+                if (filters.search) {
+                    const searchText = filters.search.toLowerCase();
+                    const userText = `${user.name} ${user.phone} ${user.institute}`.toLowerCase();
+                    if (!userText.includes(searchText)) return false;
+                }
+
+                return true;
+            });
+
+            // تطبيق فلتر المستندات
+            if (filters.documents) {
+                filteredUsers = await Promise.all(
+                    filteredUsers.map(async ({uid, user, lastActivity}) => {
+                        const documentsCount = await getDocumentsCount(uid);
+                        return { uid, user, lastActivity, documentsCount };
+                    })
+                );
+
+                filteredUsers = filteredUsers.filter(({documentsCount}) => {
+                    switch (filters.documents) {
+                        case 'hasDocuments': return documentsCount.total > 0;
+                        case 'noDocuments': return documentsCount.total === 0;
+                        case 'hasPending': return documentsCount.pending > 0;
+                        case 'hasApproved': return documentsCount.approved > 0;
+                        case 'hasRejected': return documentsCount.rejected > 0;
+                        default: return true;
+                    }
+                });
+            }
+
+            usersGrid.innerHTML = '';
+            
+            if (filteredUsers.length === 0) {
+                usersGrid.innerHTML = '<div class="no-results">لا توجد نتائج تطابق البحث</div>';
+                return;
+            }
+
+            // عرض المستخدمين المفلترة
+            for (const {uid, user} of filteredUsers) {
+                const documentsCount = await getDocumentsCount(uid);
+                const card = createUserCard(uid, user, documentsCount);
+                usersGrid.appendChild(card);
+            }
+        }
+
+        // إضافة باقي الدوال المساعدة
+        function updateSelectOptions(selectId, options) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">الكل</option>';
+            options.sort().forEach(option => {
+                select.add(new Option(option, option));
+            });
+            
+            select.value = currentValue;
+        }
+
+        function setupFilterListeners() {
+            document.getElementById('governorateFilter').addEventListener('change', handleFilterChange);
+            document.getElementById('administrationFilter').addEventListener('change', handleFilterChange);
+            document.getElementById('instituteFilter').addEventListener('change', handleFilterChange);
+            document.getElementById('documentsFilter').addEventListener('change', handleFilterChange);
+            
+            let searchTimeout;
+            document.getElementById('searchFilter').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filters.search = e.target.value.trim();
+                    loadUsers(); // إعادة تحميل المستخدمين مع الفلتر الجديد
+                }, 300);
+            });
+        }
+
+        async function handleFilterChange(e) {
+            filters[e.target.id.replace('Filter', '')] = e.target.value;
+            await loadUsers(); // إعادة تحميل المستخدمين مع الفلتر الجديد
+        }
+
+        // تحديث دالة إنشاء بطاقة المستخدم لتشمل تاريخ آخر نشاط
+        function createUserCard(uid, user, documentsCount) {
+            const div = document.createElement('div');
+            div.className = 'user-card';
+            div.innerHTML = `
+                <div class="user-header">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>${user.name}</h3>
+                        <p>${user.phone}</p>
+                    </div>
+                </div>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="number">${documentsCount.total}</div>
+                        <div class="label">المستندات</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">${documentsCount.pending}</div>
+                        <div class="label">قيد المراجعة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">${documentsCount.approved}</div>
+                        <div class="label">تمت الموافقة</div>
+                    </div>
+                </div>
+                <div class="user-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${user.governorate}
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-school"></i>
+                        ${user.institute}
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="action-btn view-btn" onclick="viewUserDetails('${uid}')">
+                        <i class="fas fa-eye"></i>
+                        عرض التفاصيل
+                    </button>
+                </div>
+            `;
+            return div;
+        }
+
+        // تحديث دالة حساب إحصائيات المستندات
+        async function getDocumentsCount(uid) {
+            const imagesRef = ref(db, `users/${uid}/images`);
+            const snapshot = await get(imagesRef);
+            const images = snapshot.val() || {};
+
+            let total = 0;
+            let pending = 0;
+            let approved = 0;
+            let rejected = 0;
+
+            Object.values(images).forEach(section => {
+                Object.values(section).forEach(doc => {
+                    total++;
+                    if (doc.status === 'pending') pending++;
+                    if (doc.status === 'approved') approved++;
+                    if (doc.status === 'rejected') rejected++;
+                        });
+                    });
+
+            return { total, pending, approved, rejected };
+        }
+
+        // عرض تفاصيل المستخدم
+        window.viewUserDetails = async function(uid) {
+            const modal = document.getElementById('userModal');
+            const content = document.getElementById('userModalContent');
+            
+            content.innerHTML = `
+                <div class="loading-spinner"></div>
+                <p class="loading-text">جاري تحميل البيانات...</p>
+            `;
+            
+            modal.classList.add('active');
+
+            try {
+                const userRef = ref(db, `users/${uid}`);
+                const snapshot = await get(userRef);
+                const user = snapshot.val();
+
+                content.innerHTML = `
+                    <div class="user-details">
+                        <h3>البيانات الشخصية</h3>
+                        <p><strong>الاسم:</strong> ${user.name}</p>
+                        <p><strong>رقم الهاتف:</strong> ${user.phone}</p>
+                        <p><strong>المحافظة:</strong> ${user.governorate}</p>
+                        <p><strong>الإدارة:</strong> ${user.administration}</p>
+                        <p><strong>المعهد:</strong> ${user.institute}</p>
+                            </div>
+                    <div class="user-documents">
+                        <h3>المستندات</h3>
+                        <div id="documentsContainer">
+                            <div class="loading-spinner"></div>
+                            <p class="loading-text">جاري تحميل المستندات...</p>
+                        </div>
+                </div>
+            `;
+
+                await loadUserDocuments(uid, content.querySelector('#documentsContainer'));
+            } catch (error) {
+                console.error('Error loading user details:', error);
+                content.innerHTML = '<p class="error-message">حدث خطأ في تحميل البيانات</p>';
+            }
+        };
+
+        // تحميل مستندات المستخدم
+        async function loadUserDocuments(uid, container) {
+            const imagesRef = ref(db, `users/${uid}/images`);
+            const snapshot = await get(imagesRef);
+            const images = snapshot.val() || {};
+
+            // إنشاء التبويبات والمحتوى
+            let tabsHtml = '<div class="documents-tabs">';
+            let contentHtml = '';
+            let isFirst = true;
+
+            for (const [section, docs] of Object.entries(images)) {
+                const sectionTitle = getSectionTitle(section);
+                const activeClass = isFirst ? 'active' : '';
+                
+                tabsHtml += `
+                    <button class="tab-button ${activeClass}" onclick="switchTab('${section}')">
+                        ${sectionTitle}
+                    </button>
+                `;
+
+                contentHtml += `
+                    <div id="tab-${section}" class="tab-content ${activeClass}">
+                        ${Object.entries(docs).map(([docId, doc]) => `
+                            <div class="document-card">
+                                <div class="document-thumbnail">
+                                    <img src="${doc[0]}" alt="${doc.title || 'مستند'}">
+                    </div>
+                                <div class="document-details">
+                                    <h3 class="document-title">${doc.title || 'مستند بدون عنوان'}</h3>
+                                    <div class="document-info">
+                                        <div class="info-item">
+                                            <span class="info-label">تاريخ الرفع</span>
+                                            <span class="info-value">${new Date(doc.uploadedAt).toLocaleDateString('ar-EG')}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">القسم الفرعي</span>
+                                            <span class="info-value">${doc.subsection || 'لا يوجد'}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">الحالة</span>
+                                            <span class="status-badge status-${doc.status || 'pending'}">
+                                                <i class="fas fa-${getStatusIcon(doc.status)}"></i>
+                                                ${getStatusText(doc.status)}
+                                </span>
+                            </div>
+                        </div>
+                                    <div class="document-actions">
+                                        <button class="action-btn view-btn" onclick="viewImages('${uid}', '${section}', '${docId}')">
+                                            <i class="fas fa-images"></i>
+                                            عرض الصور
+                                        </button>
+                                        <button class="action-btn comment-btn" onclick="showComments('${uid}', '${section}', '${docId}')">
+                                            <i class="fas fa-comments"></i>
+                                            التعليقات ${doc.comments ? `(${Object.keys(doc.comments).length})` : '(0)'}
+                                        </button>
+                                        ${doc.status !== 'approved' ? `
+                                            <button class="action-btn approve-btn" onclick="updateStatus('${uid}', '${section}', '${docId}', 'approved')">
+                                                <i class="fas fa-check"></i>
+                                                موافقة
+                                            </button>
+                                        ` : ''}
+                                        ${doc.status !== 'rejected' ? `
+                                            <button class="action-btn reject-btn" onclick="updateStatus('${uid}', '${section}', '${docId}', 'rejected')">
+                                                <i class="fas fa-times"></i>
+                                                رفض
+                                            </button>
+                                        ` : ''}
+                    </div>
+                    </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                isFirst = false;
+            }
+
+            tabsHtml += '</div>';
+            container.innerHTML = Object.keys(images).length ? tabsHtml + contentHtml : '<p>لا توجد مستندات</p>';
+        }
+
+        // دالة تبديل التبويبات
+        window.switchTab = function(sectionId) {
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelector(`.tab-button[onclick*="${sectionId}"]`).classList.add('active');
+            document.getElementById(`tab-${sectionId}`).classList.add('active');
+        };
+
+        // دالة مساعدة للحصول على أيقونة الحالة
+        function getStatusIcon(status) {
+            const icons = {
+                'pending': 'clock',
+                'approved': 'check-circle',
+                'rejected': 'times-circle'
+            };
+            return icons[status] || 'clock';
+        }
+
+        // تحديث حالة المستند
+        window.updateStatus = async function(uid, section, docId, newStatus) {
+            try {
+                // تحديث حالة المستند
+                const docRef = ref(db, `users/${uid}/images/${section}/${docId}`);
+                await update(docRef, { status: newStatus });
+
+                // إضافة إشعار للمستخدم
+                const notificationRef = ref(db, `users/${uid}/notifications`);
+                const newNotification = {
+                    type: `document_${newStatus}`,
+                    timestamp: Date.now(),
+                    message: newStatus === 'approved' 
+                        ? 'تمت الموافقة على مستندك' 
+                        : 'تم رفض مستندك',
+                    documentId: docId,
+                    section: section,
+                    isAdmin: true,
+                    adminId: auth.currentUser.uid
+                };
+                
+                await push(notificationRef, newNotification);
+
+                // تحديث واجهة المستخدم
+                const statusBadge = document.querySelector(`[data-doc-id="${docId}"] .status-badge`);
+                if (statusBadge) {
+                    statusBadge.className = `status-badge status-${newStatus}`;
+                    statusBadge.innerHTML = `
+                        <i class="fas fa-${getStatusIcon(newStatus)}"></i>
+                        ${getStatusText(newStatus)}
+                    `;
+                }
+
+                // إظهار رسالة نجاح
+                showToast(newStatus === 'approved' 
+                    ? 'تمت الموافقة على المستند بنجاح' 
+                    : 'تم رفض المستند بنجاح'
+                );
+
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showToast('حدث خطأ في تحديث حالة المستند', true);
+            }
+        };
+
+        // عرض الصور
+        window.viewImages = async function(uid, section, docId) {
+            const docRef = ref(db, `users/${uid}/images/${section}/${docId}`);
+            const snapshot = await get(docRef);
+            const doc = snapshot.val();
+
+            currentImages = Object.entries(doc)
+                .filter(([key, value]) => typeof value === 'string' && value.startsWith('http'))
+                .map(([key, value]) => value);
+            
+            currentImageIndex = 0;
+            currentZoom = 1;
+            currentRotation = 0;
+
+            const modal = document.getElementById('imagesModal');
+            const thumbnailsTrack = document.getElementById('thumbnailsTrack');
+
+            // إنشاء الصور المصغرة
+            thumbnailsTrack.innerHTML = currentImages.map((src, index) => `
+                <div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="showImage(${index})">
+                    <img src="${src}" alt="صورة ${index + 1}">
+                    </div>
+            `).join('');
+
+            // عرض الصورة الأولى
+            showImage(0);
+            modal.classList.add('active');
+        };
+
+        // دالة عرض صورة محددة
+        window.showImage = function(index) {
+            currentImageIndex = index;
+            const img = document.getElementById('currentImage');
+            img.src = currentImages[index];
+            
+            // تحديث الصورة المصغرة النشطة
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+
+            // تحديث العداد
+            document.getElementById('imageCounter').textContent = `${index + 1} / ${currentImages.length}`;
+
+            // إعادة تعيين التكبير والتدوير
+            resetZoom();
+        };
+
+        // دوال التحكم في الصورة
+        window.zoomIn = function() {
+            currentZoom = Math.min(currentZoom + 0.25, 3);
+            updateImageTransform();
+        };
+
+        window.zoomOut = function() {
+            currentZoom = Math.max(currentZoom - 0.25, 0.5);
+            updateImageTransform();
+        };
+
+        window.resetZoom = function() {
+            currentZoom = 1;
+            currentRotation = 0;
+            updateImageTransform();
+        };
+
+        window.rotateImage = function() {
+            currentRotation = (currentRotation + 90) % 360;
+            updateImageTransform();
+        };
+
+        function updateImageTransform() {
+            const img = document.getElementById('currentImage');
+            img.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
+        }
+
+        // دوال التنقل بين الصور
+        window.prevImage = function() {
+            if (currentImageIndex > 0) {
+                showImage(currentImageIndex - 1);
+            }
+        };
+
+        window.nextImage = function() {
+            if (currentImageIndex < currentImages.length - 1) {
+                showImage(currentImageIndex + 1);
+            }
+        };
+
+        // إضافة استجابة لمفاتيح الأسهم
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('imagesModal').classList.contains('active')) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        nextImage();
+                        break;
+                    case 'ArrowRight':
+                        prevImage();
+                        break;
+                    case 'Escape':
+                        closeModal('imagesModal');
+                        break;
+                    }
+                }
+            });
+
+        // إغلاق النوافذ المنبثقة
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+
+        // Helper Functions
+        function getSectionTitle(section) {
+            const titles = {
+                'hierarchy': 'الهيكل التنظيمي',
+                'leadership-meetings': 'اجتماعات القيادة',
+                'supervisor-meetings': 'اجتماعات المشرفين',
+                'family-meetings': 'اجتماعات الأسر',
+                'social-specialist': 'الأخصائي الاجتماعي',
+                'librarian': 'أمين المكتبة',
+                'sports': 'سجل التربية الرياضية',
+                'general-photos': 'صور عامة',
+                'results': 'النتيجة',
+                'attendance': 'الغياب',
+                'domains': 'المجالات'
+            };
+            return titles[section] || section;
+        }
+
+        function getStatusText(status) {
+            const statusTexts = {
+                'pending': 'قيد المراجعة',
+                'approved': 'تمت الموافقة',
+                'rejected': 'مرفوض'
+            };
+            return statusTexts[status] || 'قيد المراجعة';
+        }
+
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: isError ? "toast-error" : "toast-success",
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        // تسجيل الخروج
+        window.logout = async function() {
+            try {
+                await auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error(error);
+                showToast('حدث خطأ أثناء تسجيل الخروج', true);
+            }
+        };
+
+        // دالة عرض التعليقات
+        window.showComments = async function(uid, section, docId) {
+            currentDocumentData = { uid, section, docId };
+            const modal = document.getElementById('commentsModal');
+            const commentsList = document.getElementById('commentsList');
+            
+            commentsList.innerHTML = '<div class="loading-spinner"></div>';
+            modal.classList.add('active');
+
+            try {
+                const commentsRef = ref(db, `users/${uid}/images/${section}/${docId}/comments`);
+                const snapshot = await get(commentsRef);
+                const comments = snapshot.val() || {};
+
+                renderComments(comments);
+                
+                // إضافة إشعار للمستخدم
+                const notificationRef = ref(db, `users/${uid}/notifications`);
+                const newNotification = {
+                    type: 'comment_view',
+                    timestamp: Date.now(),
+                    message: 'قام المشرف بمراجعة التعليقات على مستندك',
+                    documentId: docId,
+                    section: section
+                };
+                await push(notificationRef, newNotification);
+                
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل التعليقات</p>';
+            }
+        };
+
+        // دالة إضافة تعليق
+        window.addComment = async function() {
+            const commentInput = document.getElementById('commentInput');
+            const text = commentInput.value.trim();
+            
+            if (!text || !currentDocumentData) return;
+
+            const { uid, section, docId } = currentDocumentData;
+            const commentsRef = ref(db, `users/${uid}/images/${section}/${docId}/comments`);
+            
+            try {
+                const newComment = {
+                    text,
+                    timestamp: Date.now(),
+                    isAdmin: true,
+                    adminId: auth.currentUser.uid
+                };
+
+                await push(commentsRef, newComment);
+                commentInput.value = '';
+
+                // إضافة إشعار للمستخدم
+                const notificationRef = ref(db, `users/${uid}/notifications`);
+                const newNotification = {
+                    type: 'new_comment',
+                    timestamp: Date.now(),
+                    message: 'تم إضافة تعليق جديد من المشرف على مستندك',
+                    documentId: docId,
+                    section: section
+                };
+                await push(notificationRef, newNotification);
+
+                // إعادة تحميل التعليقات
+                const snapshot = await get(commentsRef);
+                renderComments(snapshot.val() || {});
+
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                showToast('حدث خطأ في إضافة التعليق', true);
+            }
+        };
+
+        // تحديث دالة عرض التعليقات
+        function renderComments(comments) {
+            const commentsList = document.getElementById('commentsList');
+            
+            if (Object.keys(comments).length === 0) {
+                commentsList.innerHTML = '<p class="no-comments">لا توجد تعليقات</p>';
+                return;
+            }
+
+            commentsList.innerHTML = Object.entries(comments)
+                .sort(([,a], [,b]) => a.timestamp - b.timestamp)
+                .map(([key, comment]) => `
+                    <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''}">
+                        <div class="comment-header">
+                            <span>${comment.isAdmin ? 'المشرف' : 'المستخدم'}</span>
+                            <span>${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
+                        </div>
+                        <div class="comment-text">${comment.text}</div>
+                    </div>
+                `).join('');
+            
+            // تحريك السكرول إلى آخر التعليقات بعد إضافة تعليق جديد
+            commentsList.scrollTop = commentsList.scrollHeight;
+        }
+    </script>
+</body>
+</html>
