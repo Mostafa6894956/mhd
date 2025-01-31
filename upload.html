@@ -334,7 +334,7 @@
     <div class="upload-container">
         <div class="header">
             <h1 id="sectionTitle">رفع الملفات</h1>
-            <a href="dashboard.html" class="back-btn">رجوع</a>
+            <a href="dashboard.html" class="back-btn">عودة للوحة التحكم</a>
         </div>
 
         <div class="welcome-section">
@@ -404,6 +404,10 @@
             ],
             'supervisor-meetings': [
                 'مشرف القرآن الكريم',
+                'مشرف اللغة العربية',
+                'مشرف العلوم',
+                'مشرف الدراسات',
+                'مشرف اللغة الانجليزية',
                 'مشرف الرياضيات',
                 'مشرف التربية الفنية'
             ],
@@ -449,7 +453,8 @@
                 'معلم',
                 'منهج',
                 'مناخ تربوي'
-            ]
+            ],
+            'notes': 'الملاحظات'
         };
 
         // الحصول على القسم من URL
@@ -467,7 +472,7 @@
             sectionDescription.textContent = getSectionDescription(section);
             
             // إظهار وملء الأقسام الفرعية إذا كانت موجودة
-            if (subsections[section] && subsections[section].length > 0) {
+            if (subsections[section] && Array.isArray(subsections[section])) {
                 subsectionContainer.style.display = 'block';
                 subsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي</option>';
                 subsections[section].forEach(sub => {
@@ -759,7 +764,8 @@
                 'general-photos': 'صور عامة ولوحات المعهد',
                 'results': 'النتيجة',
                 'attendance': 'الغياب',
-                'domains': 'المجالات'
+                'domains': 'المجالات',
+                'notes': 'الملاحظات'
             };
             return titles[section] || 'رفع الملفات';
         }
@@ -777,7 +783,8 @@
                 'general-photos': 'رفع الصور العامة ولوحات المعهد',
                 'results': 'رفع صور النتائج والإحصائيات',
                 'attendance': 'رفع صور الغياب والتواجد',
-                'domains': 'رفع صور المجالات والأهداف'
+                'domains': 'رفع صور المجالات والأهداف',
+                'notes': 'رفع صور الملاحظات والتعليقات'
             };
             return descriptions[section] || '';
         }
