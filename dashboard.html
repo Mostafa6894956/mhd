@@ -1563,20 +1563,41 @@
             }
 
             if (notificationsBtn) {
-                notificationsBtn.addEventListener('click', () => {
-                    notificationsMenu.classList.toggle('active');
-                    // عرض البيانات المخزنة محلياً
-                    updateNotificationsList(cachedNotifications);
+                notificationsBtn.addEventListener('click', async () => {
+                    const menu = document.getElementById('notificationsMenu');
+                    const container = document.getElementById('notificationsList');
+                    
+                    // عرض القائمة
+                    menu.classList.add('active');
+                    
+                    // عرض حالة التحميل
+                    container.innerHTML = `
+                        <div class="loading-notifications">
+                            <div class="loading-spinner"></div>
+                            <p>جاري تحميل الإشعارات...</p>
+                        </div>
+                    `;
+                    
+                    try {
+                        // جلب الإشعارات من السيرفر مباشرة
+                        const user = auth.currentUser;
+                        if (user) {
+                            const notificationsRef = ref(db, `users/${user.uid}/notifications`);
+                            const snapshot = await get(notificationsRef);
+                            const notifications = snapshot.val() || {};
+                            renderNotifications(notifications);
+                        }
+                    } catch (error) {
+                        console.error("Error loading notifications:", error);
+                        container.innerHTML = '<div class="error-message">حدث خطأ في تحميل الإشعارات</div>';
+                    }
                 });
             }
 
-            // إضافة مستمع لزر الإغلاق
-            const closeBtn = document.querySelector('.close-notifications');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    notificationsMenu.classList.remove('active');
-                });
-            }
+            // إضافة مستمع لزر إغلاق الإشعارات
+            document.querySelector('.close-notifications').addEventListener('click', () => {
+                document.getElementById('notificationsMenu').classList.remove('active');
+            });
         }
 
         // إضافة الدوال المساعدة خارج setupNotifications
@@ -1671,36 +1692,27 @@
             const container = document.getElementById('notificationsList');
             if (!container) return;
 
-            container.innerHTML = `
-                <div class="loading-notifications">
-                    <div class="loading-spinner"></div>
-                    <p>جاري تحميل الإشعارات...</p>
-                </div>
-            `;
+            if (!notifications || Object.keys(notifications).length === 0) {
+                container.innerHTML = '<div class="no-notifications">لا توجد إشعارات</div>';
+                return;
+            }
 
-            setTimeout(() => {
-                if (!notifications || Object.keys(notifications).length === 0) {
-                    container.innerHTML = '<div class="no-notifications">لا توجد إشعارات</div>';
-                    return;
-                }
-
-                const notificationsHTML = Object.entries(notifications)
-                    .sort(([, a], [, b]) => b.timestamp - a.timestamp)
-                    .map(([id, notification]) => `
-                        <div class="notification-item ${notification.read ? '' : 'unread'}" 
-                             onclick="handleNotificationClick('${id}', '${notification.type}', '${notification.documentId}', '${notification.section}')">
-                            <div class="notification-icon ${notification.type}">
-                                <i class="fas ${getNotificationIcon(notification.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-message">${notification.message}</div>
-                                <div class="notification-time">${formatTimestamp(notification.timestamp)}</div>
-                            </div>
+            const notificationsHTML = Object.entries(notifications)
+                .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                .map(([id, notification]) => `
+                    <div class="notification-item ${notification.read ? '' : 'unread'}" 
+                         onclick="handleNotificationClick('${id}', '${notification.type}', '${notification.documentId}', '${notification.section}')">
+                        <div class="notification-icon ${notification.type}">
+                            <i class="fas ${getNotificationIcon(notification.type)}"></i>
                         </div>
-                    `).join('');
+                        <div class="notification-content">
+                            <div class="notification-message">${notification.message}</div>
+                            <div class="notification-time">${formatTimestamp(notification.timestamp)}</div>
+                        </div>
+                    </div>
+                `).join('');
 
-                container.innerHTML = notificationsHTML;
-            }, 300);
+            container.innerHTML = notificationsHTML;
         }
 
         // إضافة مراقب للإشعارات
