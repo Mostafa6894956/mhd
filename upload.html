@@ -585,6 +585,8 @@
                                 <img src="${e.target.result}">
                                 <button type="button" class="remove-btn">&times;</button>
                             `;
+                            tempPreview.dataset.file = file.name;
+                            tempPreview.dataset.blob = e.target.result;
                             tempPreview.querySelector('.remove-btn').onclick = () => tempPreview.remove();
                         };
                         reader.readAsDataURL(compressedFile);
@@ -628,6 +630,36 @@
             }
         }
 
+        // إضافة تحقق من البيئة
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const docId = urlParams.get('docId');
+            const subsection = urlParams.get('subsection');
+
+            if (mode === 'append' && docId) {
+                // تغيير العنوان والوصف
+                document.querySelector('.welcome-section h1').textContent = 'إضافة صور للمستند';
+                document.querySelector('#sectionDescription').textContent = 'يمكنك إضافة المزيد من الصور إلى المستند الحالي';
+                
+                // إخفاء حقل العنوان والقسم الفرعي وإزالة خاصية required
+                const titleInput = document.querySelector('#title');
+                titleInput.parentElement.style.display = 'none';
+                titleInput.value = 'إضافة صور';
+                
+                document.querySelector('#subsectionContainer').style.display = 'none';
+                
+                // إضافة قيمة افتراضية للقسم الفرعي
+                if (subsection) {
+                    const subsectionSelect = document.querySelector('#subsection');
+                    subsectionSelect.value = subsection;
+                }
+                
+                // تغيير نص زر الرفع
+                document.querySelector('#uploadBtn').textContent = 'إضافة الصور';
+            }
+        });
+
         // تحديث معالج النموذج
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -636,12 +668,12 @@
             const mode = urlParams.get('mode');
             const docId = urlParams.get('docId');
             const section = urlParams.get('section');
-            const subsection = subsectionSelect.value || urlParams.get('subsection');
+            const subsection = mode === 'append' ? urlParams.get('subsection') : subsectionSelect.value;
             const title = document.getElementById('title').value.trim();
-            const previews = previewContainer.querySelectorAll('.preview-item img');
+            const previews = previewContainer.querySelectorAll('.preview-item');
             const user = auth.currentUser;
             
-            if ((!mode && !title) || previews.length === 0 || (subsectionSelect.hasAttribute('required') && !subsection)) {
+            if (previews.length === 0 || (!mode && (!title || (subsectionSelect.hasAttribute('required') && !subsection)))) {
                 showToast('الرجاء إكمال جميع البيانات المطلوبة', true);
                 return;
             }
@@ -658,16 +690,14 @@
                     throw new Error('لم يتم العثور على بيانات المستخدم');
                 }
 
-                // التحقق من وجود البيانات المطلوبة
                 const institute = userData.azharInstitute || 'غير محدد';
                 const governorate = userData.governorate || 'غير محدد';
 
-                // تحويل صور المعاينة إلى ملفات
-                const files = await Promise.all(Array.from(previews).map(async (preview) => {
-                    const response = await fetch(preview.src);
-                    const blob = await response.blob();
-                    return new File([blob], 'image.jpg', { type: 'image/jpeg' });
-                }));
+                const files = Array.from(previews).map(preview => {
+                    const base64Data = preview.dataset.blob.split(',')[1];
+                    const blob = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                    return new File([blob], preview.dataset.file, { type: 'image/jpeg' });
+                });
 
                 const totalFiles = files.length;
                 let completedFiles = 0;
@@ -675,13 +705,19 @@
 
                 // رفع كل صورة على حدة
                 for (let i = 0; i < files.length; i++) {
-                    const result = await uploadToImgbb(files[i]);
-                    uploadedImages[i] = result.url;
-                    
-                    completedFiles++;
-                    const progress = (completedFiles / totalFiles) * 100;
-                    progressBar.style.width = `${progress}%`;
-                    progressText.textContent = `${Math.round(progress)}%`;
+                    try {
+                        const result = await uploadToImgbb(files[i]);
+                        uploadedImages[i] = result.url;
+                        
+                        completedFiles++;
+                        const progress = (completedFiles / totalFiles) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${Math.round(progress)}%`;
+                    } catch (error) {
+                        console.error('خطأ في رفع الصورة:', error);
+                        showToast(`فشل في رفع الصورة ${i + 1}`, true);
+                        continue; // استمر في رفع باقي الصور حتى لو فشلت واحدة
+                    }
                 }
 
                 if (mode === 'append' && docId) {
@@ -793,29 +829,6 @@
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
-            }
-        });
-
-        // إضافة تحقق من البيئة
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
-            const docId = urlParams.get('docId');
-
-            if (mode === 'append' && docId) {
-                // تغيير العنوان والوصف
-                document.querySelector('.welcome-section h1').textContent = 'إضافة صور للمستند';
-                document.querySelector('#sectionDescription').textContent = 'يمكنك إضافة المزيد من الصور إلى المستند الحالي';
-                
-                // إخفاء حقل العنوان والقسم الفرعي وإزالة خاصية required
-                const titleInput = document.querySelector('#title');
-                titleInput.parentElement.style.display = 'none';
-                titleInput.removeAttribute('required');
-                
-                document.querySelector('#subsectionContainer').style.display = 'none';
-                
-                // تغيير نص زر الرفع
-                document.querySelector('#uploadBtn').textContent = 'إضافة الصور';
             }
         });
     </script>
