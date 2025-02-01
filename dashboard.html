@@ -786,6 +786,206 @@
             font-weight: 700;
             font-size: 1.1rem;
         }
+
+        .notifications-btn {
+            position: relative;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .notifications-btn:hover {
+            color: var(--primary);
+        }
+
+        .notifications-count {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .notifications-menu {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 1rem;
+            width: 320px;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .notifications-menu.active {
+            display: block;
+        }
+
+        .notifications-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-header h3 {
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .close-notifications {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .notification-item:hover {
+            background: var(--light);
+        }
+
+        .notification-item.unread {
+            background: #f0f7ff;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .notification-icon.comment {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .notification-icon.approval {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon.rejection {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        @media (max-width: 768px) {
+            .notifications-menu {
+                width: calc(100% - 2rem);
+                top: 50px;
+            }
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notifications-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .notifications-loading .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .notifications-loading p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-notifications {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(59, 130, 246, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .notifications-count.pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -794,11 +994,16 @@
             <div class="header-content">
                 <div class="app-info">
                     <div class="welcome-text">مرحباً بكم</div>
-
                 </div>
-                <button class="menu-btn" id="menuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div class="header-buttons">
+                    <div class="notifications-btn" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notifications-count" id="notificationsCount">0</span>
+                    </div>
+                    <button class="menu-btn" id="menuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -1061,12 +1266,25 @@
             
             <p>نحن هنا لمساعدتك في أي وقت!</p>
         </div>
+
+        <!-- إضافة قائمة الإشعارات -->
+        <div class="notifications-menu" id="notificationsMenu">
+            <div class="notifications-header">
+                <h3>الإشعارات</h3>
+                <button class="close-notifications">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+                <!-- سيتم إضافة الإشعارات هنا ديناميكياً -->
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, get, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
@@ -1221,6 +1439,293 @@
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 document.querySelector('.dashboard-container').classList.add('loaded');
             }, 300);
+        });
+
+        // إضافة الكود بعد تهيئة Firebase
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNotifications();
+        });
+
+        function setupNotifications() {
+            // إنشاء العناصر كما هو
+            const header = document.querySelector('.header-buttons');
+            if (!header.querySelector('#notificationsBtn')) {
+                const notificationsBtn = document.createElement('div');
+                notificationsBtn.id = 'notificationsBtn';
+                notificationsBtn.className = 'notifications-btn';
+                notificationsBtn.innerHTML = `
+                    <i class="fas fa-bell"></i>
+                    <span class="notifications-count" id="notificationsCount">0</span>
+                `;
+                header.insertBefore(notificationsBtn, header.firstChild);
+            }
+
+            if (!document.querySelector('#notificationsMenu')) {
+                const notificationsMenu = document.createElement('div');
+                notificationsMenu.id = 'notificationsMenu';
+                notificationsMenu.className = 'notifications-menu';
+                notificationsMenu.innerHTML = `
+                    <div class="notifications-header">
+                        <h3>الإشعارات</h3>
+                        <button class="close-notifications">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="notifications-list" id="notificationsList"></div>
+                `;
+                document.querySelector('.layout').appendChild(notificationsMenu);
+            }
+
+            const notificationsBtn = document.getElementById('notificationsBtn');
+            const notificationsMenu = document.getElementById('notificationsMenu');
+            const notificationsList = document.getElementById('notificationsList');
+            const notificationsCount = document.getElementById('notificationsCount');
+            
+            // استرجاع البيانات المحلية
+            let localNotifications = JSON.parse(localStorage.getItem('notifications') || '{}');
+            let cachedNotifications = { ...localNotifications };
+            
+            // تحديث العداد من البيانات المحلية
+            if (notificationsCount) {
+                const localUnreadCount = Object.values(localNotifications).filter(n => !n.read).length;
+                notificationsCount.textContent = localUnreadCount;
+            }
+
+            function updateNotificationsList(notifications) {
+                if (!notificationsList) return;
+                
+                if (!notifications || Object.keys(notifications).length === 0) {
+                    notificationsList.innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <p>لا توجد إشعارات جديدة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                notificationsList.innerHTML = Object.entries(notifications)
+                    .sort(([,a], [,b]) => b.timestamp - a.timestamp)
+                    .map(([id, notification]) => createNotificationItem(id, notification))
+                    .join('');
+            }
+
+            function createNotificationItem(id, notification) {
+                let iconClass = '';
+                switch(notification.type) {
+                    case 'comment':
+                        iconClass = 'comment';
+                        break;
+                    case 'approval':
+                        iconClass = 'approval';
+                        break;
+                    case 'rejection':
+                        iconClass = 'rejection';
+                        break;
+                }
+
+                return `
+                    <div class="notification-item ${notification.read ? '' : 'unread'}" 
+                         onclick="handleNotificationClick('${id}', '${notification.type}', '${notification.documentId}', '${notification.section}')">
+                        <div class="notification-icon ${iconClass}">
+                            <i class="fas ${getNotificationIcon(notification.type)}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${notification.message}</div>
+                            <div class="notification-time">${formatTimestamp(notification.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // مراقبة الإشعارات في الخلفية
+            const user = auth.currentUser;
+            if (user) {
+                const notificationsRef = ref(db, `users/${user.uid}/notifications`);
+                onValue(notificationsRef, (snapshot) => {
+                    const serverNotifications = snapshot.val() || {};
+                    
+                    // مقارنة البيانات المحلية مع بيانات السيرفر
+                    if (JSON.stringify(serverNotifications) !== JSON.stringify(localNotifications)) {
+                        cachedNotifications = serverNotifications;
+                        localStorage.setItem('notifications', JSON.stringify(serverNotifications));
+                        
+                        // تحديث العداد والقائمة فقط إذا كانت مفتوحة
+                        if (notificationsCount) {
+                            const unreadCount = Object.values(serverNotifications).filter(n => !n.read).length;
+                            notificationsCount.textContent = unreadCount;
+                        }
+                        
+                        if (notificationsMenu && notificationsMenu.classList.contains('active')) {
+                            updateNotificationsList(serverNotifications);
+                        }
+                    }
+                });
+            }
+
+            if (notificationsBtn) {
+                notificationsBtn.addEventListener('click', () => {
+                    notificationsMenu.classList.toggle('active');
+                    // عرض البيانات المخزنة محلياً
+                    updateNotificationsList(cachedNotifications);
+                });
+            }
+
+            // إضافة مستمع لزر الإغلاق
+            const closeBtn = document.querySelector('.close-notifications');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    notificationsMenu.classList.remove('active');
+                });
+            }
+        }
+
+        // إضافة الدوال المساعدة خارج setupNotifications
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'comment':
+                    return 'fa-comment';
+                case 'approval':
+                    return 'fa-check-circle';
+                case 'rejection':
+                    return 'fa-times-circle';
+                default:
+                    return 'fa-bell';
+            }
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('ar-EG') + ' ' + date.toLocaleTimeString('ar-EG');
+        }
+
+        window.handleNotificationClick = async function(notificationId, type, docId, section) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // تحديث حالة القراءة
+            const notificationRef = ref(db, `users/${user.uid}/notifications/${notificationId}`);
+            await update(notificationRef, { read: true });
+
+            // توجيه المستخدم إلى المكان المناسب
+            if (type === 'new_comment') {
+                window.location.href = `gallery.html?section=${section}&documentId=${docId}&showComments=true`;
+            } else {
+                window.location.href = `gallery.html?section=${section}&documentId=${docId}`;
+            }
+        }
+
+        // إضافة دالة getStorageWithExpiry
+        function getStorageWithExpiry(key) {
+            const item = localStorage.getItem(key);
+            if (!item) return null;
+            
+            try {
+                const data = JSON.parse(item);
+                if (Date.now() > data.expiry) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+                return data.value;
+            } catch (error) {
+                console.error('خطأ في قراءة البيانات المخزنة:', error);
+                localStorage.removeItem(key);
+                return null;
+            }
+        }
+
+        // دالة إنشاء الإشعارات
+        async function createNotification(userId, type, message, documentId, section) {
+            try {
+                const notificationRef = ref(db, `users/${userId}/notifications`);
+                const newNotification = {
+                    type,
+                    message,
+                    documentId,
+                    section,
+                    timestamp: Date.now(),
+                    read: false
+                };
+                await push(notificationRef, newNotification);
+            } catch (error) {
+                console.error("Error creating notification:", error);
+            }
+        }
+
+        // دالة تحديث عداد الإشعارات
+        function updateNotificationCount(count) {
+            const badge = document.getElementById('notificationsCount');
+            if (badge) {
+                badge.textContent = count;
+                if (count > 0) {
+                    badge.style.display = 'flex';
+                    badge.classList.add('pulse');
+                } else {
+                    badge.style.display = 'none';
+                    badge.classList.remove('pulse');
+                }
+            }
+        }
+
+        // دالة عرض الإشعارات
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="loading-notifications">
+                    <div class="loading-spinner"></div>
+                    <p>جاري تحميل الإشعارات...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                if (!notifications || Object.keys(notifications).length === 0) {
+                    container.innerHTML = '<div class="no-notifications">لا توجد إشعارات</div>';
+                    return;
+                }
+
+                const notificationsHTML = Object.entries(notifications)
+                    .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                    .map(([id, notification]) => `
+                        <div class="notification-item ${notification.read ? '' : 'unread'}" 
+                             onclick="handleNotificationClick('${id}', '${notification.type}', '${notification.documentId}', '${notification.section}')">
+                            <div class="notification-icon ${notification.type}">
+                                <i class="fas ${getNotificationIcon(notification.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-message">${notification.message}</div>
+                                <div class="notification-time">${formatTimestamp(notification.timestamp)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                container.innerHTML = notificationsHTML;
+            }, 300);
+        }
+
+        // إضافة مراقب للإشعارات
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const notificationsRef = ref(db, `users/${user.uid}/notifications`);
+                const container = document.getElementById('notificationsList');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="loading-notifications">
+                            <div class="loading-spinner"></div>
+                            <p>جاري تحميل الإشعارات...</p>
+                        </div>
+                    `;
+                }
+
+                onValue(notificationsRef, (snapshot) => {
+                    const notifications = snapshot.val() || {};
+                    const unreadCount = Object.values(notifications)
+                        .filter(n => !n.read).length;
+                    
+                    updateNotificationCount(unreadCount);
+                    renderNotifications(notifications);
+                });
+            }
         });
     </script>
 </body>
