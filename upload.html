@@ -334,7 +334,7 @@
     <div class="upload-container">
         <div class="header">
             <h1 id="sectionTitle">رفع الملفات</h1>
-            <a href="dashboard.html" class="back-btn">رجوع</a>
+            <a href="dashboard.html" class="back-btn">عودة للوحة التحكم</a>
         </div>
 
         <div class="welcome-section">
@@ -563,36 +563,43 @@
 
         // تعديل دالة معالجة الملفات
         async function handleFiles(files) {
+            const maxFiles = 10; // الحد الأقصى لعدد الملفات
+            const currentFiles = previewContainer.querySelectorAll('.preview-item').length;
+            
+            if (currentFiles + files.length > maxFiles) {
+                showToast(`يمكنك رفع ${maxFiles} صور كحد أقصى`, true);
+                return;
+            }
+
             for (const file of Array.from(files)) {
                 if (file.type.startsWith('image/')) {
-                    // إضافة مؤشر تحميل مؤقت
-                    const tempPreview = document.createElement('div');
-                    tempPreview.className = 'preview-item';
-                    tempPreview.innerHTML = `
-                        <div style="width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
-                            <div>جاري المعالجة...</div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(tempPreview);
-
                     try {
-                        // ضغط الصورة
-                        const compressedFile = await compressImage(file);
-                        
+                        // إضافة مؤشر تحميل مؤقت
+                        const tempPreview = document.createElement('div');
+                        tempPreview.className = 'preview-item';
+                        tempPreview.innerHTML = `
+                            <div style="width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                                <div>جاري المعالجة...</div>
+                            </div>
+                        `;
+                        previewContainer.appendChild(tempPreview);
+
+                        // قراءة الملف وعرض المعاينة
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             tempPreview.innerHTML = `
-                                <img src="${e.target.result}">
+                                <img src="${e.target.result}" data-original="${file.name}">
                                 <button type="button" class="remove-btn">&times;</button>
                             `;
                             tempPreview.querySelector('.remove-btn').onclick = () => tempPreview.remove();
                         };
-                        reader.readAsDataURL(compressedFile);
+                        reader.readAsDataURL(file);
                     } catch (error) {
-                        tempPreview.remove();
                         console.error('خطأ في معالجة الصورة:', error);
                         showToast('حدث خطأ في معالجة الصورة', true);
                     }
+                } else {
+                    showToast('يرجى اختيار ملفات صور فقط', true);
                 }
             }
         }
@@ -632,17 +639,9 @@
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
-            const docId = urlParams.get('docId');
-            const section = urlParams.get('section');
-            const subsection = subsectionSelect.value || urlParams.get('subsection');
-            const title = document.getElementById('title').value.trim();
             const previews = previewContainer.querySelectorAll('.preview-item img');
-            const user = auth.currentUser;
-            
-            if ((!mode && !title) || previews.length === 0 || (subsectionSelect.hasAttribute('required') && !subsection)) {
-                showToast('الرجاء إكمال جميع البيانات المطلوبة', true);
+            if (previews.length === 0) {
+                showToast('الرجاء اختيار صور للرفع', true);
                 return;
             }
 
@@ -651,7 +650,7 @@
             loadingIndicator.style.display = 'block';
             
             try {
-                const userSnapshot = await get(ref(database, 'users/' + user.uid));
+                const userSnapshot = await get(ref(database, 'users/' + auth.currentUser.uid));
                 const userData = userSnapshot.val();
 
                 if (!userData) {
@@ -662,31 +661,35 @@
                 const institute = userData.azharInstitute || 'غير محدد';
                 const governorate = userData.governorate || 'غير محدد';
 
-                // تحويل صور المعاينة إلى ملفات
-                const files = await Promise.all(Array.from(previews).map(async (preview) => {
+                const files = [];
+                for (const preview of previews) {
                     const response = await fetch(preview.src);
                     const blob = await response.blob();
-                    return new File([blob], 'image.jpg', { type: 'image/jpeg' });
-                }));
+                    files.push(new File([blob], preview.dataset.original || 'image.jpg', { type: 'image/jpeg' }));
+                }
 
                 const totalFiles = files.length;
                 let completedFiles = 0;
                 const uploadedImages = {};
 
-                // رفع كل صورة على حدة
                 for (let i = 0; i < files.length; i++) {
-                    const result = await uploadToImgbb(files[i]);
-                    uploadedImages[i] = result.url;
-                    
-                    completedFiles++;
-                    const progress = (completedFiles / totalFiles) * 100;
-                    progressBar.style.width = `${progress}%`;
-                    progressText.textContent = `${Math.round(progress)}%`;
+                    try {
+                        const result = await uploadToImgbb(files[i]);
+                        uploadedImages[i] = result.url;
+                        
+                        completedFiles++;
+                        const progress = (completedFiles / totalFiles) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        progressText.textContent = `${Math.round(progress)}%`;
+                    } catch (error) {
+                        console.error('خطأ في رفع الصورة:', error);
+                        showToast(`فشل في رفع الصورة ${i + 1}`, true);
+                    }
                 }
 
-                if (mode === 'append' && docId) {
+                if (urlParams.get('mode') === 'append' && urlParams.get('docId')) {
                     // الحصول على المستند الحالي
-                    const docRef = ref(database, `users/${user.uid}/images/${section}/${docId}`);
+                    const docRef = ref(database, `users/${auth.currentUser.uid}/images/${section}/${urlParams.get('docId')}`);
                     const docSnapshot = await get(docRef);
                     const currentDoc = docSnapshot.val();
 
@@ -712,12 +715,12 @@
                     });
                 } else {
                     // إنشاء مستند جديد
-                    const imagesRef = ref(database, `users/${user.uid}/images/${section}`);
+                    const imagesRef = ref(database, `users/${auth.currentUser.uid}/images/${section}`);
                     const newImageRef = push(imagesRef);
                     await set(newImageRef, {
-                        title: title,
+                        title: urlParams.get('title'),
                         section: section,
-                        subsection: subsection || null,
+                        subsection: urlParams.get('subsection'),
                         ...uploadedImages,
                         uploadedAt: new Date().toISOString(),
                         status: 'pending',
@@ -728,15 +731,15 @@
 
                 showToast('تم رفع الملفات بنجاح');
                 setTimeout(() => {
-                    window.location.href = 'gallery.html?section=' + section + (subsection ? '&subsection=' + subsection : '');
+                    window.location.href = 'gallery.html?section=' + section + (urlParams.get('subsection') ? '&subsection=' + urlParams.get('subsection') : '');
                 }, 2000);
 
             } catch (error) {
                 console.error(error);
                 showToast(error.message || 'حدث خطأ أثناء رفع الملفات', true);
+            } finally {
                 uploadBtn.disabled = false;
                 uploadBtn.classList.remove('disabled');
-            } finally {
                 loadingIndicator.style.display = 'none';
             }
         });
