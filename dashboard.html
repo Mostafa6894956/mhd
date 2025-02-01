@@ -1982,53 +1982,23 @@
             recognition.lang = 'ar-EG';
         }
 
-        let speechSynthesis = window.speechSynthesis;
-        let currentUtterance = null;
-
-        // دالة لإغلاق النافذة وإيقاف الصوت
+        // دالة لإغلاق النافذة
         window.closeVoiceModal = function() {
             const modal = document.getElementById('voiceModal');
             modal.style.display = 'none';
-            if (currentUtterance) {
-                speechSynthesis.cancel();
-            }
             if (recognition) {
                 recognition.abort();
             }
             document.getElementById('aiAssistantBtn').classList.remove('recording');
         };
 
-        // دالة لتحويل النص إلى صوت
-        function speakText(text) {
-            return new Promise((resolve) => {
-                if (currentUtterance) {
-                    speechSynthesis.cancel();
-                }
-
-                currentUtterance = new SpeechSynthesisUtterance(text);
-                currentUtterance.lang = 'ar-SA';
-                currentUtterance.rate = 1;
-                currentUtterance.pitch = 1;
-
-                currentUtterance.onend = () => {
-                    currentUtterance = null;
-                    resolve();
-                };
-
-                speechSynthesis.speak(currentUtterance);
-            });
-        }
-
-        // دالة لمعالجة الأوامر الصوتية
         async function processVoiceCommand(text) {
             const modal = document.getElementById('voiceModal');
             const recordingStatus = document.getElementById('recordingStatus');
             const processingIndicator = document.getElementById('processingIndicator');
             const wave = document.querySelector('.wave');
             const stopBtn = document.getElementById('stopRecordingBtn');
-            const aiAssistantBtn = document.getElementById('aiAssistantBtn');
 
-            // إخفاء موجة الصوت وزر الإيقاف وإظهار مؤشر التحميل
             wave.style.display = 'none';
             stopBtn.style.display = 'none';
             recordingStatus.style.display = 'none';
@@ -2075,15 +2045,12 @@
                 const data = await response.json();
                 const aiResponse = data.generations[0].text.trim();
 
-                // التحقق من وجود أوامر التنقل
                 if (aiResponse.includes('NAVIGATE_GALLERY:') ||
                     aiResponse.includes('NAVIGATE_UPLOAD:') ||
                     aiResponse.includes('NAVIGATE_PROFILE')) {
-                    // إظهار رسالة قبل التنقل
                     processingIndicator.style.display = 'none';
                     recordingStatus.style.display = 'block';
                     recordingStatus.textContent = 'جاري الانتقال...';
-                    await speakText('جاري الانتقال إلى الصفحة المطلوبة');
                     setTimeout(() => {
                         if (aiResponse.includes('NAVIGATE_GALLERY:')) {
                             const section = aiResponse.split('NAVIGATE_GALLERY:')[1].trim();
@@ -2096,18 +2063,15 @@
                         }
                     }, 1000);
                 } else {
-                    // إظهار الرد وإخفاء مؤشر التحميل
                     processingIndicator.style.display = 'none';
                     recordingStatus.style.display = 'block';
                     recordingStatus.textContent = aiResponse;
-                    await speakText(aiResponse);
                     setTimeout(() => {
                         modal.style.display = 'none';
-                    }, 500);
+                    }, 3000); // زيادة وقت عرض الرد ليتمكن المستخدم من قراءته
                 }
             } catch (error) {
                 console.error('Error:', error);
-                // إظهار رسالة الخطأ وإخفاء مؤشر التحميل
                 processingIndicator.style.display = 'none';
                 recordingStatus.style.display = 'block';
                 recordingStatus.textContent = 'عذراً، حدث خطأ في معالجة الطلب';
@@ -2122,11 +2086,6 @@
             const recordingStatus = document.getElementById('recordingStatus');
             const aiAssistantBtn = document.getElementById('aiAssistantBtn');
             
-            // إيقاف أي صوت حالي قبل بدء تسجيل جديد
-            if (currentUtterance) {
-                speechSynthesis.cancel();
-            }
-
             try {
                 if (!recognition) {
                     throw new Error('متصفحك لا يدعم تحويل الصوت إلى نص');
