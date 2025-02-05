@@ -431,15 +431,6 @@
             animation: wave 1s ease-in-out infinite;
         }
 
-        @keyframes wave {
-            0%, 100% {
-                height: 20px;
-            }
-            50% {
-                height: 55px;
-            }
-        }
-
         .recording-timer {
             font-size: 18px;
             color: white;
@@ -605,6 +596,139 @@
             margin-top: 15px;
             font-size: 14px;
         }
+
+        /* تحديث أنماط نافذة التسجيل */
+        .recording-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .recording-window {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 25px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            direction: rtl;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .recording-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .recording-header i {
+            color: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+
+        .recording-content {
+            margin: 20px 0;
+        }
+
+        .recording-text {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            min-height: 80px;
+            text-align: right;
+            color: var(--text-color);
+            border: 1px solid #e9ecef;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .recording-timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 15px 0;
+            font-family: monospace;
+        }
+
+        .recording-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .recording-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recording-btn.stop {
+            background: #dc3545;
+            color: white;
+        }
+
+        .recording-btn.stop:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .recording-btn.cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .recording-btn.cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .recording-status {
+            color: #666;
+            margin-top: 10px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .recording-status i {
+            color: var(--primary-color);
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -635,6 +759,8 @@
         window.controller = null;
         window.currentUser = null;
         window.chatHistory = [];
+
+        let micPermissionGranted = false;
 
         // مراقبة حالة تسجيل الدخول
         onAuthStateChanged(auth, async (user) => {
@@ -949,111 +1075,130 @@
             });
         }
 
-        async function toggleRecording() {
-            const voiceButton = document.getElementById('voice-button');
-            
+        // تعريف الدوال في النطاق العام
+        window.toggleRecording = async function() {
             if (!isRecording) {
-                if (!recognition) {
-                    await startRecording();
-                }
-                voiceButton.classList.add('active');
+                await startRecording();
             } else {
                 stopRecording();
-                voiceButton.classList.remove('active');
             }
-        }
+        };
+
+        window.stopRecording = function() {
+            if (isRecording) {
+                isRecording = false;
+                if (recognition) {
+                    try {
+                        recognition.stop();
+                    } catch (e) {
+                        console.error('Error stopping recognition:', e);
+                    }
+                }
+                if (audioStream) {
+                    audioStream.getTracks().forEach(track => track.stop());
+                    audioStream = null;
+                }
+                
+                clearInterval(recordingTimer);
+                setTimeout(() => {
+                    document.getElementById("recordingOverlay").style.display = "none";
+                    document.getElementById('recordingText').textContent = '';
+                }, 1500);
+                document.getElementById('voice-button').classList.remove('active');
+            }
+        };
+
+        window.cancelRecording = function() {
+            if (recognition) {
+                recognition.abort();
+            }
+            document.getElementById('recordingText').textContent = '';
+            stopRecording();
+        };
+
+        // باقي الدوال المتعلقة بالتسجيل
+        let isRecording = false;
+        let recognition = null;
+        let recordingTimer = null;
+        let recordingDuration = 0;
+        let audioStream = null;
 
         async function startRecording() {
             if (isRecording) return;
             
             try {
-                // طلب إذن الميكروفون
-                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                // إعداد محلل الصوت
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const analyser = audioContext.createAnalyser();
-                const microphone = audioContext.createMediaStreamSource(audioStream);
-                microphone.connect(analyser);
-                
-                // إعداد التعرف على الصوت
-                recognition = new webkitSpeechRecognition();
-                recognition.lang = "ar-EG";
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                
-                // إعداد واجهة التسجيل
-                const recordingOverlay = document.getElementById("recordingOverlay");
-                const waveContainer = recordingOverlay.querySelector('.wave-container');
-                waveContainer.innerHTML = Array(20).fill('<div class="wave-bar"></div>').join('');
-                
-                // تحريك الموجات حسب الصوت
-                const waveBars = waveContainer.querySelectorAll('.wave-bar');
-                const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
-                function updateWaves() {
-                    if (isRecording) {
-                        analyser.getByteFrequencyData(dataArray);
-                        waveBars.forEach((bar, index) => {
-                            const barHeight = dataArray[index * 2] / 4;
-                            bar.style.height = `${Math.max(20, barHeight)}px`;
+                if (!('webkitSpeechRecognition' in window)) {
+                    alert("عذراً، متصفحك لا يدعم التعرف الصوتي");
+                    return;
+                }
+
+                // طلب إذن الميكروفون مرة واحدة فقط
+                if (!micPermissionGranted) {
+                    await navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(stream => {
+                            audioStream = stream;
+                            micPermissionGranted = true;
+                        })
+                        .catch(err => {
+                            throw new Error("لم يتم السماح باستخدام الميكروفون");
                         });
-                        requestAnimationFrame(updateWaves);
-                    }
                 }
                 
-                // بدء التسجيل
-                isRecording = true;
-                recordingOverlay.style.display = "flex";
-                recognition.start();
-                updateWaves();
-                startTimer();
-                
-                // معالجة نتائج التعرف على الصوت
-                recognition.onresult = function(event) {
-                    const status = recordingOverlay.querySelector('.recording-status');
-                    const lastResult = event.results[event.results.length - 1];
+                if (!recognition) {
+                    recognition = new webkitSpeechRecognition();
+                    recognition.lang = "ar-EG";
+                    recognition.continuous = false;
+                    recognition.interimResults = true;
                     
-                    if (lastResult.isFinal) {
-                        status.textContent = "تم التعرف على الكلام...";
-                        const transcript = lastResult[0].transcript;
+                    recognition.onstart = () => {
+                        isRecording = true;
+                        document.getElementById("recordingOverlay").style.display = "flex";
+                        document.getElementById('voice-button').classList.add('active');
+                        startTimer();
+                    };
+
+                    recognition.onend = () => {
                         stopRecording();
-                        sendMessage(transcript);
-                    } else {
-                        status.textContent = "جارٍ الاستماع: " + lastResult[0].transcript;
-                    }
-                };
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error('خطأ في التسجيل:', event.error);
+                        stopRecording();
+                        if (event.error === 'not-allowed') {
+                            alert("لم يتم السماح باستخدام الميكروفون");
+                        } else {
+                            alert("حدث خطأ في التسجيل. حاول مرة أخرى");
+                        }
+                    };
+
+                    recognition.onresult = function(event) {
+                        const status = document.querySelector('.recording-status');
+                        const recordingText = document.getElementById('recordingText');
+                        const lastResult = event.results[event.results.length - 1];
+                        
+                        if (lastResult.isFinal) {
+                            const transcript = lastResult[0].transcript;
+                            recordingText.textContent = transcript;
+                            status.textContent = "تم التسجيل بنجاح";
+                            stopRecording();
+                            if (transcript.trim()) {
+                                window.sendMessage(transcript);
+                            }
+                        } else {
+                            const interimTranscript = lastResult[0].transcript;
+                            recordingText.textContent = interimTranscript;
+                            status.textContent = "جاري التسجيل...";
+                        }
+                    };
+                }
                 
-                recognition.onerror = handleRecordingError;
+                recognition.start();
                 
             } catch (error) {
-                handleRecordingError(error);
+                console.error('Error:', error);
+                stopRecording();
+                alert(error.message || "حدث خطأ في التسجيل. تأكد من السماح باستخدام الميكروفون وحاول مرة أخرى.");
             }
-        }
-
-        function stopRecording() {
-            if (isRecording) {
-                isRecording = false;
-                if (recognition) {
-                    recognition.stop();
-                }
-                if (audioStream) {
-                    audioStream.getTracks().forEach(track => track.stop());
-                }
-                if (audioContext) {
-                    audioContext.close();
-                }
-                
-                clearInterval(recordingTimer);
-                document.getElementById("recordingOverlay").style.display = "none";
-                document.getElementById('voice-button').classList.remove('active');
-            }
-        }
-
-        function cancelRecording() {
-            stopRecording();
-            // يمكن إضافة صوت إلغاء هنا
-            playSound('cancel');
         }
 
         function startTimer() {
@@ -1066,33 +1211,10 @@
                 const seconds = recordingDuration % 60;
                 timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 
-                // إيقاف التسجيل تلقائياً بعد دقيقة
                 if (recordingDuration >= 60) {
                     stopRecording();
                 }
             }, 1000);
-        }
-
-        function handleRecordingError(error) {
-            console.error('خطأ في التسجيل:', error);
-            stopRecording();
-            alert("حدث خطأ في التسجيل. تأكد من السماح باستخدام الميكروفون وحاول مرة أخرى.");
-        }
-
-        function playSound(type) {
-            const audio = new Audio();
-            switch(type) {
-                case 'start':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت بدء التسجيل
-                    break;
-                case 'stop':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت إنهاء التسجيل
-                    break;
-                case 'cancel':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت إلغاء التسجيل
-                    break;
-            }
-            audio.play().catch(() => {});
         }
 
         document.getElementById('chat-box').addEventListener('scroll', function() {
@@ -1141,19 +1263,32 @@
 </head>
 <body>
     
-        
-    
-    <div class="overlay" id="recordingOverlay">
-        <div class="recording-animation">
-            <div class="wave-container">
-                <!-- سيتم إضافة الموجات ديناميكياً -->
+    <div class="recording-overlay" id="recordingOverlay">
+        <div class="recording-window">
+            <div class="recording-header">
+                <i class="fas fa-microphone"></i>
+                التسجيل الصوتي
             </div>
-            <div class="recording-timer">00:00</div>
-            <div class="recording-controls">
-                <button class="recording-button" onclick="stopRecording()">إيقاف</button>
-                <button class="recording-button" onclick="cancelRecording()">إلغاء</button>
+            <div class="recording-content">
+                <div class="recording-status">
+                    <i class="fas fa-circle"></i>
+                    جاري الاستماع...
+                </div>
+                <div class="recording-text" id="recordingText">
+                    <!-- سيتم عرض النص المسجل هنا -->
+                </div>
+                <div class="recording-timer">00:00</div>
             </div>
-            <div class="recording-status">جارٍ الاستماع...</div>
+            <div class="recording-buttons">
+                <button class="recording-btn stop" onclick="stopRecording()">
+                    <i class="fas fa-stop"></i>
+                    إيقاف
+                </button>
+                <button class="recording-btn cancel" onclick="cancelRecording()">
+                    <i class="fas fa-times"></i>
+                    إلغاء
+                </button>
+            </div>
         </div>
     </div>
     <div class="overlay" id="loadingOverlay">⏳ جاري التحميل...</div>
@@ -1193,330 +1328,5 @@
         </div>
         <div class="voice-status">جارٍ الاستماع...</div>
     </div>
-    <script>
-        let isRecording = false;
-        let recognition = null;
-        let recordingTimer = null;
-        let recordingDuration = 0;
-        let audioContext = null;
-        let audioStream = null;
-
-        async function toggleSendStop() {
-            const sendButton = document.getElementById('send-button');
-            
-            if (!window.isGenerating) {
-                await window.sendMessage();
-            } else {
-                if (window.controller) {
-                    window.controller.abort();
-                    window.controller = null;
-                }
-                window.isGenerating = false;
-                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
-                sendButton.classList.remove('loading');
-            }
-        }
-
-        async function sendMessage(userMessage) {
-            if (!window.currentUser) {
-                alert("الرجاء تسجيل الدخول أولاً");
-                window.location.href = 'index.html';
-                return;
-            }
-
-            let inputField = document.getElementById("user-input");
-            let chatBox = document.getElementById("chat-box");
-            let sendButton = document.getElementById("send-button");
-            
-            userMessage = userMessage || inputField.value.trim();
-            if (!userMessage) return;
-            
-            window.isGenerating = true;
-            sendButton.innerHTML = '<i class="fas fa-stop"></i>';
-            sendButton.classList.add('loading');
-            
-            let userDiv = document.createElement("div");
-            userDiv.className = "message user";
-            userDiv.textContent = userMessage;
-            chatBox.appendChild(userDiv);
-            
-            // حفظ رسالة المستخدم
-            window.chatHistory.push({
-                type: 'user',
-                content: userMessage,
-                timestamp: new Date().toISOString()
-            });
-            
-            document.getElementById("loadingOverlay").style.display = "flex";
-            inputField.value = "";
-            
-            try {
-                window.controller = new AbortController();
-                
-                // إضافة معلومات المستخدم للنظام
-                const systemPrompt = `أنت مساعد ذكي يساعد في نظام مراجعة الوثائق.
-                    معلومات المستخدم:
-                    الاسم: ${window.currentUser.name || 'غير محدد'}
-                    المعهد: ${window.currentUser.institute || 'غير محدد'}
-                    الإدارة: ${window.currentUser.administration || 'غير محدد'}
-                    المحافظة: ${window.currentUser.governorate || 'غير محدد'}`;
-
-                let response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer Oof5s4Kio0QY6zpa8yKDiVVtuyU10TVQ",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "mistral-tiny",
-                        messages: [
-                            {
-                                role: "system",
-                                content: systemPrompt
-                            },
-                            ...window.chatHistory.map(msg => ({
-                                role: msg.type === 'user' ? 'user' : 'assistant',
-                                content: msg.content
-                            })).slice(-5),
-                            {
-                                role: "user",
-                                content: userMessage
-                            }
-                        ],
-                        temperature: 0.3,
-                        max_tokens: 800
-                    }),
-                    signal: window.controller.signal
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                let data = await response.json();
-                let botMessage = data.choices[0].message.content.trim();
-                
-                document.getElementById("loadingOverlay").style.display = "none";
-                let botDiv = document.createElement("div");
-                botDiv.className = "message bot typing";
-                chatBox.appendChild(botDiv);
-                
-                await typeWriter(botMessage, botDiv);
-                
-                // حفظ رد المساعد
-                window.chatHistory.push({
-                    type: 'bot',
-                    content: botMessage,
-                    timestamp: new Date().toISOString()
-                });
-                
-                // حفظ المحادثة في localStorage
-                localStorage.setItem('chatHistory', JSON.stringify(window.chatHistory));
-                
-            } catch (error) {
-                console.error('Error:', error);
-                if (error.name === 'AbortError') {
-                    console.log('تم إيقاف الإجابة');
-                } else {
-                    document.getElementById("loadingOverlay").style.display = "none";
-                    alert("حدث خطأ في الاتصال بالخادم، حاول مرة أخرى.");
-                }
-            } finally {
-                window.isGenerating = false;
-                sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
-                sendButton.classList.remove('loading');
-                document.getElementById("loadingOverlay").style.display = "none";
-            }
-        }
-
-        async function toggleRecording() {
-            const voiceButton = document.getElementById('voice-button');
-            
-            if (!isRecording) {
-                if (!recognition) {
-                    await startRecording();
-                }
-                voiceButton.classList.add('active');
-            } else {
-                stopRecording();
-                voiceButton.classList.remove('active');
-            }
-        }
-
-        async function startRecording() {
-            if (isRecording) return;
-            
-            try {
-                // طلب إذن الميكروفون
-                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                // إعداد محلل الصوت
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const analyser = audioContext.createAnalyser();
-                const microphone = audioContext.createMediaStreamSource(audioStream);
-                microphone.connect(analyser);
-                
-                // إعداد التعرف على الصوت
-                recognition = new webkitSpeechRecognition();
-                recognition.lang = "ar-EG";
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                
-                // إعداد واجهة التسجيل
-                const recordingOverlay = document.getElementById("recordingOverlay");
-                const waveContainer = recordingOverlay.querySelector('.wave-container');
-                waveContainer.innerHTML = Array(20).fill('<div class="wave-bar"></div>').join('');
-                
-                // تحريك الموجات حسب الصوت
-                const waveBars = waveContainer.querySelectorAll('.wave-bar');
-                const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
-                function updateWaves() {
-                    if (isRecording) {
-                        analyser.getByteFrequencyData(dataArray);
-                        waveBars.forEach((bar, index) => {
-                            const barHeight = dataArray[index * 2] / 4;
-                            bar.style.height = `${Math.max(20, barHeight)}px`;
-                        });
-                        requestAnimationFrame(updateWaves);
-                    }
-                }
-                
-                // بدء التسجيل
-                isRecording = true;
-                recordingOverlay.style.display = "flex";
-                recognition.start();
-                updateWaves();
-                startTimer();
-                
-                // معالجة نتائج التعرف على الصوت
-                recognition.onresult = function(event) {
-                    const status = recordingOverlay.querySelector('.recording-status');
-                    const lastResult = event.results[event.results.length - 1];
-                    
-                    if (lastResult.isFinal) {
-                        status.textContent = "تم التعرف على الكلام...";
-                        const transcript = lastResult[0].transcript;
-                        stopRecording();
-                        sendMessage(transcript);
-                    } else {
-                        status.textContent = "جارٍ الاستماع: " + lastResult[0].transcript;
-                    }
-                };
-                
-                recognition.onerror = handleRecordingError;
-                
-            } catch (error) {
-                handleRecordingError(error);
-            }
-        }
-
-        function stopRecording() {
-            if (isRecording) {
-                isRecording = false;
-                if (recognition) {
-                    recognition.stop();
-                }
-                if (audioStream) {
-                    audioStream.getTracks().forEach(track => track.stop());
-                }
-                if (audioContext) {
-                    audioContext.close();
-                }
-                
-                clearInterval(recordingTimer);
-                document.getElementById("recordingOverlay").style.display = "none";
-                document.getElementById('voice-button').classList.remove('active');
-            }
-        }
-
-        function cancelRecording() {
-            stopRecording();
-            // يمكن إضافة صوت إلغاء هنا
-            playSound('cancel');
-        }
-
-        function startTimer() {
-            recordingDuration = 0;
-            const timerElement = document.querySelector('.recording-timer');
-            
-            recordingTimer = setInterval(() => {
-                recordingDuration++;
-                const minutes = Math.floor(recordingDuration / 60);
-                const seconds = recordingDuration % 60;
-                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                // إيقاف التسجيل تلقائياً بعد دقيقة
-                if (recordingDuration >= 60) {
-                    stopRecording();
-                }
-            }, 1000);
-        }
-
-        function handleRecordingError(error) {
-            console.error('خطأ في التسجيل:', error);
-            stopRecording();
-            alert("حدث خطأ في التسجيل. تأكد من السماح باستخدام الميكروفون وحاول مرة أخرى.");
-        }
-
-        function playSound(type) {
-            const audio = new Audio();
-            switch(type) {
-                case 'start':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت بدء التسجيل
-                    break;
-                case 'stop':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت إنهاء التسجيل
-                    break;
-                case 'cancel':
-                    audio.src = 'data:audio/mp3;base64,...'; // يمكن إضافة صوت إلغاء التسجيل
-                    break;
-            }
-            audio.play().catch(() => {});
-        }
-
-        document.getElementById('chat-box').addEventListener('scroll', function() {
-            let messages = document.querySelectorAll('.message');
-            messages.forEach(message => {
-                let position = message.getBoundingClientRect();
-                if(position.top >= 0 && position.bottom <= window.innerHeight) {
-                    message.style.opacity = '1';
-                    message.style.transform = 'translateY(0)';
-                }
-            });
-        });
-
-        // دالة مساعدة لإزالة HTML tags
-        function stripHtml(html) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = html;
-            return tmp.textContent || tmp.innerText || '';
-        }
-
-        // إضافة زر لمسح المحادثات
-        function addClearButton() {
-            const inputContainer = document.querySelector('.input-container');
-            const clearButton = document.createElement('button');
-            clearButton.innerHTML = '🗑️';
-            clearButton.title = 'مسح المحادثة';
-            clearButton.onclick = clearChat;
-            inputContainer.appendChild(clearButton);
-        }
-
-        // دالة مسح المحادثة
-        function clearChat() {
-            if (confirm('هل أنت متأكد من مسح المحادثة؟')) {
-                window.chatHistory = [];
-                saveChatHistory();
-                document.getElementById('chat-box').innerHTML = '';
-            }
-        }
-
-        // تحميل البيانات عند بدء التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
-            // يمكنك إضافة أي تهيئة إضافية هنا
-            
-        });
-    </script>
 </body>
 </html>
