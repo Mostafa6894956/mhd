@@ -334,7 +334,7 @@
     <div class="upload-container">
         <div class="header">
             <h1 id="sectionTitle">رفع الملفات</h1>
-            <a href="dashboard.html" class="back-btn">رجوع</a>
+            <a href="dashboard.html" class="back-btn">عودة للوحة التحكم</a>
         </div>
 
         <div class="welcome-section">
@@ -427,7 +427,8 @@
                 'الابحاث',
                 'المحاضرات',
                 'الكشافة',
-                'الارشاد النفسي والتربوي'
+                'الارشاد النفسي والتربوي',
+                'المواقف السريعة'
             ],
             'librarian': [
                 'الندوات',
@@ -829,6 +830,13 @@
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                const section = urlParams.get('section');
+                const subsection = urlParams.get('subsection');
+                // استخدم section و subsection كما هو مطلوب في الكود
+                console.log('Section:', section, 'Subsection:', subsection);
+                // يمكنك استخدام هذه القيم لعرض المعلومات المناسبة في الصفحة
             }
         });
     </script>
