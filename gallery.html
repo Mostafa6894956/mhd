@@ -1571,6 +1571,9 @@
                             <li class="nav-item">
                                 <a href="?section=social-specialist&subsection=الارشاد النفسي والتربوي" class="nav-link">الارشاد النفسي والتربوي</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="?section=social-specialist&subsection=المواقف السريعة" class="nav-link">المواقف السريعة</a>
+                            </li>
                         </ul>
                     </div>
 
@@ -2165,7 +2168,8 @@
                         'الابحاث',
                         'المحاضرات',
                         'الكشافة',
-                        'الارشاد النفسي والتربوي'
+                        'الارشاد النفسي والتربوي',
+                        'المواقف السريعة'
                     ],
                     'librarian': [
                         'الندوات',
@@ -2827,7 +2831,7 @@
                 .map(([key, comment]) => `
                     <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''}">
                         <div class="comment-header">
-                            <span>${comment.isAdmin ? 'المشرف' : 'المستخدم'}</span>
+                            <span>${comment.isAdmin ? 'المشرف' : 'المشرف'}</span>
                             <span>${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
                         </div>
                         <div class="comment-text">${comment.text}</div>
