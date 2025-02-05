@@ -1426,7 +1426,7 @@
         </div>
 
         <!-- إضافة زر المساعد الذكي الثابت -->
-        <button class="ai-assistant-btn" onclick="toggleVoiceRecording()" id="aiAssistantBtn">
+        <button class="ai-assistant-btn" onclick="navigateToAIChat()" id="aiAssistantBtn1">
             <i class="fas fa-robot"></i>
         </button>
 
@@ -2216,6 +2216,9 @@
                 alert(err.message || 'حدث خطأ في تشغيل التعرف على الصوت');
             }
         };
+        window.navigateToAIChat = function() {
+                window.location.href = 'ai-chat.html';
+            }
     </script>
 </body>
 </html> 
