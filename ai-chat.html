@@ -860,8 +860,6 @@
                 const systemPrompt = `
                 أنت مساعد ذكي متخصص في نظام مراجعة الوثائق للمعاهد الأزهرية.
                 واسمك هو المساعد الذكي للمعهد الأزهري.
-                جاوب دائما باللغة العربية. و لخص واختصر في الرد علي المستخدم 
-                تم تطويرك وتدريبك وبرمجتك بواسطة شركة MHD للتكنولوجيا لمساعدة المستخدمين في إدارة وتنظيم وثائق المعهد.
                 
                 
 
@@ -981,11 +979,19 @@
                  معلم التربيه الرياضيه بالمعهد لا بد من تفعيل النشاط الداخلي والنشاط الخارجي بالمعهد
                  المجالات وهم  رؤيه ورساله- قياده وحوكمه -موارد بشريه وماديه -مشاركه مجتمعيه -ضمان الجوده والمسائله -المعلم -المتعلم- المنهج -والمناخ التربوي
 
-                    معلومات المستخدم:
-                    الاسم: ${window.currentUser.name || 'غير محدد'}
-                    المعهد: ${window.currentUser.institute || 'غير محدد'}
-                    الإدارة: ${window.currentUser.administration || 'غير محدد'}
-                    المحافظة: ${window.currentUser.governorate || 'غير محدد'}`;
+                معلومات المستخدم:
+                الاسم: ${window.currentUser.name || 'غير محدد'}
+                المعهد: ${window.currentUser.institute || 'غير محدد'}
+                الإدارة: ${window.currentUser.administration || 'غير محدد'}
+                المحافظة: ${window.currentUser.governorate || 'غير محدد'}
+                
+                التعليمات الأساسية:
+                1. اجعل إجاباتك مختصرة ومباشرة
+                2. ركز فقط على المعلومات المطلوبة
+                3. تجنب الإطالة والتفاصيل غير الضرورية
+                4. استخدم نقاط محددة في الإجابة
+                5. لا تكرر المعلومات
+                6. أجب فقط على ما يُسأل عنه`;
 
                 let response = await fetch("https://api.mistral.ai/v1/chat/completions", {
                     method: "POST",
@@ -1003,14 +1009,14 @@
                             ...window.chatHistory.map(msg => ({
                                 role: msg.type === 'user' ? 'user' : 'assistant',
                                 content: msg.content
-                            })).slice(-5),
+                            })).slice(-3),
                             {
                                 role: "user",
                                 content: userMessage
                             }
                         ],
-                        temperature: 0.3,
-                        max_tokens: 800
+                        temperature: 0.1,
+                        max_tokens: 300
                     }),
                     signal: window.controller.signal
                 });
