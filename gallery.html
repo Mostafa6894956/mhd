@@ -2835,7 +2835,7 @@
                 .map(([key, comment]) => `
                     <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''}">
                         <div class="comment-header">
-                            <span>${comment.isAdmin ? 'المشرف' : 'المشرف'}</span>
+                            <span>${comment.isAdmin ? 'المشرف' : 'انت'}</span>
                             <span>${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
                         </div>
                         <div class="comment-text">${comment.text}</div>
