@@ -19,7 +19,7 @@
             --primary: #3b82f6;
             --primary-dark: #2563eb;
             --secondary: #f43f5e;
-            --dark: #0f172a;
+            --dark: #1e293b;
             --light: #f8fafc;
             --gray: #64748b;
             --white: #ffffff;
@@ -29,10 +29,12 @@
         body {
             background: var(--light);
             min-height: 100vh;
-            padding-top: 60px;
+            padding-top: 56px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
+            height: 56px;
             background: var(--white);
             position: fixed;
             top: 0;
@@ -40,21 +42,25 @@
             right: 0;
             z-index: 100;
             box-shadow: var(--shadow);
-            height: 60px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-between; /* توزيع المساحة */
             padding: 0 1rem;
-            gap: 10px;
+            width: 100%; /* تأكيد العرض الكامل */
         }
 
-        .header h1 {
-            font-size: 1.2rem;
-            color: var(--dark);
+        .header-buttons-left {
+            position: absolute;
+            left: 1rem;
+        }
+
+        .header-buttons-right {
+            position: absolute;
+            right: 1rem;
         }
 
         .upload-btn {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: var(--white);
             padding: 0.5rem 1rem;
             border-radius: 8px;
@@ -63,23 +69,18 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s ease;
-            min-width: max-content;
-        }
-
-        .upload-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
         }
 
         .upload-btn.home-btn {
             background: var(--gray);
-            order: -1;
-            margin-right: auto;
         }
 
-        .upload-btn.home-btn:hover {
-            background: #475569;
+        /* إزالة تأثيرات hover */
+        .upload-btn:hover, .upload-btn.home-btn:hover {
+            transform: none;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         }
 
         .gallery-layout {
@@ -88,7 +89,6 @@
             padding: 1rem;
             max-width: 1400px;
             margin: 0 auto;
-            position: relative;
         }
 
         .sidebar {
@@ -101,7 +101,6 @@
             top: 70px;
             max-height: calc(100vh - 80px);
             overflow-y: auto;
-            transition: all 0.3s ease;
         }
 
         .sidebar h3 {
@@ -120,8 +119,8 @@
             color: var(--gray);
             font-size: 0.9rem;
             font-weight: 600;
+            padding: 0.8rem;
             margin-bottom: 0.5rem;
-            padding: 0.5rem;
         }
 
         .nav-items {
@@ -140,7 +139,7 @@
         }
 
         .nav-link:hover, .nav-link.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: var(--white);
         }
 
@@ -175,7 +174,7 @@
 
         .document-card {
             background: var(--white);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
@@ -247,62 +246,49 @@
         .document-actions {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 0.8rem;
+            padding: 0.5rem;
         }
 
         .action-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 0.8rem;
         }
 
         .action-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 8px 15px;
+            gap: 0.5rem;
+            padding: 0.8rem;
             border: none;
             border-radius: 8px;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
-            color: white;
+            min-height: 40px;
         }
 
         .view-btn {
-            background: var(--primary);
-        }
-
-        .view-btn:hover {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
         }
 
         .delete-btn {
-            background: var(--secondary);
-        }
-
-        .delete-btn:hover {
-            background: #d61f69;
+            background: linear-gradient(135deg, var(--secondary), #e11d48);
+            color: var(--white);
         }
 
         .comments-btn {
-            background: #4CAF50;
-        }
-
-        .comments-btn:hover {
-            background: #388E3C;
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: var(--white);
         }
 
         .add-images-btn {
-            background: #FF9800;
-        }
-
-        .add-images-btn:hover {
-            background: #F57C00;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: var(--white);
         }
 
         .action-btn i {
@@ -316,8 +302,9 @@
 
         @media (max-width: 480px) {
             .action-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                padding: 0.6rem;
+                font-size: 0.85rem;
+                min-height: 36px;
             }
             
             .action-btn i {
@@ -339,6 +326,19 @@
             .header {
                 padding: 0 0.8rem;
             }
+            
+            .header-buttons-left {
+                left: 0.8rem;
+            }
+
+            .header-buttons-right {
+                right: 0.8rem;
+            }
+
+            .upload-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
 
             .header h1 {
                 font-size: 1rem;
@@ -358,7 +358,7 @@
             .sidebar {
                 position: fixed;
                 right: -280px;
-                top: 60px;
+                top: 56px;
                 bottom: 0;
                 z-index: 99;
                 border-radius: 0;
@@ -521,6 +521,8 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             flex-direction: column;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
         }
 
         .image-viewer.active {
@@ -532,8 +534,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 1rem;
             background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
             color: white;
         }
 
@@ -626,10 +629,14 @@
             gap: 15px;
             padding: 15px;
             background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
         }
 
         .viewer-controls button {
-            background: transparent;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
             border: none;
             color: white;
             font-size: 1.2rem;
@@ -640,11 +647,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
         }
 
         .viewer-controls button:hover {
             background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
         }
 
         #imageCounter {
@@ -1277,7 +1284,7 @@
 
         .back-btn {
             display: inline-flex;
-            align-items: center;
+            align-items: left;
             gap: 0.8rem;
             padding: 0.8rem 1.5rem;
             background: var(--primary);
@@ -1292,11 +1299,6 @@
         .back-btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-        }
-
-        .back-btn i {
-            font-size: 1rem;
-            transition: transform 0.3s ease;
         }
 
         .back-btn:hover i {
@@ -1455,20 +1457,21 @@
 </head>
 <body>
         <div class="header">
-        <button class="menu-btn" id="menuBtn">
-            <i class="fas fa-bars"></i>
-        </button>
+        <div class="header-buttons-left">
+            <a href="dashboard.html" class="upload-btn home-btn">
+                <i class="fa fa-backward"></i>
+                رجوع
+            </a>
+        </div>
         
-        
-        <a href="#" class="upload-btn" id="uploadBtn">
-            <i class="fas fa-plus"></i>
-            رفع مستند
-        </a>
-        <h1 id="sectionTitle">معرض الصور</h1>
-        <a href="dashboard.html" class="upload-btn home-btn">
-            <i class="fa fa-backward"></i>
-            رجوع
-        </a>
+        <div class="header-buttons-right">
+            <a href="#" class="upload-btn" id="uploadBtn">
+                <i class="fas fa-plus"></i>
+                رفع مستند
+            </a>
+        </div>
+        <h1 id="sectionTitle1"></h1>
+
         </div>
 
         <div class="gallery-layout">
@@ -1674,8 +1677,8 @@
 
             <main class="content">
             <section class="welcome-section">
-                <h2>معرض الوثائق والصور</h2>
-                <p>استعرض وإدارة جميع الوثائق والصور الخاصة بالمعهد</p>
+                <h2 id="sectionTitle">معرض الوثائق والصور</h2>
+
             </section>
 
             <div class="documents-grid" id="documentsGrid">
@@ -2335,7 +2338,7 @@
                 // تحديث العنوان
                 const sectionTitle = document.getElementById('sectionTitle');
                 if (sectionTitle) {
-                    sectionTitle.textContent = this.getSectionTitle();
+                    sectionTitle.textContent = "معرض صور : " + this.getSectionTitle();
                 }
 
                 // تحسين التنقل بين الأقسام
