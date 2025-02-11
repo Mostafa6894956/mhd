@@ -2,172 +2,163 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>رفع الملفات - نظام مراجعة الوثائق</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
-        }
-
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --dark: #1e293b;
-            --light: #f1f5f9;
-            --gray: #64748b;
-            --white: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--light);
+            background: #f8fafc;
             min-height: 100vh;
-            padding-top: 60px;
+            padding-top: 56px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
-            background: var(--white);
+            height: 56px;
+            background: white;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 100;
-            box-shadow: var(--shadow);
-            height: 60px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1.5rem;
+            padding: 0 1rem;
         }
 
         .back-btn {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--primary);
+            color: #3b82f6;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
-            margin: 0;
+            min-height: 44px;
+            padding: 0 0.5rem;
         }
 
-        .back-btn:hover {
-            transform: translateX(-5px);
+        .back-btn:active {
+            transform: scale(0.95);
         }
 
         .upload-container {
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
+            padding: 1rem;
         }
 
         .welcome-section {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: white;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
         }
 
         .welcome-section h1 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: var(--white);
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
         }
 
         .welcome-section p {
-            color: var(--white);
-            opacity: 0.9;
-            font-size: 1.1rem;
-            line-height: 1.6;
+            font-size: 1rem;
+            opacity: 0.95;
         }
 
         .form-group {
-            background: var(--white);
+            background: white;
             border-radius: 16px;
-            padding: 1.8rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .form-group:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         label {
             display: block;
-            margin-bottom: 0.8rem;
-            color: var(--dark);
-            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.95rem;
         }
 
         select, input[type="text"] {
             width: 100%;
-            padding: 1rem 1.2rem;
-            border: 2px solid var(--light);
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background-color: var(--white);
+            background: #f8fafc;
+            color: #1e293b;
         }
 
         select:focus, input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .file-upload {
-            border: 2px dashed var(--primary);
-            padding: 3rem 2rem;
+            border: 2px dashed #3b82f6;
+            padding: 2rem 1rem;
             text-align: center;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: var(--light);
+            background: #f8fafc;
+            margin-bottom: 1rem;
         }
 
-        .file-upload:hover {
-            background: var(--white);
-            transform: translateY(-2px);
-            border-color: var(--primary-dark);
+        .file-upload:active {
+            background: #e2e8f0;
+            border-color: #2563eb;
         }
 
         .file-upload p {
-            color: var(--primary);
+            color: #3b82f6;
             font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .preview-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .preview-item {
             position: relative;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .preview-item:hover {
-            transform: translateY(-5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            aspect-ratio: 1;
         }
 
         .preview-item img {
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: cover;
         }
 
@@ -175,52 +166,63 @@
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            background: var(--secondary);
-            color: var(--white);
+            background: #ef4444;
+            color: white;
             border: none;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
 
-        .remove-btn:hover {
-            transform: scale(1.1);
+        .remove-btn:active {
+            transform: scale(0.9);
         }
 
         .upload-btn {
             width: 100%;
-            padding: 1.2rem;
-            background: var(--primary);
-            color: var(--white);
+            padding: 1rem;
+            background: #3b82f6;
+            color: white;
             border: none;
             border-radius: 12px;
-            cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
-        .upload-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+        .upload-btn:active {
+            transform: scale(0.98);
+        }
+
+        .upload-btn.disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
         }
 
         .loading {
-            background: var(--white);
-            padding: 1.5rem;
+            background: white;
+            padding: 1rem;
             border-radius: 12px;
-            margin-top: 1rem;
+            margin-bottom: 1rem;
             text-align: center;
-            display: none;
         }
 
         .progress-container {
             width: 100%;
             height: 8px;
-            background: var(--light);
+            background: #f1f5f9;
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 0.5rem;
@@ -229,135 +231,143 @@
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: #3b82f6;
             border-radius: 10px;
             transition: width 0.3s ease;
         }
 
         #progressText {
-            color: var(--primary);
+            color: #3b82f6;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
-        .upload-btn.disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        @media (max-width: 639px) {
-            body {
-                padding-top: 40px;
-            }
-
-            .header {
-                height: 50px;
-                padding: 0 1rem;
-            }
-
-            .header h1 {
-                font-size: 1.2rem;
-            }
-
-            .upload-container {
-                margin: 0.5rem auto;
-                padding: 0 0.75rem;
-            }
-
-            .back-btn {
-                font-size: 0.9rem;
-                margin-bottom: 1rem;
+        /* تحسينات للموبايل */
+        @media (max-width: 480px) {
+            .preview-container {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .welcome-section {
-                padding: 1.5rem;
-                margin: 1rem 0;
-            }
-
-            .welcome-section h1 {
-                font-size: 1.4rem;
-            }
-
-            .welcome-section p {
-                font-size: 0.95rem;
-            }
-
-            .form-group {
+                margin: 0.8rem;
                 padding: 1.2rem;
             }
 
+            .welcome-section h1 {
+                font-size: 1.2rem;
+            }
+
+            .welcome-section p {
+                font-size: 0.9rem;
+            }
+
+            .form-group {
+                padding: 1rem;
+            }
+
             .file-upload {
-                padding: 2rem 1rem;
+                padding: 1.5rem 1rem;
             }
+        }
 
-            .file-upload p {
-                font-size: 0.9rem;
-            }
+        /* تحسين التمرير */
+        .smooth-scroll {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
 
-            .preview-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
-                margin-top: 1rem;
-            }
+        /* منع التحديد للنص */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-            .preview-item {
-                border-radius: 8px;
-            }
+        /* تأثيرات اللمس */
+        .touch-feedback {
+            position: relative;
+            overflow: hidden;
+        }
 
-            .preview-item img {
-                height: 140px;
-            }
+        .touch-feedback:active::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.6s ease-out;
+        }
 
-            .remove-btn {
-                width: 24px;
-                height: 24px;
-                font-size: 1rem;
+        @keyframes ripple {
+            to {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
             }
+        }
 
-            .upload-btn {
-                padding: 0.9rem;
-                font-size: 1rem;
-                border-radius: 8px;
-                margin-top: 1rem;
-            }
+        /* تحسين أنماط Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 200px;
+            text-align: center;
+        }
 
-            .loading {
-                padding: 0.75rem;
-                font-size: 0.9rem;
-                border-radius: 8px;
-            }
+        .toast.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .toast.success {
+            background: #dcfce7;
+            color: #16a34a;
         }
     </style>
 </head>
-<body>
-    <div class="upload-container">
-        <div class="header">
-            <h1 id="sectionTitle">رفع الملفات</h1>
-            <a href="dashboard.html" class="back-btn">رجوع</a>
-        </div>
+<body class="smooth-scroll">
+    <div class="header">
+        <h1 id="sectionTitle" class="no-select">رفع الملفات</h1>
+        <a href="dashboard.html" class="back-btn touch-feedback">
+            <i class="fas fa-arrow-right"></i>
+رجوع        </a>
+    </div>
 
+    <div class="upload-container">
         <div class="welcome-section">
-            <h1>رفع الملفات</h1>
-            <p id="sectionDescription">يمكنك رفع الصور والملفات الخاصة بالمعهد</p>
+            <h1 class="no-select">رفع الملفات</h1>
+            <p id="sectionDescription" class="no-select">يمكنك رفع الصور والملفات الخاصة بالمعهد</p>
         </div>
 
         <form id="uploadForm">
             <div class="form-group" id="subsectionContainer" style="display: none;">
-                <label for="subsection">اختر القسم الفرعي</label>
-                <select id="subsection" name="subsection">
+                <label for="subsection" class="no-select">اختر القسم الفرعي</label>
+                <select id="subsection" name="subsection" class="touch-feedback">
                     <option value="">اختر القسم الفرعي</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="title">عنوان الملف</label>
-                <input type="text" id="title" required placeholder="أدخل عنواناً وصفياً للملف">
+                <label for="title" class="no-select">عنوان الملف</label>
+                <input type="text" id="title" required placeholder="أدخل عنواناً وصفياً للملف" class="touch-feedback">
             </div>
 
-            <div class="file-upload" id="dropZone">
+            <div class="file-upload touch-feedback" id="dropZone">
                 <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-                <p>اسحب الصور هنا أو اضغط للاختيار</p>
+                <p class="no-select">اسحب الصور هنا أو اضغط للاختيار</p>
             </div>
 
             <div class="preview-container" id="previewContainer"></div>
@@ -366,10 +376,13 @@
                 <div class="progress-container">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
-                <p id="progressText">0%</p>
+                <p id="progressText" class="no-select">0%</p>
             </div>
 
-            <button type="submit" class="upload-btn" id="uploadBtn">رفع الملفات</button>
+            <button type="submit" class="upload-btn touch-feedback" id="uploadBtn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span class="no-select">رفع الملفات</span>
+            </button>
         </form>
     </div>
 
