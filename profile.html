@@ -30,37 +30,12 @@
             background: var(--light);
             min-height: 100vh;
             padding: 2rem 1rem;
-            padding-top: 5rem;
+            padding-top: 56px;
         }
 
         /* تحسين شاشة التحميل */
         .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--light);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(59, 130, 246, 0.1);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            color: var(--primary);
-            font-weight: 600;
+            display: none !important;
         }
 
         /* تحسين تصميم الحاوية */
@@ -68,11 +43,15 @@
             background: var(--white);
             border-radius: 20px;
             padding: 2rem;
-            margin: 0 auto;
-            max-width: 600px;
+            margin: 1rem auto;
+            max-width: 800px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+            margin-top: 1rem;
         }
 
         .profile-container::before {
@@ -87,21 +66,7 @@
 
         /* تحسين رأس الصفحة */
         .profile-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            position: relative;
-            padding-top: 2rem;
-        }
-
-        .profile-header h1 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-header p {
-            color: var(--gray);
-            font-size: 1.1rem;
+            display: none;
         }
 
         /* تحسين عرض البيانات */
@@ -112,6 +77,9 @@
             background: var(--light);
             border-radius: 15px;
             animation: fadeIn 0.3s ease;
+            opacity: 1 !important;
+            transform: none !important;
+            transition: transform 0.3s ease, opacity 0.3s ease !important;
         }
 
         .profile-data.hidden {
@@ -120,10 +88,12 @@
 
         .data-group {
             background: var(--white);
-            padding: 1rem;
+            padding: 1.2rem;
             border-radius: 12px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
         }
 
         .data-group:hover {
@@ -142,9 +112,9 @@
             color: var(--dark);
             font-size: 1.1rem;
             font-weight: 600;
-            padding: 0.5rem;
+            padding: 0.8rem;
             border-radius: 8px;
-            background: var(--light);
+            background: #f8fafc;
         }
 
         /* تحسين الأزرار */
@@ -160,17 +130,17 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .edit-button {
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
 
         .edit-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
         }
 
         .save-button {
@@ -179,7 +149,10 @@
         }
 
         .cancel-button {
-            background: var(--gray) !important;
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+            border: 1px solid #e2e8f0 !important;
+            margin-top: 0.5rem;
         }
 
         /* تحسين نموذج التعديل */
@@ -188,12 +161,19 @@
             background: var(--light);
             padding: 1.5rem;
             border-radius: 15px;
+            opacity: 1 !important;
+            transform: none !important;
+            transition: transform 0.3s ease, opacity 0.3s ease !important;
         }
 
         .profile-form.active {
             display: grid;
             gap: 1.5rem;
             animation: fadeIn 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
         }
 
         .form-group input {
@@ -203,12 +183,14 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
+            background: #f8fafc;
         }
 
         .form-group input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             outline: none;
+            background: white;
         }
 
         .form-group input:disabled {
@@ -217,12 +199,6 @@
         }
 
         /* إضافة الأنيميشن */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* إضافة أنيميشن الظهور */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -279,48 +255,30 @@
 
         /* تحديث ستايل زر العودة */
         .back-button {
-            position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: var(--white);
-            color: var(--primary);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            font-size: 1rem;
-            z-index: 100;
+            display: none;
         }
 
-        .back-button i {
-            font-size: 1.2rem;
-            transition: transform 0.3s ease;
-        }
+        /* تحسينات للموبايل */
+        @media (max-width: 640px) {
+            .profile-container {
+                margin: 0.5rem;
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
 
-        .back-button:hover {
-            background: var(--primary);
-            color: var(--white);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
-        }
+            .profile-header {
+                padding: 1.5rem;
+                margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            }
 
-        .back-button:hover i {
-            transform: translateX(-3px);
-        }
+            .profile-header h1 {
+                font-size: 1.5rem;
+            }
 
-        /* تعديل padding الصفحة لتجنب تداخل الزر */
-        body {
-            padding-top: 5rem;
-        }
+            .data-group {
+                padding: 1rem;
+            }
 
-        /* تحسين responsive للزر */
-        @media (max-width: 768px) {
             .back-button {
                 top: 1rem;
                 right: 1rem;
@@ -328,31 +286,94 @@
                 font-size: 0.9rem;
             }
 
-            .back-button i {
-                font-size: 1rem;
+            .page-title {
+                font-size: 1.1rem;
             }
+        }
+
+        /* إضافة ستايل الهيدر الثابت */
+        .header {
+            height: 56px;
+            background: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+        }
+
+        .header-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #f8fafc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:active {
+            background: #e2e8f0;
+            transform: scale(0.95);
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* إضافة ستايل للتحميل */
+        .loading-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <!-- تعديل شاشة التحميل -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">جاري تحميل البيانات...</div>
+    <div class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="page-title">الملف الشخصي</div>
+            <div style="width: 40px;"></div> <!-- للمحاذاة -->
+        </div>
     </div>
 
     <div class="profile-container">
-        <button class="back-button" onclick="window.location.href='dashboard.html'">
-            <i class="fas fa-chevron-right"></i>
-            العودة للرئيسية
-        </button>
-
-        <div class="profile-header">
-            <h1>الملف الشخصي</h1>
-            <p>بياناتك الشخصية</p>
-        </div>
-        
-        <!-- عرض البيانات -->
         <div class="profile-data" id="profileData">
             <div class="data-group">
                 <label>الاسم الكامل</label>
@@ -385,7 +406,6 @@
             </button>
         </div>
         
-        <!-- نموذج التعديل -->
         <form class="profile-form" id="profileForm">
             <div class="form-group">
                 <label>الاسم الكامل</label>
@@ -440,48 +460,96 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // تحميل بيانات المستخدم
+        document.addEventListener('DOMContentLoaded', () => {
+            // التحقق من وجود بيانات محلية
+            const localUserData = {
+                name: localStorage.getItem('userName'),
+                phone: localStorage.getItem('userPhone'),
+                governorate: localStorage.getItem('userGovernorate'),
+                administration: localStorage.getItem('userAdministration'),
+                institute: localStorage.getItem('userInstitute')
+            };
+            
+            // التحقق من وجود أي بيانات محلية
+            const hasLocalData = Object.values(localUserData).some(value => value !== null && value !== '');
+            
+            if (hasLocalData) {
+                // إذا وجدت بيانات محلية، اعرضها فوراً
+                updateUIWithData(localUserData);
+            } else {
+                // إذا لم توجد بيانات محلية، اظهر التحميل
+                document.querySelectorAll('.data-group .value').forEach(element => {
+                    element.innerHTML = `
+                        <div class="loading-placeholder">
+                            <div class="loading-spinner"></div>
+                            جاري التحميل...
+                        </div>
+                    `;
+                });
+            }
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    document.getElementById('loadingOverlay').style.display = 'flex';
-                    
                     const snapshot = await get(ref(db, `users/${user.uid}`));
                     if (snapshot.exists()) {
-                        const userData = snapshot.val();
+                        const serverData = snapshot.val();
                         
-                        // تحديث حقول النموذج
-                        document.getElementById('name').value = userData.name || '';
-                        document.getElementById('phone').value = userData.phone || '';
-                        document.getElementById('governorate').value = userData.governorate || '';
-                        document.getElementById('administration').value = userData.administration || '';
-                        document.getElementById('institute').value = userData.institute || '';
-
-                        // تحديث عرض البيانات
-                        document.getElementById('nameValue').textContent = userData.name || 'غير محدد';
-                        document.getElementById('phoneValue').textContent = userData.phone || 'غير محدد';
-                        document.getElementById('governorateValue').textContent = userData.governorate || 'غير محدد';
-                        document.getElementById('administrationValue').textContent = userData.administration || 'غير محدد';
-                        document.getElementById('instituteValue').textContent = userData.institute || 'غير محدد';
+                        // تحديث البيانات المحلية
+                        localStorage.setItem('userName', serverData.name || '');
+                        localStorage.setItem('userPhone', serverData.phone || '');
+                        localStorage.setItem('userGovernorate', serverData.governorate || '');
+                        localStorage.setItem('userAdministration', serverData.administration || '');
+                        localStorage.setItem('userInstitute', serverData.institute || '');
+                        
+                        // تحديث واجهة المستخدم
+                        updateUIWithData(serverData);
+                    } else {
+                        // إذا لم توجد بيانات في السيرفر
+                        updateUIWithData({
+                            name: 'غير محدد',
+                            phone: 'غير محدد',
+                            governorate: 'غير محدد',
+                            administration: 'غير محدد',
+                            institute: 'غير محدد'
+                        });
                     }
                 } catch (error) {
                     console.error("Error loading user data:", error);
                     showToast('حدث خطأ في تحميل البيانات', true);
-                } finally {
-                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // في حالة الخطأ، عرض رسالة خطأ في الحقول
+                    document.querySelectorAll('.data-group .value').forEach(element => {
+                        element.textContent = 'حدث خطأ في التحميل';
+                    });
                 }
             } else {
                 window.location.href = 'index.html?reason=not_authenticated';
             }
         });
 
-        // تعديل معالج النموذج
+        function updateUIWithData(userData) {
+            // تحديث حقول النموذج
+            document.getElementById('name').value = userData.name || '';
+            document.getElementById('phone').value = userData.phone || '';
+            document.getElementById('governorate').value = userData.governorate || '';
+            document.getElementById('administration').value = userData.administration || '';
+            document.getElementById('institute').value = userData.institute || '';
+
+            // تحديث عرض البيانات
+            document.getElementById('nameValue').textContent = userData.name || 'غير محدد';
+            document.getElementById('phoneValue').textContent = userData.phone || 'غير محدد';
+            document.getElementById('governorateValue').textContent = userData.governorate || 'غير محدد';
+            document.getElementById('administrationValue').textContent = userData.administration || 'غير محدد';
+            document.getElementById('instituteValue').textContent = userData.institute || 'غير محدد';
+        }
+
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const saveButton = e.target.querySelector('.save-button');
             const cancelButton = e.target.querySelector('.cancel-button');
             
-            // تفعيل حالة التحميل
             saveButton.disabled = true;
             cancelButton.disabled = true;
             saveButton.classList.add('loading');
@@ -501,24 +569,24 @@
                 // تحديث البيانات في Firebase
                 await update(ref(db, `users/${user.uid}`), updates);
                 
-                // تحديث البيانات المعروضة
-                document.getElementById('nameValue').textContent = updates.name;
-                document.getElementById('governorateValue').textContent = updates.governorate;
-                document.getElementById('administrationValue').textContent = updates.administration;
-                document.getElementById('instituteValue').textContent = updates.institute;
-                
-                // تحديث localStorage
+                // تحديث البيانات المحلية
                 localStorage.setItem('userName', updates.name);
+                localStorage.setItem('userGovernorate', updates.governorate);
+                localStorage.setItem('userAdministration', updates.administration);
+                localStorage.setItem('userInstitute', updates.institute);
+                
+                // تحديث واجهة المستخدم
+                updateUIWithData({
+                    ...updates,
+                    phone: document.getElementById('phone').value
+                });
                 
                 showToast('تم حفظ التغييرات بنجاح');
-                
-                // العودة لوضع العرض
                 toggleEditMode();
             } catch (error) {
                 console.error("Error updating profile:", error);
                 showToast('حدث خطأ في حفظ التغييرات', true);
             } finally {
-                // إعادة الأزرار لحالتها الطبيعية
                 saveButton.disabled = false;
                 cancelButton.disabled = false;
                 saveButton.classList.remove('loading');
@@ -526,23 +594,16 @@
             }
         });
 
-        // دالة التبديل بين العرض والتعديل
         window.toggleEditMode = function() {
             const form = document.getElementById('profileForm');
             const data = document.getElementById('profileData');
             
             if (form.classList.contains('active')) {
-                // العودة لوضع العرض
                 form.classList.remove('active');
-                setTimeout(() => {
-                    data.classList.remove('hidden');
-                }, 100);
+                data.classList.remove('hidden');
             } else {
-                // الانتقال لوضع التعديل
                 data.classList.add('hidden');
-                setTimeout(() => {
-                    form.classList.add('active');
-                }, 100);
+                form.classList.add('active');
             }
         }
 
