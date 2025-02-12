@@ -1459,7 +1459,7 @@
         <div class="header">
         <div class="header-buttons-left">
             <a href="dashboard.html" class="upload-btn home-btn">
-                <i class="fa fa-backward"></i>
+                <i class="fas fa-chevron-right"></i>
                 رجوع
             </a>
         </div>
@@ -1724,14 +1724,6 @@
             });
         });
     </script>
-
-    <!-- إضافة قسم التحميل -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">جاري تحميل المعرض...</p>
-        </div>
-    </div>
 
     <!-- إضافة نافذة عرض الصور -->
     <div class="image-viewer" id="imageViewer">
@@ -2032,16 +2024,15 @@
                 const storedData = LocalStorage.getData('galleryData');
                 
                 if (storedData && storedData.data) {
-                    // عرض البيانات المخزنة فوراً
+                    // عرض البيانات المخزنة فوراً بدون تحميل
                     this.cachedData = storedData.data;
                     this.renderDocuments(this.cachedData);
                     this.setupEventListeners();
-                    this.hideLoading();
                     
-                    // تحميل البيانات من Firebase في الخلفية بدون إظهار التحميل
+                    // تحديث البيانات من السيرفر في الخلفية
                     this.silentUpdate();
                 } else {
-                    // فقط في حالة عدم وجود بيانات محلية
+                    // فقط في حالة عدم وجود بيانات محلية نهائياً
                     this.showLoading();
                     await this.loadData();
                 }
