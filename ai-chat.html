@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html dir="rtl" lang="ar">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,24 +30,19 @@
             perspective: 1000px;
         }
         .chat-header {
-            height: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
             background: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1rem;
-        }
-
-        .chat-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #2563eb;
         }
 
         .back-button {
@@ -60,12 +56,41 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #3b82f6;
         }
 
         .back-button:active {
             background: #e2e8f0;
+            color: #3b82f6;
             transform: scale(0.95);
+        }
+        .back-button i {
+            font-size: 1.2rem;
+            color: #3b82f6;
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2563eb;
+            font-weight: bold;
+
+        }
+
+        .chat-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+
+        }
+
+        .chat-title i {
+            color: #3b82f6;
+            font-size: 1.4rem;
         }
 
         .chat-container {
@@ -282,7 +307,7 @@
             }
             
             .chat-title {
-                font-size: 1.4rem;
+                font-size: 1.1rem;
             }
             
             .input-container {
@@ -473,14 +498,6 @@
         .voice-button {
             position: relative;
             overflow: hidden;
-            min-width: 48px;
-            min-height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
         }
 
         .voice-button.active {
@@ -1338,11 +1355,13 @@
     <div class="overlay" id="responseOverlay"></div>
     <div class="chat-container">
         <div class="chat-header">
-            <button class="back-button" onclick="window.location.href='dashboard.html'">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="chat-title" >مساعد الذكاء الاصطناعي</div>
-            <div style="width: 40px;"></div> <!-- للمحاذاة -->
+            <div class="header-content">
+                <button class="back-button" onclick="window.location.href='dashboard.html'">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="page-title">المساعد الذكي</div>
+                <div style="width: 40px;"></div> <!-- للمحاذاة -->
+            </div>
         </div>
         <div class="chat-box" id="chat-box"></div>
         <div class="input-container">
