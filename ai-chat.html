@@ -473,6 +473,14 @@
         .voice-button {
             position: relative;
             overflow: hidden;
+            min-width: 48px;
+            min-height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
         .voice-button.active {
@@ -1333,7 +1341,7 @@
             <button class="back-button" onclick="window.location.href='dashboard.html'">
                 <i class="fas fa-chevron-right"></i>
             </button>
-            <div class="chat-title" >الذكاء الاصطناعي</div>
+            <div class="chat-title" >مساعد الذكاء الاصطناعي</div>
             <div style="width: 40px;"></div> <!-- للمحاذاة -->
         </div>
         <div class="chat-box" id="chat-box"></div>
