@@ -1881,7 +1881,7 @@
 
             <main class="content">
             <section class="welcome-section">
-                <h2 id="sectionTitle">معرض الوثائق والصور</h2>
+                <h2 id="sectionTitle">جاري التحميل...</h2>
 
             </section>
 
@@ -2741,24 +2741,7 @@
                     this.currentDocId = docId;
 
                     // إضافة مستمعي الأحداث لزر إضافة التعليق
-                    const addCommentBtn = document.getElementById('addCommentBtn');
-                    const commentInput = document.getElementById('commentInput');
-
-                    // إزالة المستمعين السابقين إن وجدت
-                    if (addCommentBtn && commentInput) {
-                        addCommentBtn.onclick = null;
-                        commentInput.onkeypress = null;
-
-                        // إضافة المستمعين الجدد
-                        const boundHandleAddComment = this.handleAddComment.bind(this);
-                        addCommentBtn.onclick = boundHandleAddComment;
-                        commentInput.onkeypress = (e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                boundHandleAddComment();
-                            }
-                        };
-                    }
+                    setupCommentEventListeners(docId);
 
                 } catch (error) {
                     console.error('Error showing comments:', error);
@@ -2799,27 +2782,6 @@
                     if (highlightComment) {
                         highlightComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
-                }
-            }
-
-            async handleAddComment() {
-                const commentInput = document.getElementById('commentInput');
-                if (!commentInput || !commentInput.value.trim()) return;
-
-                const comment = {
-                    text: commentInput.value.trim(),
-                    timestamp: Date.now(),
-                    userId: auth.currentUser.uid
-                };
-
-                try {
-                    const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${this.currentSection}/${this.currentDocId}/comments`));
-                    await set(newCommentRef, comment);
-                    commentInput.value = '';
-                    commentInput.style.height = 'auto';
-                } catch (error) {
-                    console.error('Error adding comment:', error);
-                    showToast('حدث خطأ أثناء إضافة التعليق', true);
                 }
             }
         }
@@ -3147,7 +3109,7 @@
         LocalStorage.clearExpiredData();
 
         // إضافة الدوال الجديدة
-        window.showComments = function(docId) {
+        window.showComments = async function(docId, highlightCommentId = null) {
             if (!window.galleryManager) {
                 console.error('GalleryManager غير متاح');
                 return;
@@ -3156,7 +3118,7 @@
             const commentsDialog = document.getElementById('commentsDialog');
             const commentsList = document.getElementById('commentsList');
             window.galleryManager.currentDocId = docId;
-
+            
             // إظهار حالة التحميل
             commentsList.innerHTML = `
                 <div class="comments-loading">
@@ -3164,69 +3126,112 @@
                     <p>جاري تحميل التعليقات...</p>
                 </div>
             `;
-
+            
             // عرض نافذة التعليقات
             commentsDialog.classList.add('active');
             document.getElementById('overlay').classList.add('active');
 
-            // إضافة مستمعي الأحداث
-            const setupEventListeners = () => {
-                const addCommentBtn = document.getElementById('addCommentBtn');
-                const commentInput = document.getElementById('commentInput');
+            try {
+                // جلب البيانات المحدثة للمستند من السيرفر أولاً
+                const docRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}`);
+                const docSnapshot = await get(docRef);
+                const docData = docSnapshot.val();
 
-                if (addCommentBtn && commentInput) {
-                    // إزالة المستمعين القديمين إن وجدوا
-                    addCommentBtn.onclick = null;
-                    commentInput.onkeypress = null;
+                if (!docData) {
+                    throw new Error('لم يتم العثور على المستند');
+                }
 
-                    // إضافة المستمعين الجدد
-                    addCommentBtn.onclick = async () => {
-                        if (!commentInput.value.trim()) return;
+                // تحديث البيانات المحلية
+                if (window.galleryManager.cachedData) {
+                    window.galleryManager.cachedData[window.galleryManager.currentSection][docId] = docData;
+                }
 
-                        const comment = {
-                            text: commentInput.value.trim(),
-                            timestamp: Date.now(),
-                            userId: auth.currentUser.uid
-                        };
+                // إعداد مستمعي الأحداث للتعليقات
+                setupCommentEventListeners(docId);
 
-                        try {
-                            const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`));
-                            await set(newCommentRef, comment);
-                            commentInput.value = '';
-                            commentInput.style.height = 'auto';
-                        } catch (error) {
-                            console.error('Error adding comment:', error);
-                            showToast('حدث خطأ أثناء إضافة التعليق', true);
-                        }
-                    };
+                // جلب التعليقات من Firebase
+                const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`);
+                onValue(commentsRef, (snapshot) => {
+                    const serverComments = snapshot.val() || {};
+                    window.galleryManager.renderComments(serverComments, highlightCommentId);
+                    const commentInput = document.getElementById('commentInput');
+                    if (commentInput) {
+                        commentInput.focus();
+                        // إعادة تعيين الارتفاع
+                        commentInput.style.height = 'auto';
+                        commentInput.style.height = (commentInput.scrollHeight) + 'px';
+                    }
+                }, (error) => {
+                    console.error('خطأ في جلب التعليقات:', error);
+                    commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل التعليقات</p>';
+                });
 
-                    commentInput.onkeypress = (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            addCommentBtn.click();
-                        }
-                    };
+            } catch (error) {
+                console.error('خطأ في جلب بيانات المستند:', error);
+                commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل البيانات</p>';
+            }
+        };
+
+        // دالة جديدة لإعداد مستمعي الأحداث للتعليقات
+        function setupCommentEventListeners(docId) {
+            const addCommentBtn = document.getElementById('addCommentBtn');
+            const commentInput = document.getElementById('commentInput');
+
+            if (!addCommentBtn || !commentInput) {
+                console.error('عناصر التعليقات غير موجودة');
+                return;
+            }
+
+            // إزالة المستمعين القديمين
+            const newClickHandler = async () => {
+                if (!commentInput.value.trim()) return;
+
+                const comment = {
+                    text: commentInput.value.trim(),
+                    timestamp: Date.now(),
+                    userId: auth.currentUser.uid
+                };
+
+                try {
+                    const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`));
+                    await set(newCommentRef, comment);
+                    commentInput.value = '';
+                    commentInput.style.height = 'auto';
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    showToast('حدث خطأ أثناء إضافة التعليق', true);
                 }
             };
 
-            // إعداد مستمعي الأحداث مباشرة
-            setupEventListeners();
+            // إزالة جميع مستمعي الأحداث القديمة
+            addCommentBtn.replaceWith(addCommentBtn.cloneNode(true));
+            commentInput.replaceWith(commentInput.cloneNode(true));
 
-            // جلب التعليقات من Firebase
-            const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`);
-            onValue(commentsRef, (snapshot) => {
-                const serverComments = snapshot.val() || {};
-                window.galleryManager.renderComments(serverComments);
-                const commentInput = document.getElementById('commentInput');
-                if (commentInput) commentInput.focus();
-                
-                // إعادة إعداد مستمعي الأحداث بعد تحديث التعليقات
-                setupEventListeners();
-            }, (error) => {
-                console.error('خطأ في جلب التعليقات:', error);
-                commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل التعليقات</p>';
-            });
-        };
+            // إعادة تعيين المراجع بعد الاستنساخ
+            const newAddCommentBtn = document.getElementById('addCommentBtn');
+            const newCommentInput = document.getElementById('commentInput');
+
+            if (newAddCommentBtn && newCommentInput) {
+                // إضافة المستمعين الجدد
+                newAddCommentBtn.addEventListener('click', newClickHandler);
+                newCommentInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        newClickHandler();
+                    }
+                });
+
+                // إضافة خاصية تكبير حقل التعليق تلقائياً
+                newCommentInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+
+                // تعيين الارتفاع الأولي
+                newCommentInput.style.height = 'auto';
+                newCommentInput.style.height = (newCommentInput.scrollHeight) + 'px';
+            }
+        }
 
         // دوال إغلاق النوافذ
         window.closeCommentsDialog = function() {
