@@ -2128,7 +2128,7 @@
         class GalleryManager {
             constructor() {
                 this.documentsGrid = document.getElementById('documentsGrid');
-                this.loadingOverlay = document.getElementById('loadingOverlay');
+                this.loadingOverlay = document.querySelector('.loading-overlay');
                 this.currentSection = new URLSearchParams(window.location.search).get('section');
                 this.currentSubsection = new URLSearchParams(window.location.search).get('subsection');
                 this.uploadBtn = document.getElementById('uploadBtn');
@@ -2570,10 +2570,12 @@
             }
 
             hideLoading() {
-                this.loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    this.loadingOverlay.style.display = 'none';
-                }, 300);
+                if (this.loadingOverlay) {
+                    this.loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        this.loadingOverlay.style.display = 'none';
+                    }, 300);
+                }
             }
 
             async loadData() {
@@ -2728,7 +2730,7 @@
                     onValue(commentsRef, (snapshot) => {
                         console.log('تم استلام التعليقات:', snapshot.val());
                         const serverComments = snapshot.val() || {};
-                        this.renderComments(serverComments);
+                        this.renderComments(serverComments, highlightCommentId);
                         document.getElementById('commentInput').focus();
                     }, (error) => {
                         console.error('خطأ في جلب التعليقات:', error);
@@ -2738,45 +2740,25 @@
                     // تخزين معرف المستند الحالي
                     this.currentDocId = docId;
 
-                    // إضافة مستمع لزر إضافة التعليق
+                    // إضافة مستمعي الأحداث لزر إضافة التعليق
                     const addCommentBtn = document.getElementById('addCommentBtn');
                     const commentInput = document.getElementById('commentInput');
 
                     // إزالة المستمعين السابقين إن وجدت
-                    addCommentBtn.removeEventListener('click', this.handleAddComment);
-                    commentInput.removeEventListener('keypress', this.handleEnterPress);
+                    if (addCommentBtn && commentInput) {
+                        addCommentBtn.onclick = null;
+                        commentInput.onkeypress = null;
 
-                    // إضافة المستمعين الجدد
-                    this.handleAddComment = async () => {
-                        if (!commentInput.value.trim()) return;
-
-                        const comment = {
-                            text: commentInput.value.trim(),
-                            timestamp: Date.now(),
-                            userId: auth.currentUser.uid,
-                            userEmail: auth.currentUser.email
+                        // إضافة المستمعين الجدد
+                        const boundHandleAddComment = this.handleAddComment.bind(this);
+                        addCommentBtn.onclick = boundHandleAddComment;
+                        commentInput.onkeypress = (e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                boundHandleAddComment();
+                            }
                         };
-
-                        try {
-                            const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${this.currentSection}/${this.currentDocId}/comments`));
-                            await set(newCommentRef, comment);
-                            commentInput.value = '';
-                            commentInput.style.height = 'auto';
-                        } catch (error) {
-                            console.error('Error adding comment:', error);
-                            showToast('حدث خطأ أثناء إضافة التعليق', true);
-                        }
-                    };
-
-                    this.handleEnterPress = (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            this.handleAddComment();
-                        }
-                    };
-
-                    addCommentBtn.addEventListener('click', this.handleAddComment);
-                    commentInput.addEventListener('keypress', this.handleEnterPress);
+                    }
 
                 } catch (error) {
                     console.error('Error showing comments:', error);
@@ -2784,8 +2766,8 @@
                 }
             }
 
-            // تحديث دالة renderComments لتدعم تمييز التعليقات
-            renderComments(comments) {
+            // تحديث دالة renderComments لإخفاء الإيميل
+            renderComments(comments, highlightCommentId = null) {
                 const commentsList = document.getElementById('commentsList');
                 
                 if (!comments || Object.keys(comments).length === 0) {
@@ -2796,21 +2778,49 @@
                 commentsList.innerHTML = Object.entries(comments)
                     .sort(([,a], [,b]) => a.timestamp - b.timestamp)
                     .map(([key, comment]) => `
-                        <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''}"
+                        <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''} ${key === highlightCommentId ? 'highlight-comment' : ''}"
                              data-comment-id="${key}">
-                        <div class="comment-header">
-                            <div class="comment-user-info">
-                                <span class="comment-user">${comment.isAdmin ? 'المشرف' : 'انت'}</span>
-                                ${comment.userEmail ? `<span class="user-email">(${comment.userEmail})</span>` : ''}
+                            <div class="comment-header">
+                                <div class="comment-user-info">
+                                    <span class="comment-user">${comment.isAdmin ? 'المشرف' : 'انت'}</span>
+                                </div>
+                                <span class="comment-date">${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
                             </div>
-                            <span class="comment-date">${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
+                            <div class="comment-text">${comment.text}</div>
                         </div>
-                        <div class="comment-text">${comment.text}</div>
-                    </div>
-                `).join('');
+                    `).join('');
                 
                 // تحريك السكرول إلى آخر التعليقات
                 commentsList.scrollTop = commentsList.scrollHeight;
+
+                // إذا كان هناك تعليق مميز، قم بتمريره إلى الموقع
+                if (highlightCommentId) {
+                    const highlightComment = commentsList.querySelector(`.comment-item[data-comment-id="${highlightCommentId}"]`);
+                    if (highlightComment) {
+                        highlightComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+
+            async handleAddComment() {
+                const commentInput = document.getElementById('commentInput');
+                if (!commentInput || !commentInput.value.trim()) return;
+
+                const comment = {
+                    text: commentInput.value.trim(),
+                    timestamp: Date.now(),
+                    userId: auth.currentUser.uid
+                };
+
+                try {
+                    const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${this.currentSection}/${this.currentDocId}/comments`));
+                    await set(newCommentRef, comment);
+                    commentInput.value = '';
+                    commentInput.style.height = 'auto';
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    showToast('حدث خطأ أثناء إضافة التعليق', true);
+                }
             }
         }
 
@@ -2818,7 +2828,7 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.galleryManager = new GalleryManager();
-                } else {
+            } else {
                 window.location.href = 'login.html';
             }
         });
@@ -3138,7 +3148,6 @@
 
         // إضافة الدوال الجديدة
         window.showComments = function(docId) {
-            // استخدام galleryManager مباشرة
             if (!window.galleryManager) {
                 console.error('GalleryManager غير متاح');
                 return;
@@ -3160,54 +3169,64 @@
             commentsDialog.classList.add('active');
             document.getElementById('overlay').classList.add('active');
 
+            // إضافة مستمعي الأحداث
+            const setupEventListeners = () => {
+                const addCommentBtn = document.getElementById('addCommentBtn');
+                const commentInput = document.getElementById('commentInput');
+
+                if (addCommentBtn && commentInput) {
+                    // إزالة المستمعين القديمين إن وجدوا
+                    addCommentBtn.onclick = null;
+                    commentInput.onkeypress = null;
+
+                    // إضافة المستمعين الجدد
+                    addCommentBtn.onclick = async () => {
+                        if (!commentInput.value.trim()) return;
+
+                        const comment = {
+                            text: commentInput.value.trim(),
+                            timestamp: Date.now(),
+                            userId: auth.currentUser.uid
+                        };
+
+                        try {
+                            const newCommentRef = push(ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`));
+                            await set(newCommentRef, comment);
+                            commentInput.value = '';
+                            commentInput.style.height = 'auto';
+                        } catch (error) {
+                            console.error('Error adding comment:', error);
+                            showToast('حدث خطأ أثناء إضافة التعليق', true);
+                        }
+                    };
+
+                    commentInput.onkeypress = (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            addCommentBtn.click();
+                        }
+                    };
+                }
+            };
+
+            // إعداد مستمعي الأحداث مباشرة
+            setupEventListeners();
+
             // جلب التعليقات من Firebase
             const commentsRef = ref(database, `users/${auth.currentUser.uid}/images/${window.galleryManager.currentSection}/${docId}/comments`);
             onValue(commentsRef, (snapshot) => {
                 const serverComments = snapshot.val() || {};
-                window.galleryManager.renderComments(serverComments); // استخدام galleryManager مباشرة
-                document.getElementById('commentInput').focus();
+                window.galleryManager.renderComments(serverComments);
+                const commentInput = document.getElementById('commentInput');
+                if (commentInput) commentInput.focus();
+                
+                // إعادة إعداد مستمعي الأحداث بعد تحديث التعليقات
+                setupEventListeners();
             }, (error) => {
                 console.error('خطأ في جلب التعليقات:', error);
                 commentsList.innerHTML = '<p class="error-message">حدث خطأ في تحميل التعليقات</p>';
             });
         };
-
-        // دالة لمقارنة التعليقات
-        function hasCommentsChanged(newComments, oldComments) {
-            if (!oldComments) return true;
-            try {
-                return JSON.stringify(newComments) !== JSON.stringify(oldComments);
-            } catch (error) {
-                console.error('خطأ في مقارنة التعليقات:', error);
-                return true;
-            }
-        }
-
-        // دالة لعرض التعليقات
-        function renderComments(comments, highlightAll = false) {
-            const commentsList = document.getElementById('commentsList');
-            
-            if (!comments || Object.keys(comments).length === 0) {
-                commentsList.innerHTML = '<p class="no-comments">لا توجد تعليقات</p>';
-                return;
-            }
-
-            commentsList.innerHTML = Object.entries(comments)
-                .sort(([,a], [,b]) => a.timestamp - b.timestamp)
-                .map(([key, comment]) => `
-                    <div class="comment-item ${comment.isAdmin ? 'admin-comment' : ''} ${highlightAll ? 'highlighted-comment' : ''}"
-                         data-comment-id="${key}">
-                        <div class="comment-header">
-                            <span>${comment.isAdmin ? 'المشرف' : 'انت'}</span>
-                            <span>${new Date(comment.timestamp).toLocaleString('ar-EG')}</span>
-                        </div>
-                        <div class="comment-text">${comment.text}</div>
-                    </div>
-                `).join('');
-            
-            // تحريك السكرول إلى آخر التعليقات
-            commentsList.scrollTop = commentsList.scrollHeight;
-        }
 
         // دوال إغلاق النوافذ
         window.closeCommentsDialog = function() {
@@ -3219,8 +3238,8 @@
             const commentInput = document.getElementById('commentInput');
             
             if (window.galleryManager && window.galleryManager.handleAddComment) {
-                addCommentBtn.removeEventListener('click', window.galleryManager.handleAddComment);
-                commentInput.removeEventListener('keypress', window.galleryManager.handleEnterPress);
+                addCommentBtn.onclick = null;
+                commentInput.onkeypress = null;
             }
         };
 
