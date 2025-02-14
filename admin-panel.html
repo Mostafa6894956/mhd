@@ -91,6 +91,7 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1rem;
             padding: 1rem;
+            transition: opacity 0.3s ease;
         }
 
         /* تحديث تصميم بطاقة المستخدم */
@@ -269,6 +270,115 @@
 
         .documents-container.active {
             display: block;
+        }
+
+        .filters-section {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 2.5rem 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: var(--light);
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            min-width: 180px;
+            position: relative;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 0.8rem 2.5rem 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: var(--light);
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .filter-group::after {
+            content: '\f107';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            pointer-events: none;
+        }
+
+        .filter-group select:not(:disabled):hover {
+            border-color: var(--primary-light);
+            background: var(--white);
+        }
+
+        .filter-group select:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-group select:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box,
+            .filter-group {
+                width: 100%;
+            }
         }
 
         .filters-bar {
@@ -616,39 +726,43 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--white);
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 9999;
-            gap: 1rem;
+            transition: all 0.3s ease;
         }
 
         .loading-overlay.hidden {
-            display: none;
+            opacity: 0;
+            visibility: hidden;
         }
 
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid var(--light);
-            border-top: 3px solid var(--primary);
+            border: 4px solid var(--light);
+            border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
         }
 
         .loading-text {
-            color: var(--primary);
+            color: var(--dark);
             font-size: 1.1rem;
-            font-weight: 500;
+            text-align: center;
+            margin-top: 1rem;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* تنسيق تحميل البطاقات */
@@ -1835,6 +1949,59 @@
                 transform: rotate(360deg);
             }
         }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 1.1rem;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        #loadingOverlay {
+            z-index: 1000;
+        }
+
+        .user-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item.pending {
+            background: #fff5f5;
+            color: #e53e3e;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-item.pending .stat-value {
+            color: #e53e3e;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 0.2rem;
+        }
     </style>
 </head>
 <body>
@@ -1843,51 +2010,36 @@
         <p class="loading-text">جاري تحميل البيانات...</p>
     </div>
 
-    
-
     <div class="main-container">
-        <div class="filters-bar">
-            <div class="filter-group">
-                <label>المحافظة</label>
-                <select id="governorateFilter">
-                    <option value="">الكل</option>
-                    <!-- سيتم تحميل المحافظات ديناميكياً -->
-                </select>
+        <!-- إضافة قسم التصفية هنا مباشرة بعد بداية main-container -->
+        <div class="filters-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="البحث بالاسم أو المدرسة..." oninput="filterUsers()">
+                <i class="fas fa-search"></i>
             </div>
-            <div class="filter-group">
-                <label>الإدارة</label>
-                <select id="administrationFilter">
-                    <option value="">الكل</option>
-                    <!-- سيتم تحميل الإدارات ديناميكياً -->
-                </select>
-        </div>
-            <div class="filter-group">
-                <label>المعهد</label>
-                <select id="instituteFilter">
-                    <option value="">الكل</option>
-                    <!-- سيتم تحميل المعاهد ديناميكياً -->
+            <div class="filters-row">
+                <div class="filter-group">
+                    <select id="governorateFilter" onchange="handleGovernorateChange()">
+                        <option value="">كل المحافظات</option>
                     </select>
+                </div>
+                <div class="filter-group">
+                    <select id="administrationFilter" onchange="handleAdministrationChange()" disabled>
+                        <option value="">كل الإدارات</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="instituteFilter" onchange="filterUsers()" disabled>
+                        <option value="">كل المدارس</option>
+                    </select>
+                </div>
             </div>
-            <div class="filter-group">
-                <label>حالة المستندات</label>
-                <select id="documentsFilter">
-                    <option value="">الكل</option>
-                    <option value="hasDocuments">لديهم مستندات</option>
-                    <option value="noDocuments">لا يوجد مستندات</option>
-                    <option value="hasPending">لديهم مستندات قيد المراجعة</option>
-                    <option value="hasApproved">لديهم مستندات تمت الموافقة عليها</option>
-                    <option value="hasRejected">لديهم مستندات مرفوضة</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>بحث</label>
-                <input type="text" id="searchFilter" placeholder="ابحث عن مستخدم...">
-            </div>
-                    </div>
+        </div>
+
         <div class="users-grid" id="usersGrid">
             <!-- سيتم إضافة بطاقات المستخدمين هنا -->
-            </div>
         </div>
+    </div>
 
     <div class="modal" id="userModal">
         <div class="modal-content">
@@ -1985,6 +2137,12 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // إضافة المتغيرات العامة
+        window.allUsers = [];
+        window.governoratesMap = {};
+        window.administrationsMap = {};
+        window.institutesMap = {};
+
         // التحقق من صلاحيات المشرف
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -2002,16 +2160,6 @@
             }
         });
 
-        // إضافة المتغيرات العامة للتصفية
-        let allUsers = {};
-        let filters = {
-            governorate: '',
-            administration: '',
-            institute: '',
-            documents: '',
-            search: ''
-        };
-
         // متغيرات عامة لمعرض الصور
         window.currentImages = [];
         window.currentImageIndex = 0;
@@ -2021,173 +2169,283 @@
         // متغيرات عامة للتعليقات
         let currentDocumentData = null;
 
-        // تحديث دالة تحميل المستخدمين
-        async function loadUsers() {
+        // تحديث دالة loadUsers وجعلها متاحة عالمياً
+        window.loadUsers = async function() {
             const loadingOverlay = document.getElementById('loadingOverlay');
-            loadingOverlay.classList.remove('hidden');
-
+            const usersGrid = document.getElementById('usersGrid');
+            const loadingText = document.querySelector('.loading-text');
+            
             try {
+                // نعرض شاشة التحميل فقط عند أول تحميل للبيانات
+                if (!window.allUsers || window.allUsers.length === 0) {
+                    loadingOverlay.classList.remove('hidden');
+                    usersGrid.style.display = 'none';
+                }
+                
+                loadingText.textContent = 'جاري تحميل بيانات المستخدمين...';
+
+                // تنظيف المتغيرات العالمية
+                window.allUsers = [];
+                window.governoratesMap = {};
+                window.administrationsMap = {};
+                window.institutesMap = {};
+
+                loadingText.textContent = 'جاري جلب بيانات المستخدمين...';
                 const usersRef = ref(db, 'users');
                 const snapshot = await get(usersRef);
-                allUsers = snapshot.val() || {};
+                const users = snapshot.val() || {};
 
-                // تحميل قوائم التصفية
-                await loadFilterOptions();
-                
-                // تحويل المستخدمين إلى مصفوفة مع حساب آخر نشاط
-                let usersArray = await Promise.all(
-                    Object.entries(allUsers)
-                        .filter(([_, user]) => user.userType === 'user')
-                        .map(async ([uid, user]) => {
-                            const imagesRef = ref(db, `users/${uid}/images`);
-                            const imagesSnapshot = await get(imagesRef);
-                            const images = imagesSnapshot.val() || {};
+                const processedUsers = new Map();
+                let processedCount = 0;
+                const totalUsers = Object.entries(users).filter(([, user]) => user.userType === 'user').length;
+
+                for (const [uid, user] of Object.entries(users)) {
+                    if (user.userType !== 'user') continue;
+                    
+                    processedCount++;
+                    loadingText.textContent = `جاري معالجة بيانات المستخدمين (${processedCount}/${totalUsers})...`;
+                    
+                    // تجميع بيانات الفلاتر
+                    if (user.governorate) {
+                        window.governoratesMap[user.governorate] = true;
+                        
+                        if (user.administration) {
+                            if (!window.administrationsMap[user.governorate]) {
+                                window.administrationsMap[user.governorate] = {};
+                            }
+                            window.administrationsMap[user.governorate][user.administration] = true;
                             
-                            let lastActivity = 0;
-                            Object.values(images).forEach(section => {
-                                Object.values(section).forEach(doc => {
+                            if (user.institute) {
+                                if (!window.institutesMap[user.administration]) {
+                                    window.institutesMap[user.administration] = {};
+                                }
+                                window.institutesMap[user.administration][user.institute] = true;
+                            }
+                        }
+                    }
+
+                    loadingText.textContent = `جاري حساب إحصائيات المستخدم ${user.name}...`;
+                    const imagesRef = ref(db, `users/${uid}/images`);
+                    const imagesSnapshot = await get(imagesRef);
+                    const images = imagesSnapshot.val() || {};
+                    
+                    let lastActivity = 0;
+                    let totalDocs = 0;
+                    let pendingDocs = 0;
+
+                    Object.values(images).forEach(section => {
+                        if (section) {
+                            Object.values(section).forEach(doc => {
+                                totalDocs++;
+                                if (doc.status === 'pending') pendingDocs++;
+                                if (doc && doc.uploadedAt) {
                                     const uploadTime = new Date(doc.uploadedAt).getTime();
-                                    if (uploadTime > lastActivity) {
-                                        lastActivity = uploadTime;
-                                    }
-                                });
+                                    lastActivity = Math.max(lastActivity, uploadTime);
+                                }
                             });
+                        }
+                    });
 
-                            return {
-                                uid,
-                                user,
-                                lastActivity: lastActivity || 0
-                            };
-                        })
-                );
+                    processedUsers.set(uid, {
+                        uid,
+                        user,
+                        lastActivity: lastActivity || 0,
+                        stats: {
+                            totalDocs,
+                            pendingDocs
+                        }
+                    });
+                }
 
-                // ترتيب المستخدمين حسب آخر نشاط
-                usersArray.sort((a, b) => b.lastActivity - a.lastActivity);
+                loadingText.textContent = 'جاري ترتيب وتحضير البيانات...';
+                window.allUsers = Array.from(processedUsers.values())
+                    .sort((a, b) => b.lastActivity - a.lastActivity);
 
-                // إضافة مستمعي الأحداث للفلاتر
-                setupFilterListeners();
+                updateFilters();
                 
-                // تطبيق الفلاتر على المصفوفة المرتبة
-                await applyFilters(usersArray);
+                // نخفي شاشة التحميل فقط إذا كانت ظاهرة
+                if (!loadingOverlay.classList.contains('hidden')) {
+                    loadingOverlay.classList.add('hidden');
+                    // نظهر الشبكة فقط إذا كانت مخفية
+                    if (usersGrid.style.display === 'none') {
+                        usersGrid.style.display = 'grid';
+                    }
+                }
+                
+                // تحديث عرض المستخدمين مباشرة
+                window.filterUsers();
 
             } catch (error) {
                 console.error('Error loading users:', error);
                 showToast('حدث خطأ في تحميل البيانات', true);
-            } finally {
-                loadingOverlay.classList.add('hidden');
+                if (!loadingOverlay.classList.contains('hidden')) {
+                    loadingOverlay.classList.add('hidden');
+                }
             }
+        };
+
+        // إضافة دالة تحديث الفلاتر للنافذة
+        function updateFilters() {
+            const governorateSelect = document.getElementById('governorateFilter');
+            const administrationSelect = document.getElementById('administrationFilter');
+            const instituteSelect = document.getElementById('instituteFilter');
+
+            // تحديث قائمة المحافظات
+            governorateSelect.innerHTML = '<option value="">كل المحافظات</option>';
+            Object.keys(window.governoratesMap).sort().forEach(governorate => {
+                governorateSelect.innerHTML += `<option value="${governorate}">${governorate}</option>`;
+            });
         }
 
-        // دالة تحميل خيارات التصفية
-        async function loadFilterOptions() {
-            const governorates = new Set();
-            const administrations = new Set();
-            const institutes = new Set();
-
-            Object.values(allUsers).forEach(user => {
-                if (user.userType === 'user') {
-                    if (user.governorate) governorates.add(user.governorate);
-                    if (user.administration) administrations.add(user.administration);
-                    if (user.institute) institutes.add(user.institute);
-                }
-            });
-
-            updateSelectOptions('governorateFilter', Array.from(governorates));
-            updateSelectOptions('administrationFilter', Array.from(administrations));
-            updateSelectOptions('instituteFilter', Array.from(institutes));
-        }
-
-        // تحديث دالة تطبيق الفلاتر
-        async function applyFilters(usersArray) {
-            const usersGrid = document.getElementById('usersGrid');
-            usersGrid.innerHTML = '<div class="loading-text">جاري تطبيق الفلاتر...</div>';
-
-            // تأخير صغير لإظهار حالة التحميل
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            let filteredUsers = usersArray.filter(({user}) => {
-                // تطبيق الفلاتر
-                if (filters.governorate && user.governorate !== filters.governorate) return false;
-                if (filters.administration && user.administration !== filters.administration) return false;
-                if (filters.institute && user.institute !== filters.institute) return false;
-
-                if (filters.search) {
-                    const searchText = filters.search.toLowerCase();
-                    const userText = `${user.name} ${user.phone} ${user.institute}`.toLowerCase();
-                    if (!userText.includes(searchText)) return false;
-                }
-
-                return true;
-            });
-
-            // تطبيق فلتر المستندات
-            if (filters.documents) {
-                filteredUsers = await Promise.all(
-                    filteredUsers.map(async ({uid, user, lastActivity}) => {
-                        const documentsCount = await getDocumentsCount(uid);
-                        return { uid, user, lastActivity, documentsCount };
-                    })
-                );
-
-                filteredUsers = filteredUsers.filter(({documentsCount}) => {
-                    switch (filters.documents) {
-                        case 'hasDocuments': return documentsCount.total > 0;
-                        case 'noDocuments': return documentsCount.total === 0;
-                        case 'hasPending': return documentsCount.pending > 0;
-                        case 'hasApproved': return documentsCount.approved > 0;
-                        case 'hasRejected': return documentsCount.rejected > 0;
-                        default: return true;
-                    }
+        // إضافة دوال التصفية للنافذة
+        window.handleGovernorateChange = function() {
+            const governorateSelect = document.getElementById('governorateFilter');
+            const administrationSelect = document.getElementById('administrationFilter');
+            const instituteSelect = document.getElementById('instituteFilter');
+            
+            const selectedGovernorate = governorateSelect.value;
+            
+            // إعادة تعيين الإدارات والمدارس
+            administrationSelect.innerHTML = '<option value="">كل الإدارات</option>';
+            instituteSelect.innerHTML = '<option value="">كل المدارس</option>';
+            
+            if (selectedGovernorate) {
+                administrationSelect.disabled = false;
+                const administrations = Object.keys(window.administrationsMap[selectedGovernorate] || {}).sort();
+                administrations.forEach(administration => {
+                    administrationSelect.innerHTML += `<option value="${administration}">${administration}</option>`;
                 });
+            } else {
+                administrationSelect.disabled = true;
+                instituteSelect.disabled = true;
             }
-
-            usersGrid.innerHTML = '';
             
-            if (filteredUsers.length === 0) {
-                usersGrid.innerHTML = '<div class="no-results">لا توجد نتائج تطابق البحث</div>';
-                return;
-            }
+            window.filterUsers();
+        };
 
-            // عرض المستخدمين المفلترة
-            for (const {uid, user} of filteredUsers) {
-                const documentsCount = await getDocumentsCount(uid);
-                const card = createUserCard(uid, user, documentsCount);
-                usersGrid.appendChild(card);
-            }
-        }
-
-        // إضافة باقي الدوال المساعدة
-        function updateSelectOptions(selectId, options) {
-            const select = document.getElementById(selectId);
-            const currentValue = select.value;
+        window.handleAdministrationChange = function() {
+            const administrationSelect = document.getElementById('administrationFilter');
+            const instituteSelect = document.getElementById('instituteFilter');
             
-            select.innerHTML = '<option value="">الكل</option>';
-            options.sort().forEach(option => {
-                select.add(new Option(option, option));
+            const selectedAdministration = administrationSelect.value;
+            
+            // إعادة تعيين المدارس
+            instituteSelect.innerHTML = '<option value="">كل المدارس</option>';
+            
+            if (selectedAdministration) {
+                instituteSelect.disabled = false;
+                const institutes = Object.keys(window.institutesMap[selectedAdministration] || {}).sort();
+                institutes.forEach(institute => {
+                    instituteSelect.innerHTML += `<option value="${institute}">${institute}</option>`;
+                });
+            } else {
+                instituteSelect.disabled = true;
+            }
+            
+            window.filterUsers();
+        };
+
+        // تحديث دالة filterUsers لعرض إحصائيات المستندات
+        window.filterUsers = function() {
+            const searchInput = document.getElementById('searchInput');
+            const governorateSelect = document.getElementById('governorateFilter');
+            const administrationSelect = document.getElementById('administrationFilter');
+            const instituteSelect = document.getElementById('instituteFilter');
+            const usersGrid = document.getElementById('usersGrid');
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGovernorate = governorateSelect.value;
+            const selectedAdministration = administrationSelect.value;
+            const selectedInstitute = instituteSelect.value;
+            
+            const filteredUsers = window.allUsers.filter(({ user }) => {
+                const nameMatch = user.name.toLowerCase().includes(searchTerm);
+                const instituteMatch = user.institute.toLowerCase().includes(searchTerm);
+                const searchMatch = nameMatch || instituteMatch;
+                
+                const governorateMatch = !selectedGovernorate || user.governorate === selectedGovernorate;
+                const administrationMatch = !selectedAdministration || user.administration === selectedAdministration;
+                const instituteMatch2 = !selectedInstitute || user.institute === selectedInstitute;
+                
+                return searchMatch && governorateMatch && administrationMatch && instituteMatch2;
             });
             
-            select.value = currentValue;
-        }
+            // تحديث المحتوى مباشرة بدون إخفاء/إظهار
+            usersGrid.innerHTML = filteredUsers.length === 0 ? 
+                '<div class="no-results">لا توجد نتائج</div>' : 
+                filteredUsers.map(({ uid, user, stats }) => `
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <h3>${user.name}</h3>
+                                <p><i class="fas fa-phone"></i>${user.phone}</p>
+                            </div>
+                        </div>
+                        <div class="user-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${user.governorate}
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-school"></i>
+                                ${user.institute}
+                            </div>
+                        </div>
+                        <div class="user-stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">${stats.totalDocs}</div>
+                                <div class="stat-label">إجمالي المستندات</div>
+                            </div>
+                            <div class="stat-item ${stats.pendingDocs > 0 ? 'pending' : ''}">
+                                <div class="stat-value">${stats.pendingDocs}</div>
+                                <div class="stat-label">قيد المراجعة</div>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="action-btn view-btn" onclick="viewUserDetails('${uid}')">
+                                <i class="fas fa-eye"></i>
+                                عرض التفاصيل
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+        };
 
-        function setupFilterListeners() {
-            document.getElementById('governorateFilter').addEventListener('change', handleFilterChange);
-            document.getElementById('administrationFilter').addEventListener('change', handleFilterChange);
-            document.getElementById('instituteFilter').addEventListener('change', handleFilterChange);
-            document.getElementById('documentsFilter').addEventListener('change', handleFilterChange);
-            
-            let searchTimeout;
-            document.getElementById('searchFilter').addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    filters.search = e.target.value.trim();
-                    loadUsers(); // إعادة تحميل المستخدمين مع الفلتر الجديد
-                }, 300);
-            });
-        }
+        // تحميل المستخدمين عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            window.loadUsers();
+        });
 
-        async function handleFilterChange(e) {
-            filters[e.target.id.replace('Filter', '')] = e.target.value;
-            await loadUsers(); // إعادة تحميل المستخدمين مع الفلتر الجديد
+        // إضافة الدوال الجديدة
+        function getDocumentsCount(uid) {
+            const imagesRef = ref(db, `users/${uid}/images`);
+            return get(imagesRef)
+                .then(snapshot => {
+                    const images = snapshot.val() || {};
+                    let total = 0;
+                    let pending = 0;
+                    let approved = 0;
+                    let rejected = 0;
+
+                    Object.values(images).forEach(section => {
+                        Object.values(section).forEach(doc => {
+                            total++;
+                            if (doc.status === 'pending') pending++;
+                            if (doc.status === 'approved') approved++;
+                            if (doc.status === 'rejected') rejected++;
+                        });
+                    });
+
+                    return { total, pending, approved, rejected };
+                })
+                .catch(error => {
+                    console.error('Error getting documents count:', error);
+                    showToast('حدث خطأ في تحميل إحصائيات المستندات', true);
+                    return { total: 0, pending: 0, approved: 0, rejected: 0 };
+                });
         }
 
         // تحديث دالة إنشاء بطاقة المستخدم لتشمل تاريخ آخر نشاط
@@ -2236,29 +2494,6 @@
                 </div>
             `;
             return div;
-        }
-
-        // تحديث دالة حساب إحصائيات المستندات
-        async function getDocumentsCount(uid) {
-            const imagesRef = ref(db, `users/${uid}/images`);
-            const snapshot = await get(imagesRef);
-            const images = snapshot.val() || {};
-
-            let total = 0;
-            let pending = 0;
-            let approved = 0;
-            let rejected = 0;
-
-            Object.values(images).forEach(section => {
-                Object.values(section).forEach(doc => {
-                    total++;
-                    if (doc.status === 'pending') pending++;
-                    if (doc.status === 'approved') approved++;
-                    if (doc.status === 'rejected') rejected++;
-                        });
-                    });
-
-            return { total, pending, approved, rejected };
         }
 
         // عرض تفاصيل المستخدم
@@ -2731,28 +2966,6 @@
             }
         };
 
-        // تحديث دالة فتح النافذة المنبثقة
-        window.openModal = function(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                // تأخير قصير لتفعيل الانتقال
-                setTimeout(() => {
-                    modal.classList.add('active');
-                }, 10);
-            }
-        };
-
-        // إضافة مستمع للنقر خارج النافذة المنبثقة
-        document.addEventListener('click', function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    closeModal(modal.id);
-                }
-            });
-        });
-
         // Helper Functions
         function getSectionTitle(section) {
             const titles = {
@@ -3039,5 +3252,8 @@
             }
         }
     </script>
+
+    <!-- في نهاية الكود JavaScript -->
+    
 </body>
 </html>
