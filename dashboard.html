@@ -1452,12 +1452,16 @@
             const notificationRef = ref(db, `users/${user.uid}/notifications/${notificationId}`);
             await update(notificationRef, { read: true });
 
-            // توجيه المستخدم إلى المكان المناسب
-            if (type === 'new_comment') {
-                window.location.href = `gallery.html?section=${section}&documentId=${docId}&showComments=true`;
-            } else {
-                window.location.href = `gallery.html?section=${section}&documentId=${docId}`;
-            }
+            // تخزين معلومات الإشعار في localStorage للاستخدام في صفحة المعرض
+            localStorage.setItem('activeNotification', JSON.stringify({
+                type,
+                docId,
+                notificationId,
+                timestamp: Date.now()
+            }));
+
+            // توجيه المستخدم إلى المعرض مع المعلمات المناسبة
+            window.location.href = `gallery.html?section=${section}&docId=${docId}&highlight=true&type=${type}`;
         }
 
         // إضافة دالة getStorageWithExpiry
