@@ -20,8 +20,9 @@
         :root {
             --primary: #3b82f6;
             --primary-dark: #2563eb;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             --secondary: #f43f5e;
-            --dark: #0f172a;
+            --dark: #1e293b;
             --light: #f8fafc;
             --gray: #64748b;
             --white: #ffffff;
@@ -34,13 +35,14 @@
             justify-content: center;
             align-items: center;
             padding: 2rem 1rem;
+            font-family: 'Cairo', sans-serif;
         }
 
         .register-container {
             background: var(--white);
             padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 500px;
             position: relative;
@@ -53,36 +55,49 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            height: 6px;
+            background: var(--primary-gradient);
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             color: var(--dark);
             font-size: 2rem;
             font-weight: 700;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
             position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 0.7rem;
-            color: var(--gray);
-            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: var(--dark);
+            font-weight: 600;
             font-size: 0.95rem;
         }
 
         input, select {
             width: 100%;
-            padding: 1rem;
+            padding: 1.2rem;
             border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
             background: var(--light);
@@ -92,7 +107,7 @@
         input:focus, select:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         select {
@@ -114,27 +129,27 @@
 
         button[type="submit"] {
             width: 100%;
-            height: 50px;
-            padding: 0;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            height: 56px;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 1.1rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             position: relative;
+            overflow: hidden;
         }
 
-        button[type="submit"]:disabled {
-            cursor: not-allowed;
-            opacity: 0.8;
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
 
         button[type="submit"].loading {
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark), var(--primary));
+            background: var(--primary-gradient);
             background-size: 200% 100%;
             animation: gradient-shift 2s ease infinite;
             pointer-events: none;
@@ -164,16 +179,23 @@
             }
         }
 
+        @keyframes gradient-shift {
+            0% { background-position: 100% 50%; }
+            50% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
         .login-link {
             text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f1f5f9;
         }
 
         .login-link p {
             color: var(--gray);
             margin-bottom: 1rem;
+            font-size: 0.95rem;
         }
 
         .login-link a {
@@ -181,6 +203,9 @@
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .login-link a:hover {
@@ -419,6 +444,31 @@
             return /^[\u0600-\u06FF\s]{5,}$/.test(name) && name.trim().split(/\s+/).length >= 2;
         }
 
+        // إضافة هذه الدالة في بداية الـ script
+        function getStorageWithExpiry(key) {
+            const itemStr = localStorage.getItem(key);
+            if (!itemStr) return null;
+
+            const item = JSON.parse(itemStr);
+            const now = new Date();
+
+            if (now.getTime() > item.expiry) {
+                localStorage.removeItem(key);
+                return null;
+            }
+            return item.value;
+        }
+
+        // إضافة هذه الدالة في بداية الـ script
+        function setStorageWithExpiry(key, value, months = 6) {
+            const now = new Date();
+            const item = {
+                value: value,
+                expiry: now.setMonth(now.getMonth() + months),
+            };
+            localStorage.setItem(key, JSON.stringify(item));
+        }
+
         // معالجة إنشاء الحساب
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -474,8 +524,8 @@
 
                 // تخزين بيانات المستخدم محلياً
                 const token = await user.getIdToken();
-                localStorage.setItem('authToken', token);
-                localStorage.setItem('userName', name);
+                setStorageWithExpiry('authToken', token);
+                setStorageWithExpiry('userName', name);
 
                 // التأكد من حفظ البيانات قبل التوجيه
                 await new Promise(resolve => {
