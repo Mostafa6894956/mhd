@@ -1895,6 +1895,18 @@
                             </li>
                         </ul>
                     </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">الزائرة الصحية</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=health-visitor&subsection=السجل" class="nav-link">السجل</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=health-visitor&subsection=الندوات" class="nav-link">الندوات</a>
+                            </li>
+                        </ul>
+                    </div>
                 </nav>
             </aside>
 
@@ -2420,6 +2432,10 @@
                         'لجنة المقترحات والشكاوي',
                         'لجنة الإثابة والتقويم',
                         'لجنة الأمن والسلامة'
+                    ],
+                    'health-visitor': [
+                        'السجل',
+                        'الندوات'
                     ]
                 };
 
@@ -2582,7 +2598,8 @@
                 'domains': 'المجالات',
                 'notes': 'الملاحظات',
                 'training': 'وحدة التدريب',
-                'committees': 'اللجان'
+                'committees': 'اللجان',
+                'health-visitor': 'الزائرة الصحية'
             };
                 return this.currentSubsection || titles[this.currentSection] || 'معرض الصور';
             }
