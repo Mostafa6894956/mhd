@@ -1876,6 +1876,25 @@
                     <div class="nav-section">
                         <a href="?section=notes" class="nav-link">الملاحظات</a>
                     </div>
+
+                    <div class="nav-section">
+                        <a href="?section=training" class="nav-link">وحدة التدريب</a>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">اللجان</div>
+                        <ul class="nav-items">
+                            <li class="nav-item">
+                                <a href="?section=committees&subsection=لجنة المقترحات والتعاون" class="nav-link">لجنة المقترحات والتعاون</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=committees&subsection=لجنة الإثابة والتقويم" class="nav-link">لجنة الإثابة والتقويم</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="?section=committees&subsection=لجنة الأمن والأمان" class="nav-link">لجنة الأمن والأمان</a>
+                            </li>
+                        </ul>
+                    </div>
                 </nav>
             </aside>
 
@@ -2395,6 +2414,12 @@
                         'معلم',
                         'منهج',
                         'مناخ تربوي'
+                    ],
+                    'training': [],
+                    'committees': [
+                        'لجنة المقترحات والتعاون',
+                        'لجنة الإثابة والتقويم',
+                        'لجنة الأمن والأمان'
                     ]
                 };
 
@@ -2555,7 +2580,9 @@
                 'results': 'النتيجة',
                 'attendance': 'الغياب',
                 'domains': 'المجالات',
-                'notes': 'الملاحظات'
+                'notes': 'الملاحظات',
+                'training': 'وحدة التدريب',
+                'committees': 'اللجان'
             };
                 return this.currentSubsection || titles[this.currentSection] || 'معرض الصور';
             }
