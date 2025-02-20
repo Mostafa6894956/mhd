@@ -989,7 +989,8 @@
                         userInput.value = finalTranscript;
                         sendMessage();
                         stopRecording();
-                        recordingWindow.classList.remove('active'); // إغلاق النافذة بعد الإرسال
+                        recordingWindow.classList.remove('active');
+                        finalTranscript = ''; // إعادة تعيين النص النهائي
                     }, 1000);
                 }
             };
@@ -1031,6 +1032,7 @@
                 isRecording = false;
                 recognition.stop();
                 micBtn.classList.remove('active');
+                finalTranscript = ''; // إعادة تعيين النص النهائي
             }
         }
 
