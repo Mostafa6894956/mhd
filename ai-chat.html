@@ -563,6 +563,91 @@
                 transform: translateY(0);
             }
         }
+
+        /* تحسينات نافذة الترحيب */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 120px); /* حساب الارتفاع مع مراعاة الهيدر ومنطقة الإدخال */
+            padding: 2rem;
+            text-align: center;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .welcome-text {
+            font-size: 1.3rem;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .welcome-tips {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .welcome-tip {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .welcome-tip:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-tip i {
+            color: #3b82f6;
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-container {
+                height: calc(100vh - 100px);
+                padding: 1rem;
+            }
+
+            .welcome-icon {
+                font-size: 3rem;
+            }
+
+            .welcome-text {
+                font-size: 1.1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .welcome-tips {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .welcome-tip {
+                padding: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -581,8 +666,28 @@
     </header>
 
     <div class="chat-container" id="chatContainer">
-        <div class="message assistant-message">
-مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟
+        <div class="welcome-container" id="welcomeContainer">
+            <div class="welcome-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="welcome-text">
+                مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟<br>
+                يمكنك البدء بالضغط على الميكروفون أو كتابة رسالتك.
+            </div>
+            <div class="welcome-tips">
+                <div class="welcome-tip">
+                    <i class="fas fa-microphone"></i>
+                    اضغط على الميكروفون للتحدث
+                </div>
+                <div class="welcome-tip">
+                    <i class="fas fa-keyboard"></i>
+                    اكتب رسالتك هنا
+                </div>
+                <div class="welcome-tip">
+                    <i class="fas fa-question-circle"></i>
+                    اسألني عن أي شيء
+                </div>
+            </div>
         </div>
     </div>
 
@@ -864,6 +969,12 @@
         }
 
         function appendMessage(message, sender) {
+            // إخفاء نافذة الترحيب عند إضافة رسالة
+            const welcomeContainer = document.getElementById('welcomeContainer');
+            if (welcomeContainer) {
+                welcomeContainer.style.display = 'none';
+            }
+
             const messageElement = document.createElement('div');
             messageElement.className = `message ${sender}-message`;
             
@@ -1056,43 +1167,65 @@
         // تحميل المحادثات عند بدء التشغيل
         window.onload = function() {
             loadChatHistory();
-            updateClearButton();
-        }
-
-        // دالة عرض نافذة التأكيد
-        function showConfirm() {
-            const confirmOverlay = document.getElementById('confirmOverlay');
-            confirmOverlay.style.display = 'flex';
-        }
-
-        // دالة إغلاق نافذة التأكيد
-        function closeConfirm() {
-            const confirmOverlay = document.getElementById('confirmOverlay');
-            confirmOverlay.style.display = 'none';
-        }
-
-        // دالة حذف المحادثة
-        function deleteChat() {
-            localStorage.removeItem(CHAT_HISTORY_KEY);
-            chatContainer.innerHTML = `
-                <div class="message assistant-message">
-مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟
-                </div>
-            `;
-            closeConfirm();
+            const messages = document.querySelectorAll('.message');
+            const welcomeContainer = document.getElementById('welcomeContainer');
+            if (messages.length > 0 && welcomeContainer) {
+                welcomeContainer.style.display = 'none';
+            }
             updateClearButton();
         }
 
         // تعديل دالة clearChat
         function clearChat() {
-            showConfirm();
+            const confirmOverlay = document.getElementById('confirmOverlay');
+            confirmOverlay.style.display = 'flex';
         }
 
-        // دالة تحديث حالة زر الحذف
+        // تعديل دالة deleteChat
+        function deleteChat() {
+            const confirmOverlay = document.getElementById('confirmOverlay');
+            confirmOverlay.style.display = 'none';
+            
+            localStorage.removeItem(CHAT_HISTORY_KEY);
+            chatContainer.innerHTML = `
+                <div class="welcome-container" id="welcomeContainer">
+                    <div class="welcome-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="welcome-text">
+                        مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟<br>
+                        يمكنك البدء بالضغط على الميكروفون أو كتابة رسالتك.
+                    </div>
+                    <div class="welcome-tips">
+                        <div class="welcome-tip">
+                            <i class="fas fa-microphone"></i>
+                            اضغط على الميكروفون للتحدث
+                        </div>
+                        <div class="welcome-tip">
+                            <i class="fas fa-keyboard"></i>
+                            اكتب رسالتك هنا
+                        </div>
+                        <div class="welcome-tip">
+                            <i class="fas fa-question-circle"></i>
+                            اسألني عن أي شيء
+                        </div>
+                    </div>
+                </div>
+            `;
+            updateClearButton();
+        }
+
+        // تعديل دالة closeConfirm
+        function closeConfirm() {
+            const confirmOverlay = document.getElementById('confirmOverlay');
+            confirmOverlay.style.display = 'none';
+        }
+
+        // تعديل دالة updateClearButton
         function updateClearButton() {
             const clearBtn = document.querySelector('.clear-btn');
             const messages = document.querySelectorAll('.message');
-            if (messages.length > 1) { // أكثر من رسالة واحدة (باستثناء الرسالة الترحيبية)
+            if (messages.length > 0) {
                 clearBtn.classList.add('visible');
             } else {
                 clearBtn.classList.remove('visible');
