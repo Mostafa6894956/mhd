@@ -358,12 +358,13 @@
             background: #10b981;
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.8rem 1.5rem;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
@@ -607,10 +608,16 @@
             <div class="wave"></div>
         </div>
         <div class="recording-text" id="recordingText">التحدث الآن...</div>
-        <button class="cancel-btn" id="cancelRecordingBtn">
-            <i class="fas fa-times"></i>
-            إلغاء التسجيل
-        </button>
+        <div class="recording-actions">
+            <button class="cancel-btn" id="cancelRecordingBtn">
+                <i class="fas fa-times"></i>
+                إلغاء التسجيل
+            </button>
+            <button class="send-audio-btn" id="sendAudioBtn" disabled>
+                <i class="fas fa-paper-plane"></i>
+                إرسال
+            </button>
+        </div>
     </div>
 
     <!-- نافذة تأكيد الحذف -->
@@ -633,9 +640,6 @@
         let isProcessing = false;
         let isTyping = false;
         let abortController = new AbortController();
-
-        // إضافة متغير لتتبع حالة الإرسال
-        let isAutoSending = false;
 
         // تحميل محادثات سابقة عند بدء التشغيل
         function loadChatHistory() {
@@ -986,18 +990,9 @@
                 }
                 recordingText.textContent = finalTranscript + interimTranscript;
                 
-                // إرسال تلقائي عند انتهاء الكلام
-                if (finalTranscript.trim() && !interimTranscript && !isAutoSending) {
-                    isAutoSending = true; // منع الإرسال المتكرر
-                    setTimeout(() => {
-                        userInput.value = finalTranscript;
-                        sendMessage();
-                        stopRecording();
-                        recordingWindow.classList.remove('active');
-                        finalTranscript = ''; // إعادة تعيين النص النهائي
-                        isAutoSending = false; // إعادة تعيين حالة الإرسال
-                    }, 2000); // زيادة التأخير إلى ثانيتين
-                }
+                // تفعيل زر الإرسال عند وجود نص
+                const sendAudioBtn = document.getElementById('sendAudioBtn');
+                sendAudioBtn.disabled = !(finalTranscript.trim() || interimTranscript.trim());
             };
 
             recognition.onerror = (event) => {
@@ -1037,8 +1032,8 @@
                 isRecording = false;
                 recognition.stop();
                 micBtn.classList.remove('active');
-                finalTranscript = ''; // إعادة تعيين النص النهائي
-                isAutoSending = false; // إعادة تعيين حالة الإرسال
+                finalTranscript = '';
+                sendAudioBtn.disabled = true;
             }
         }
 
@@ -1104,6 +1099,18 @@
                 clearBtn.classList.remove('visible');
             }
         }
+
+        // إضافة حدث لزر الإرسال
+        const sendAudioBtn = document.getElementById('sendAudioBtn');
+        sendAudioBtn.addEventListener('click', () => {
+            if (finalTranscript.trim()) {
+                userInput.value = finalTranscript;
+                sendMessage();
+                stopRecording();
+                recordingWindow.classList.remove('active');
+                finalTranscript = '';
+            }
+        });
     </script>
 </body>
 </html>
