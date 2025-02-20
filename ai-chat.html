@@ -866,7 +866,19 @@
         function appendMessage(message, sender) {
             const messageElement = document.createElement('div');
             messageElement.className = `message ${sender}-message`;
-            messageElement.innerHTML = formatMessage(message);
+            
+            // إذا كانت الرسالة تحتوي على ساعات تسجيل
+            if (message.includes('ساعات التسجيل:')) {
+                const parts = message.split('ساعات التسجيل:');
+                messageElement.innerHTML = `
+                    <div>${parts[0]}</div>
+                    <div style="margin-top: 0.5rem; font-weight: bold;">ساعات التسجيل:</div>
+                    <div style="white-space: pre-wrap;">${parts[1]}</div>
+                `;
+            } else {
+                messageElement.innerHTML = formatMessage(message);
+            }
+            
             chatContainer.appendChild(messageElement);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateClearButton();
@@ -876,10 +888,10 @@
             // تحويل **text** إلى <strong>text</strong>
             message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
-            // تحويل *text* إلى <em>text</em> (مع التأكد من وجود نص بين العلامات)
+            // تحويل *text* إلى <em>text</em>
             message = message.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
             
-            // تحويل - text إلى قائمة نقطية (فقط إذا كانت الرسالة تحتوي على نقاط)
+            // تحويل - text إلى قائمة نقطية
             if (message.includes('- ')) {
                 message = message.replace(/^- (.*$)/gm, '<li>$1</li>');
                 const listItems = message.match(/<li>.*<\/li>/g);
