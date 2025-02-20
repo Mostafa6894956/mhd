@@ -634,6 +634,9 @@
         let isTyping = false;
         let abortController = new AbortController();
 
+        // إضافة متغير لتتبع حالة الإرسال
+        let isAutoSending = false;
+
         // تحميل محادثات سابقة عند بدء التشغيل
         function loadChatHistory() {
             const history = localStorage.getItem(CHAT_HISTORY_KEY);
@@ -984,14 +987,16 @@
                 recordingText.textContent = finalTranscript + interimTranscript;
                 
                 // إرسال تلقائي عند انتهاء الكلام
-                if (finalTranscript.trim() && !interimTranscript) {
+                if (finalTranscript.trim() && !interimTranscript && !isAutoSending) {
+                    isAutoSending = true; // منع الإرسال المتكرر
                     setTimeout(() => {
                         userInput.value = finalTranscript;
                         sendMessage();
                         stopRecording();
                         recordingWindow.classList.remove('active');
                         finalTranscript = ''; // إعادة تعيين النص النهائي
-                    }, 1000);
+                        isAutoSending = false; // إعادة تعيين حالة الإرسال
+                    }, 2000); // زيادة التأخير إلى ثانيتين
                 }
             };
 
@@ -1033,6 +1038,7 @@
                 recognition.stop();
                 micBtn.classList.remove('active');
                 finalTranscript = ''; // إعادة تعيين النص النهائي
+                isAutoSending = false; // إعادة تعيين حالة الإرسال
             }
         }
 
