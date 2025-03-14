@@ -104,6 +104,16 @@
 with zipfile.ZipFile('', 'r') as myzip:
     myzip.extractall()</pre>
     </div>
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df = df.rename(columns={'ApplicationP': 'ApplicationProcedure'})</pre>
+    </div>
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.['StartDate'] = df.['StartDate'].str.replace('Immediately', 'ASAP')</pre>
+    </div>
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df['Animal'] = df['Animal'].str[2:]</pre>
+        <div class ="describe"> حذف اول حرفين </div>
+    </div>
     <script>
         function copyCode(element) {
             const text = element.querySelector('pre').innerText;
