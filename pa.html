@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أشهر أكواد Pandas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .code-block {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .code-block:hover {
+            background: #f1f1f1;
+        }
+        pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            color: #e74c3c;
+            user-select: text;
+        }
+        .description {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <!-- عرض أكواد Pandas مع شرح -->
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>import pandas as pd</pre>
+        <div class="description">استيراد مكتبة Pandas واستخدام الاختصار "pd".</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df = pd.read_csv('file.csv')</pre>
+        <div class="description">قراءة ملف CSV وحفظه في DataFrame.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.head()</pre>
+        <div class="description">عرض أول 5 صفوف من DataFrame.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.describe()</pre>
+        <div class="description">عرض إحصائيات وصفية للبيانات (مثل المتوسط، الانحراف المعياري، إلخ).</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df['column'].value_counts()</pre>
+        <div class="description">عد القيم الفريدة في عمود معين.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.groupby('column').mean()</pre>
+        <div class="description">تجميع البيانات حسب عمود وحساب المتوسط لكل مجموعة.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.dropna()</pre>
+        <div class="description">حذف الصفوف التي تحتوي على قيم مفقودة (NaN).</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.fillna(value)</pre>
+        <div class="description">ملء القيم المفقودة بقيمة محددة.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.to_csv('output.csv', index=False)</pre>
+        <div class="description">حفظ DataFrame في ملف CSV بدون حفظ الفهرس.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.sort_values('column')</pre>
+        <div class="description">ترتيب البيانات حسب عمود معين.</div>
+    </div>
+
+    <div class="code-block" onclick="copyCode(this)">
+        <pre>df.merge(df2, on='column')</pre>
+        <div class="description">دمج DataFrame مع آخر بناءً على عمود مشترك.</div>
+    </div>
+
+    <script>
+        function copyCode(element) {
+            const text = element.querySelector('pre').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ الكود: ' + text);
+            });
+        }
+    </script>
+</body>
+</html> 
