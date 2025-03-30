@@ -1,126 +1,109 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mostafa hazem</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-        .code-block {
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .code-block:hover {
-            background: #f1f1f1;
-        }
-        pre {
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace;
-            color: #e74c3c;
-            user-select: text;
-        }
-        .description {
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.9em;
-            user-select: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الهيكل التنظيمي للحزب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .line-vertical {
+      border-right: 2px solid #ccc;
+      height: 30px;
+      margin: auto;
+    }
+  </style>
 </head>
-<body>
-    
+<body class="bg-gray-50 text-gray-900 p-6 font-sans">
 
-    <!-- عرض أكواد Pandas مع شرح -->
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>import pandas as pd</pre>
-        <div class="description">استيراد مكتبة Pandas واستخدام الاختصار "pd".</div>
-    </div>
+  <h1 class="text-4xl font-bold text-center mb-10 text-red-700">الهيكل التنظيمي للحزب السياسي</h1>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df = pd.read_csv('file.csv')</pre>
-        <div class="description">قراءة ملف CSV وحفظه في DataFrame.</div>
+  <!-- رئيس الحزب -->
+  <div class="flex flex-col items-center">
+    <div class="bg-red-600 text-white px-8 py-3 rounded-full shadow-xl font-bold text-lg animate-bounce">
+      🔺 رئيس الحزب
     </div>
+    <div class="line-vertical"></div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.head()</pre>
-        <div class="description">عرض أول 5 صفوف من DataFrame.</div>
+  <!-- نواب الرئيس والأمانة العامة -->
+  <div class="flex justify-center items-start flex-wrap gap-6 mt-6">
+    <div class="bg-orange-500 text-white px-5 py-3 rounded shadow-lg font-medium relative w-64 text-center hover:scale-105 transition-transform">
+      👥 نواب رئيس الحزب
+      <button onclick="showDetails('نواب الرئيس', 'يساعدون رئيس الحزب في المهام اليومية، مثل متابعة الأمانات والإشراف على الملفات الخاصة بكل نائب، كالشباب أو المرأة.')" class="absolute left-2 top-2 text-white text-xl">ℹ️</button>
     </div>
+    <div class="bg-yellow-500 text-white px-5 py-3 rounded shadow-lg font-medium relative w-64 text-center hover:scale-105 transition-transform">
+      🏛️ الأمانة العامة
+      <button onclick="showDetails('الأمانة العامة', 'تشرف على التنسيق العام بين كافة أجهزة الحزب الداخلية وتتابع تنفيذ الخطط المركزية. يرأسها أمين عام يساعده عدد من الأمناء.')" class="absolute left-2 top-2 text-white text-xl">ℹ️</button>
+    </div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.describe()</pre>
-        <div class="description">عرض إحصائيات وصفية للبيانات (مثل المتوسط، الانحراف المعياري، إلخ).</div>
-    </div>
+  <!-- الأمانات النوعية -->
+  <h2 class="text-2xl font-semibold text-center text-blue-700 mt-10 mb-4">الأمانات النوعية</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📂 أمانة التنظيم<button onclick="showDetails('أمانة التنظيم','تنظم الهياكل الداخلية للحزب، وتتابع تكوين أمانات المحافظات، وتعمل على ضبط الانضباط الهيكلي.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🧠 أمانة التثقيف السياسي<button onclick="showDetails('أمانة التثقيف السياسي','تنظم الندوات، وتصدر المطبوعات، وتؤهل الكوادر سياسيًا.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🧒 أمانة الشباب<button onclick="showDetails('أمانة الشباب','تركز على جذب الشباب، تنظيم معسكرات وورش عمل، إعداد قيادات شابة.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">👩‍🦰 أمانة المرأة<button onclick="showDetails('أمانة المرأة','تهدف لتمكين المرأة سياسيًا، تنظيم فعاليات توعوية، وتمثيل النساء في صنع القرار.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📰 أمانة الإعلام<button onclick="showDetails('أمانة الإعلام','تنسيق الحملات الإعلامية، إصدار البيانات الرسمية، متابعة وسائل الإعلام.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📝 أمانة العضوية<button onclick="showDetails('أمانة العضوية','تنظيم قاعدة بيانات العضوية، إصدار البطاقات، مراجعة الطلبات.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🤝 العلاقات العامة<button onclick="showDetails('العلاقات العامة','تعزيز علاقات الحزب مع المجتمع، عقد لقاءات مع منظمات المجتمع المدني.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">⚖️ الشؤون القانونية<button onclick="showDetails('الشؤون القانونية','تمثيل الحزب قانونيًا، تقديم الاستشارات، متابعة النزاعات.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">💰 الشؤون المالية<button onclick="showDetails('الشؤون المالية','إعداد الميزانيات، متابعة الإيرادات والمصروفات، تقديم تقارير دورية.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📊 أمانة التخطيط والمتابعة<button onclick="showDetails('أمانة التخطيط والمتابعة','وضع الخطط، متابعة الأداء، التقييم المرحلي والسنوي.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df['column'].value_counts()</pre>
-        <div class="description">عد القيم الفريدة في عمود معين.</div>
+  <!-- اللجان المركزية والهيئات العليا -->
+  <h2 class="text-2xl font-semibold text-center text-green-700 mt-10 mb-4">اللجان المركزية والهيئات العليا</h2>
+  <div class="flex flex-col md:flex-row justify-center gap-6 text-center">
+    <div class="bg-green-200 px-6 py-3 rounded shadow hover:bg-green-300 transition relative w-full md:w-80">
+      🏛️ لجان الحزب (السياسات، التشريع، الشباب، الإعلام...)
+      <button onclick="showDetails('لجان الحزب','تتخصص في ملفات محددة وتقدم توصيات لصناع القرار في الحزب.')" class="absolute left-2 top-2 text-green-700 text-xl">ℹ️</button>
     </div>
+    <div class="bg-green-300 px-6 py-3 rounded shadow hover:bg-green-400 transition relative w-full md:w-80">
+      🎯 الهيئة العليا (المكتب السياسي/المجلس التنفيذي)
+      <button onclick="showDetails('الهيئة العليا','الجهة المخولة باتخاذ قرارات عليا، مثل اختيار القيادات العليا واعتماد السياسات العامة.')" class="absolute left-2 top-2 text-green-800 text-xl">ℹ️</button>
+    </div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.groupby('column').mean()</pre>
-        <div class="description">تجميع البيانات حسب عمود وحساب المتوسط لكل مجموعة.</div>
+  <!-- الهياكل الجغرافية -->
+  <h2 class="text-2xl font-semibold text-center text-purple-700 mt-10 mb-4">الهياكل الجغرافية للحزب</h2>
+  <div class="flex flex-col md:flex-row justify-center gap-6 text-center">
+    <div class="bg-purple-300 px-6 py-3 rounded shadow hover:bg-purple-400 transition relative w-full md:w-80">
+      🏘️ أمانات المحافظات
+      <button onclick="showDetails('أمانات المحافظات','تمثل الحزب على مستوى المحافظات، وتتابع تنفيذ التعليمات الصادرة من المركز.')" class="absolute left-2 top-2 text-purple-800 text-xl">ℹ️</button>
     </div>
+    <div class="bg-purple-200 px-6 py-3 rounded shadow hover:bg-purple-300 transition relative w-full md:w-80">
+      🏙️ أمانات المراكز/المدن
+      <button onclick="showDetails('أمانات المراكز/المدن','تنفذ سياسات الحزب على مستوى المدن والمراكز وتتابع الأداء المحلي.')" class="absolute left-2 top-2 text-purple-700 text-xl">ℹ️</button>
+    </div>
+    <div class="bg-purple-100 px-6 py-3 rounded shadow hover:bg-purple-200 transition relative w-full md:w-80">
+      🏡 أمانات القرى/الأحياء
+      <button onclick="showDetails('أمانات القرى/الأحياء','تمثل الحزب على المستوى القاعدي، وتساهم في التفاعل المباشر مع المواطنين.')" class="absolute left-2 top-2 text-purple-600 text-xl">ℹ️</button>
+    </div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.dropna()</pre>
-        <div class="description">حذف الصفوف التي تحتوي على قيم مفقودة (NaN).</div>
+  <!-- نافذة التفاصيل -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center relative">
+      <h2 id="modalTitle" class="text-xl font-bold mb-2"></h2>
+      <p id="modalContent" class="mb-4"></p>
+      <button onclick="closeModal()" class="bg-red-600 text-white px-4 py-2 rounded">إغلاق</button>
     </div>
+  </div>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.fillna(value)</pre>
-        <div class="description">ملء القيم المفقودة بقيمة محددة.</div>
-    </div>
+  <!-- سكريبت التفاصيل -->
+  <script>
+    function showDetails(title, content) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalContent").textContent = content;
+      document.getElementById("modal").classList.remove("hidden");
+      document.getElementById("modal").classList.add("flex");
+    }
+    function closeModal() {
+      document.getElementById("modal").classList.remove("flex");
+      document.getElementById("modal").classList.add("hidden");
+    }
+  </script>
 
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.to_csv('output.csv', index=False)</pre>
-        <div class="description">حفظ DataFrame في ملف CSV بدون حفظ الفهرس.</div>
-    </div>
-
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.sort_values('column')</pre>
-        <div class="description">ترتيب البيانات حسب عمود معين.</div>
-    </div>
-
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.merge(df2, on='column')</pre>
-        <div class="description">دمج DataFrame مع آخر بناءً على عمود مشترك.</div>
-    </div>
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>import zipfile
-with zipfile.ZipFile('', 'r') as myzip:
-    myzip.extractall()</pre>
-    </div>
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df = df.rename(columns={'ApplicationP': 'ApplicationProcedure'})</pre>
-    </div>
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df.['StartDate'] = df.['StartDate'].str.replace('Immediately', 'ASAP')</pre>
-    </div>
-    <div class="code-block" onclick="copyCode(this)">
-        <pre>df['Animal'] = df['Animal'].str[2:]</pre>
-        <div class ="describe"> حذف اول حرفين </div>
-    </div>
-    <script>
-        function copyCode(element) {
-            const text = element.querySelector('pre').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('تم نسخ الكود: ' + text);
-            });
-        }
-    </script>
 </body>
-</html> 
+</html>
