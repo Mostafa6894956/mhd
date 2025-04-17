@@ -2002,6 +2002,70 @@
             color: var(--gray);
             margin-top: 0.2rem;
         }
+
+        /* أنماط أزرار القسم الفرعي الثاني */
+        .subsections-nav.secondary {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: var(--light);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 90;
+            display: none;
+        }
+
+        .subsections-nav.secondary.active {
+            display: block;
+        }
+
+        .subsubsection-btn {
+            display: none; /* إخفاء الأزرار بشكل افتراضي */
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .subsubsection-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* أنماط أزرار القسم الفرعي الثاني */
+        .subsections-filter.secondary {
+            display: none; /* إخفاء الأزرار بشكل افتراضي */
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .subsections-filter.secondary.active {
+            display: block;
+        }
+
+        .subsubsection-btn {
+            display: inline-block;
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--gray);
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subsubsection-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .subsubsection-btn:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
     </style>
 </head>
 <body>
@@ -2645,9 +2709,13 @@
                 
                 // جمع الأقسام الفرعية الفريدة
                 const subsections = new Set();
+                const subsubsections = new Set();
                 Object.values(docs).forEach(doc => {
                     if (doc.subsection) {
                         subsections.add(doc.subsection);
+                    }
+                    if (doc.subSubsection) {
+                        subsubsections.add(doc.subSubsection);
                     }
                 });
                 
@@ -2671,9 +2739,62 @@
                                 `).join('')}
                             </div>
                         ` : ''}
+                        
+                        ${subsections.has('متابعات الوكيل الشرعي والعربي') ? `
+                            <div class="subsections-filter secondary" id="subsubsections-${section}-شرعي" style="display: none;">
+                                <button class="subsection-btn subsubsection-btn active" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', '')">
+                                    الكل
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعات لجنة الإثابة والتقويم')">
+                                    متابعات لجنة الإثابة والتقويم
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعات المكتبة')">
+                                    متابعات المكتبة
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعات مشرف القرآن الكريم')">
+                                    متابعات مشرف القرآن الكريم
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعات مشرف اللغة العربية')">
+                                    متابعات مشرف اللغة العربية
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعات شئون العاملين')">
+                                    متابعات شئون العاملين
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الشرعي والعربي', 'متابعة الأخصائي الاجتماعي')">
+                                    متابعة الأخصائي الاجتماعي
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        ${subsections.has('متابعات الوكيل الثقافي') ? `
+                            <div class="subsections-filter secondary" id="subsubsections-${section}-ثقافي" style="display: none;">
+                                <button class="subsection-btn subsubsection-btn active" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', '')">
+                                    الكل
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'لجنة الأمن والسلامة')">
+                                    لجنة الأمن والسلامة
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'لجنة المقترحات والشكاوي')">
+                                    لجنة المقترحات والشكاوي
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'مشرفي المواد الثقافية')">
+                                    مشرفي المواد الثقافية
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'معمل الحاسب')">
+                                    معمل الحاسب
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'معمل العلوم')">
+                                    معمل العلوم
+                                </button>
+                                <button class="subsection-btn subsubsection-btn" onclick="filterSubSubsections('${section}', 'متابعات الوكيل الثقافي', 'شئون الطلبة')">
+                                    شئون الطلبة
+                                </button>
+                            </div>
+                        ` : ''}
+                        
                         <div class="documents-grid">
                             ${Object.entries(docs).map(([docId, doc]) => `
-                                <div class="document-card" data-id="${docId}" data-subsection="${doc.subsection || ''}">
+                                <div class="document-card" data-id="${docId}" data-subsection="${doc.subsection || ''}" data-subsubsection="${doc.subSubsection || ''}">
                                     <div class="document-thumbnail">
                                         <img src="${doc[0]}" alt="${doc.title || 'مستند'}">
                                     </div>
@@ -2688,6 +2809,12 @@
                                                 <div class="info-item">
                                                     <span class="info-label">القسم الفرعي</span>
                                                     <span class="info-value">${doc.subsection}</span>
+                                                </div>
+                                            ` : ''}
+                                            ${doc.subSubsection ? `
+                                                <div class="info-item">
+                                                    <span class="info-label">القسم الفرعي الثاني</span>
+                                                    <span class="info-value">${doc.subSubsection}</span>
                                                 </div>
                                             ` : ''}
                                             <div class="info-item">
@@ -2759,8 +2886,9 @@
             const tabContent = document.getElementById(`tab-${section}`);
             const cards = tabContent.querySelectorAll('.document-card');
             const buttons = tabContent.querySelectorAll('.subsection-btn');
+            const secondaryButtons = tabContent.querySelectorAll('.subsections-filter.secondary');
             
-            // تحديث حالة الأزرار
+            // تحديث حالة أزرار القسم الفرعي الأول
             buttons.forEach(btn => {
                 if (
                     (subsection === '' && btn.textContent.trim() === 'الكل') ||
@@ -2772,7 +2900,20 @@
                 }
             });
             
-            // تصفية البطاقات
+            // إخفاء جميع أزرار القسم الفرعي الثاني أولاً
+            secondaryButtons.forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            // إظهار أزرار القسم الفرعي الثاني المناسبة
+            if (subsection === 'متابعات الوكيل الشرعي والعربي' || subsection === 'متابعات الوكيل الثقافي') {
+                const subsubsectionsFilter = tabContent.querySelector(`#subsubsections-${section}-${subsection === 'متابعات الوكيل الشرعي والعربي' ? 'شرعي' : 'ثقافي'}`);
+                if (subsubsectionsFilter) {
+                    subsubsectionsFilter.style.display = 'block';
+                }
+            }
+            
+            // تصفية البطاقات بناءً على القسم الفرعي الأول
             cards.forEach(card => {
                 if (!subsection || card.dataset.subsection === subsection) {
                     card.style.display = 'flex';
@@ -2781,6 +2922,61 @@
                 }
             });
         };
+
+        // إضافة دالة تصفية القسم الفرعي الثاني
+        window.filterSubSubsections = function(section, subsection, subsubsection) {
+            const tabContent = document.getElementById(`tab-${section}`);
+            const cards = tabContent.querySelectorAll('.document-card');
+            const buttons = tabContent.querySelectorAll('.subsubsection-btn');
+            
+            // تحديث حالة أزرار القسم الفرعي الثاني
+            buttons.forEach(btn => {
+                if (
+                    (subsubsection === '' && btn.textContent.trim() === 'الكل') ||
+                    btn.textContent.trim() === subsubsection
+                ) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // تصفية البطاقات بناءً على القسم الفرعي الثاني
+            cards.forEach(card => {
+                if (!subsubsection || card.dataset.subsubsection === subsubsection) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        };
+
+        // تحديث دالة إنشاء بطاقات المستندات
+        function createDocumentCard(doc) {
+            return `
+                <div class="document-card" data-id="${doc.id}" data-subsection="${doc.subsection || ''}" data-subsubsection="${doc.subSubsection || ''}">
+                    <div class="document-images">
+                        <img src="${doc.images[0]}" alt="${doc.title}">
+                        <span class="image-count">${Object.keys(doc.images).length} صور</span>
+                    </div>
+                    <div class="document-info">
+                        <h3 class="document-title">${doc.title}</h3>
+                        ${doc.subsection ? `<p class="document-subsection">${doc.subsection}</p>` : ''}
+                        ${doc.subSubsection ? `<p class="document-subsubsection">${doc.subSubsection}</p>` : ''}
+                        <div class="document-actions">
+                            <button class="action-btn view-btn" onclick="window.viewImages('${doc.uid}', '${doc.section}', '${doc.id}')">
+                                <i class="fas fa-images"></i>
+                                عرض الصور
+                            </button>
+                            <button class="action-btn comment-btn" onclick="showComments('${doc.uid}', '${doc.section}', '${doc.id}')">
+                                <i class="fas fa-comments"></i>
+                                التعليقات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
         // دوال التحكم في الصورة
         window.viewImages = async function(uid, section, docId) {
