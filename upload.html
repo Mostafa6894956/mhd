@@ -477,7 +477,9 @@
                 'سجل الخطة',
                 'مجلس الآباء',
                 'سجل الأخصائي العام',
-                'الحالات الفردية'
+                'الحالات الفردية',
+                'الرحلات'
+
             ],
             'librarian': [
                 'الندوات',
@@ -536,10 +538,22 @@
                 subsectionContainer.style.display = 'block';
                 subsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي</option>';
                 subsections[section].forEach(sub => {
-                    const option = document.createElement('option');
-                    option.value = sub;
-                    option.textContent = sub;
-                    subsectionSelect.appendChild(option);
+                    if (typeof sub === 'object') {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = Object.keys(sub)[0];
+                        sub[Object.keys(sub)[0]].forEach(subSub => {
+                            const option = document.createElement('option');
+                            option.value = subSub;
+                            option.textContent = subSub;
+                            optgroup.appendChild(option);
+                        });
+                        subsectionSelect.appendChild(optgroup);
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = sub;
+                        option.textContent = sub;
+                        subsectionSelect.appendChild(option);
+                    }
                 });
                 // إضافة خاصية required فقط إذا كان هناك أقسام فرعية
                 subsectionSelect.setAttribute('required', 'required');
@@ -720,7 +734,54 @@
             }
         });
 
-        // تحديث معالج النموذج
+        // إضافة عنصر جديد للقسم الفرعي الثاني
+        const subSubsectionContainer = document.createElement('div');
+        subSubsectionContainer.className = 'form-group';
+        subSubsectionContainer.style.display = 'none';
+        subSubsectionContainer.innerHTML = `
+            <label for="subSubsectionSelect">القسم الفرعي الثاني:</label>
+            <select id="subSubsectionSelect" class="touch-feedback">
+                <option value="">اختر القسم الفرعي الثاني</option>
+            </select>
+        `;
+        // إدراج الصندوق فوق حقل الاسم
+        document.getElementById('uploadForm').insertBefore(subSubsectionContainer, document.getElementById('title').parentElement);
+
+        // إضافة مستمع حدث لتحديث القسم الفرعي الثاني
+        subsectionSelect.addEventListener('change', function() {
+            const subSubsectionSelect = document.getElementById('subSubsectionSelect');
+            subSubsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي الثاني</option>';
+            subSubsectionContainer.style.display = 'none';
+            subSubsectionSelect.removeAttribute('required');
+
+            if (this.value === 'متابعات الوكيل الشرعي والعربي') {
+                subSubsectionContainer.style.display = 'block';
+                subSubsectionSelect.innerHTML = `
+                    <option value="">اختر القسم الفرعي الثاني</option>
+                    <option value="متابعات لجنة الإثابة والتقويم">متابعات لجنة الإثابة والتقويم</option>
+                    <option value="متابعات المكتبة">متابعات المكتبة</option>
+                    <option value="متابعات مشرف القرآن الكريم">متابعات مشرف القرآن الكريم</option>
+                    <option value="متابعات مشرف اللغة العربية">متابعات مشرف اللغة العربية</option>
+                    <option value="متابعات شئون العاملين">متابعات شئون العاملين</option>
+                    <option value="متابعة الأخصائي الاجتماعي">متابعة الأخصائي الاجتماعي</option>
+                `;
+                subSubsectionSelect.setAttribute('required', 'required');
+            } else if (this.value === 'متابعات الوكيل الثقافي') {
+                subSubsectionContainer.style.display = 'block';
+                subSubsectionSelect.innerHTML = `
+                    <option value="">اختر القسم الفرعي الثاني</option>
+                    <option value="لجنة الأمن والسلامة">لجنة الأمن والسلامة</option>
+                    <option value="لجنة المقترحات والشكاوي">لجنة المقترحات والشكاوي</option>
+                    <option value="مشرفي المواد الثقافية">مشرفي المواد الثقافية</option>
+                    <option value="معمل الحاسب">معمل الحاسب</option>
+                    <option value="معمل العلوم">معمل العلوم</option>
+                    <option value="شئون الطلبة">شئون الطلبة</option>
+                `;
+                subSubsectionSelect.setAttribute('required', 'required');
+            }
+        });
+
+        // تعديل دالة الرفع لحفظ القسم الفرعي الثاني
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -729,6 +790,7 @@
             const docId = urlParams.get('docId');
             const section = urlParams.get('section');
             const subsection = mode === 'append' ? urlParams.get('subsection') : subsectionSelect.value;
+            const subSubsection = subSubsectionSelect.value;
             const title = document.getElementById('title').value.trim();
             const previews = previewContainer.querySelectorAll('.preview-item');
             const user = auth.currentUser;
@@ -776,7 +838,7 @@
                     } catch (error) {
                         console.error('خطأ في رفع الصورة:', error);
                         showToast(`فشل في رفع الصورة ${i + 1}`, true);
-                        continue; // استمر في رفع باقي الصور حتى لو فشلت واحدة
+                        continue;
                     }
                 }
 
@@ -814,6 +876,7 @@
                         title: title,
                         section: section,
                         subsection: subsection || null,
+                        subSubsection: subSubsection || null,
                         ...uploadedImages,
                         uploadedAt: new Date().toISOString(),
                         status: 'pending',
@@ -824,7 +887,9 @@
 
                 showToast('تم رفع الملفات بنجاح');
                 setTimeout(() => {
-                    window.location.href = 'gallery.html?section=' + section + (subsection ? '&subsection=' + subsection : '');
+                    window.location.href = 'gallery.html?section=' + section + 
+                        (subsection ? '&subsection=' + subsection : '') +
+                        (subSubsection ? '&subsubsection=' + subSubsection : '');
                 }, 2000);
 
             } catch (error) {
@@ -906,6 +971,54 @@
                 // يمكنك استخدام هذه القيم لعرض المعلومات المناسبة في الصفحة
             }
         });
+
+        // تحديث دالة تحميل الأقسام الفرعية
+        function loadSubsections() {
+            const section = document.getElementById('section').value;
+            const subsectionSelect = document.getElementById('subsection');
+            const subsubsectionSelect = document.getElementById('subsubsection');
+            
+            // إعادة تعيين القوائم
+            subsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي</option>';
+            subsubsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي الثاني</option>';
+            subsubsectionSelect.style.display = 'none';
+
+            if (section === 'اجتماعات القيادة') {
+                subsectionSelect.innerHTML += `
+                    <option value="متابعات الوكيل الشرعي والعربي">متابعات الوكيل الشرعي والعربي</option>
+                    <option value="متابعات الوكيل الثقافي">متابعات الوكيل الثقافي</option>
+                `;
+            }
+
+            // إضافة حدث تغيير للقسم الفرعي
+            subsectionSelect.addEventListener('change', function() {
+                const subsection = this.value;
+                subsubsectionSelect.innerHTML = '<option value="">اختر القسم الفرعي الثاني</option>';
+                subsubsectionSelect.style.display = 'none';
+
+                if (subsection === 'متابعات الوكيل الشرعي والعربي') {
+                    subsubsectionSelect.innerHTML += `
+                        <option value="متابعات لجنة الإثابة والتقويم">متابعات لجنة الإثابة والتقويم</option>
+                        <option value="متابعات المكتبة">متابعات المكتبة</option>
+                        <option value="متابعات مشرف القرآن الكريم">متابعات مشرف القرآن الكريم</option>
+                        <option value="متابعات مشرف اللغة العربية">متابعات مشرف اللغة العربية</option>
+                        <option value="متابعات شئون العاملين">متابعات شئون العاملين</option>
+                        <option value="متابعة الأخصائي الاجتماعي">متابعة الأخصائي الاجتماعي</option>
+                    `;
+                    subsubsectionSelect.style.display = 'block';
+                } else if (subsection === 'متابعات الوكيل الثقافي') {
+                    subsubsectionSelect.innerHTML += `
+                        <option value="لجنة الأمن والسلامة">لجنة الأمن والسلامة</option>
+                        <option value="لجنة المقترحات والشكاوي">لجنة المقترحات والشكاوي</option>
+                        <option value="مشرفي المواد الثقافية">مشرفي المواد الثقافية</option>
+                        <option value="معمل الحاسب">معمل الحاسب</option>
+                        <option value="معمل العلوم">معمل العلوم</option>
+                        <option value="شئون الطلبة">شئون الطلبة</option>
+                    `;
+                    subsubsectionSelect.style.display = 'block';
+                }
+            });
+        }
     </script>
 </body>
 </html> 
