@@ -1340,6 +1340,11 @@
             display: none;
         }
 
+        .subsections-nav.secondary {
+            bottom: 60px; /* وضع الشريط الثانوي فوق الأول */
+            background: var(--light);
+        }
+
         .subsections-nav.active {
             display: block;
         }
@@ -1377,7 +1382,7 @@
 
         /* تعديل المحتوى الرئيسي لإضافة مساحة في الأسفل */
         .content {
-            padding-bottom: 70px;
+            padding-bottom: 140px; /* زيادة المساحة لاستيعاب شريطين */
         }
 
         @media (max-width: 768px) {
@@ -1657,6 +1662,70 @@
             top: 0;
             z-index: 1;
         }
+
+        /* إضافة شريط التنقل بين الأقسام الفرعية الثانوية */
+        .subsections-nav.secondary {
+            position: fixed;
+            bottom: 60px; /* وضع الشريط الثانوي فوق الأول */
+            left: 0;
+            right: 0;
+            background: var(--light);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            z-index: 90;
+            display: none;
+        }
+
+        .subsections-nav.secondary.active {
+            display: block;
+        }
+
+        .subsections-container.secondary {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px;
+            max-width: 1400px;
+            margin: 0 auto;
+            scrollbar-width: thin;
+        }
+
+        .subsection-link.secondary {
+            padding: 8px 15px;
+            background: var(--white);
+            color: var(--dark);
+            border-radius: 20px;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .subsection-link.secondary:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .subsection-link.secondary.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* تعديل المحتوى الرئيسي لإضافة مساحة في الأسفل */
+        .content {
+            padding-bottom: 140px; /* زيادة المساحة لاستيعاب شريطين */
+        }
+
+        @media (max-width: 768px) {
+            .subsections-container.secondary {
+                padding: 5px 10px;
+            }
+            
+            .subsection-link.secondary {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1698,6 +1767,11 @@
 
         <!-- إضافة شريط التنقل بين الأقسام الفرعية -->
         <div class="subsections-nav" id="subsectionsNav">
+            <div class="subsections-container"></div>
+        </div>
+
+        <!-- إضافة شريط التنقل بين الأقسام الفرعية الثانوية -->
+        <div class="subsections-nav secondary" id="secondarySubsectionsNav">
             <div class="subsections-container"></div>
         </div>
 
@@ -1938,6 +2012,7 @@
                 this.cachedData = null;
                 this.isFirstLoad = true;
                 this.subsectionsNav = document.getElementById('subsectionsNav');
+                this.secondarySubsectionsNav = document.getElementById('secondarySubsectionsNav');
                 this.initialize();
                 this.setupRealtimeUpdates();
 
@@ -2099,12 +2174,12 @@
             }
 
             handleUrlChange() {
-                // تحديث القسم الحالي
-                this.currentSection = new URLSearchParams(window.location.search).get('section');
-                this.currentSubsection = new URLSearchParams(window.location.search).get('subsection');
+                const urlParams = new URLSearchParams(window.location.search);
+                this.currentSection = urlParams.get('section');
+                this.currentSubsection = urlParams.get('subsection');
+                this.currentSubsubsection = urlParams.get('subsubsection');
                 
                 if (this.cachedData) {
-                    // إذا كانت البيانات موجودة، نعرضها فوراً
                     this.renderDocuments(this.cachedData);
                     this.setupEventListeners();
                     this.updateSubsectionsNav();
@@ -2112,23 +2187,38 @@
             }
 
             updateSubsectionsNav() {
-                const subsections = this.getSubsections();
-                if (!subsections.length || !this.currentSection) {
-                    this.subsectionsNav.classList.remove('active');
-                    return;
-                }
-
-                const container = this.subsectionsNav.querySelector('.subsections-container');
-                container.innerHTML = subsections.map(subsection => `
+                // تحديث الأقسام الفرعية الأولية
+                const primarySubsections = this.getSubsections();
+                const primaryContainer = this.subsectionsNav.querySelector('.subsections-container');
+                
+                primaryContainer.innerHTML = primarySubsections.map(subsection => `
                     <a href="?section=${this.currentSection}&subsection=${subsection}" 
                        class="subsection-link ${this.currentSubsection === subsection ? 'active' : ''}">
                        ${subsection}
                     </a>
                 `).join('');
 
-                this.subsectionsNav.classList.add('active');
+                this.subsectionsNav.classList.toggle('active', primarySubsections.length > 0);
 
-                // إضافة مستمعات الأحداث للروابط
+                // تحديث الأقسام الفرعية الثانوية
+                const secondarySubsections = this.getSecondarySubsections(this.currentSubsection);
+                const secondaryContainer = this.secondarySubsectionsNav.querySelector('.subsections-container');
+                
+                secondaryContainer.innerHTML = secondarySubsections.map(subsection => `
+                    <a href="?section=${this.currentSection}&subsection=${this.currentSubsection}&subsubsection=${subsection}" 
+                       class="subsection-link ${this.currentSubsubsection === subsection ? 'active' : ''}">
+                       ${subsection}
+                    </a>
+                `).join('');
+
+                this.secondarySubsectionsNav.classList.toggle('active', secondarySubsections.length > 0);
+
+                // إضافة مستمعي الأحداث
+                this.setupSubsectionEventListeners(primaryContainer);
+                this.setupSubsectionEventListeners(secondaryContainer);
+            }
+
+            setupSubsectionEventListeners(container) {
                 container.querySelectorAll('.subsection-link').forEach(link => {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -2184,7 +2274,8 @@
                         'سجل الخطة',
                         'مجلس الآباء',
                         'سجل الأخصائي العام',
-                        'الحالات الفردية'
+                        'الحالات الفردية',
+                        'الرحلات'
                     ],
                     'librarian': [
                         'الندوات',
@@ -2227,6 +2318,30 @@
                 return subsectionsMap[this.currentSection] || [];
             }
 
+            getSecondarySubsections(primarySubsection) {
+                const secondarySubsectionsMap = {
+                    'متابعات الوكيل الشرعي والعربي': [
+                        'متابعات لجنة الإثابة والتقويم',
+                        'متابعات المكتبة',
+                        'متابعات مشرف القرآن الكريم',
+                        'متابعات مشرف اللغة العربية',
+                        'متابعات شئون العاملين',
+                        'متابعة الأخصائي الاجتماعي'
+                    ],
+                    'متابعات الوكيل الثقافي': [
+                        'لجنة الأمن والسلامة',
+                        'لجنة المقترحات والشكاوي',
+                        'مشرفي المواد الثقافية',
+                        'معمل الحاسب',
+                        'معمل العلوم',
+                        'شئون الطلبة'
+                    ],
+
+                
+                };
+                return secondarySubsectionsMap[primarySubsection] || [];
+            }
+
             // تحسين التنقل بين الأقسام
             setupNavigation() {
                 document.querySelectorAll('.nav-link').forEach(link => {
@@ -2263,8 +2378,12 @@
 
                 let documents = [];
                 Object.entries(sectionData).forEach(([id, doc]) => {
+                    // تصفية بناءً على القسم الفرعي الأول
                     if (!this.currentSubsection || doc.subsection === this.currentSubsection) {
-                        documents.push({ id, ...doc });
+                        // تصفية إضافية بناءً على القسم الفرعي الثاني إذا كان موجودًا
+                        if (!this.currentSubsubsection || doc.subSubsection === this.currentSubsubsection) {
+                            documents.push({ id, ...doc });
+                        }
                     }
                 });
 
@@ -2302,6 +2421,11 @@
                 let subtitle = '';
                 if (doc.subsection) {
                     subtitle = `<div class="document-subtitle">${doc.subsection}</div>`;
+                }
+                
+                // إضافة القسم الفرعي الثاني إذا كان موجودًا
+                if (doc.subSubsection) {
+                    subtitle += `<div class="document-subtitle">${doc.subSubsection}</div>`;
                 }
                 
                 return `
