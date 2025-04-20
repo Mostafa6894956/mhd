@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإجابة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563EB;  /* أزرق ملكي للنصوص المميزة */
+            --secondary-color: #DC2626;  /* أحمر نابض للأزرار */
+            --accent-color: #1E40AF;  /* أزرق داكن أنيق لنصوص القرآن */
+            --bg-color: #FFFFFF;  /* أبيض نقي للخلفية */
+            --text-color: #1E3A8A;  /* أزرق داكن للنصوص العادية */
+            --card-bg: #EBF8FF;  /* أزرق فاتح جدًا لخلفية المربعات */
+            --border-color: #DBEAFE;  /* أزرق فاتح للحدود */
+            --button-text: #FFFFFF;  /* أبيض لنصوص الأزرار */
+        }
+
+        body {
+            font-family: 'Amiri', serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .ayah, .hadith {
+            font-family: 'Amiri', serif;
+            font-size: 1.6rem;
+            color: var(--accent-color);
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ayah::before, .hadith::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.1));
+            transition: 0.5s;
+        }
+
+        .ayah:hover::before, .hadith:hover::before {
+            left: 100%;
+        }
+
+        .translation {
+            font-size: 1.2rem;
+            color: #4b5563;
+            margin-top: 1rem;
+            padding-right: 1rem;
+            opacity: 0.9;
+        }
+
+        .advice-box {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--secondary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .advice-box::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                var(--accent-color),
+                transparent
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .advice-box h2 {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .advice-box ul {
+            list-style: none;
+            padding-right: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .advice-box li {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: #4b5563;
+            padding: 1rem;
+            background: rgba(20, 184, 166, 0.05);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back {
+            background: var(--secondary-color);
+            color: var(--button-text);
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-back::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+        }
+
+        .btn-back:hover::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #loading {
+            min-height: 300px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        
+
+        
+
+        
+
+        /* تحسينات جديدة */
+        .explanation-box {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .explanation-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(245, 158, 11, 0.05), transparent);
+            z-index: 0;
+        }
+
+        .explanation-box p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #4b5563;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(20, 184, 166, 0.1), transparent);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: -1rem;
+            right: -1rem;
+            font-size: 6rem;
+            color: rgba(15, 118, 110, 0.1);
+            transform: rotate(15deg);
+            pointer-events: none;
+        }
+
+        .advice-box li {
+            position: relative;
+            padding-right: 2rem;
+        }
+
+        .advice-box li::before {
+            content: '✓';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            color: var(--button-text);
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            background: var(--secondary-color);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(15, 118, 110, 0.2);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .ayah-box {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-right: 6px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .ayah-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        .ayah-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(37, 99, 235, 0.05), transparent);
+            z-index: 0;
+        }
+
+        .ayah-text {
+            font-family: 'Amiri', serif;
+            font-size: 2rem;
+            color: var(--accent-color);
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+            text-align: justify;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+        }
+
+        .ayah-text i {
+            color: var(--primary-color);
+            margin-left: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .ayah-box::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1), transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* تحسينات جديدة */
+        .answer-nav {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .copy-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(244, 162, 97, 0.2);
+        }
+
+        .bookmark-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+        }
+
+        .bookmark-btn.active {
+            background: var(--secondary-color);
+        }
+
+        .share-btn {
+            background: #10B981;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="mx-auto max-w-4xl glass-effect shadow-2xl p-8 md:p-12">
+        <h1 class="text-4xl font-bold text-center text-teal-700 mb-8">إجابة على سؤالك</h1>
+        
+        <!-- شاشة التحميل -->
+        <div id="loading" class="flex flex-col items-center justify-center space-y-6">
+            <div class="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin floating"></div>
+            <p class="text-teal-700 text-xl">جاري تحميل الإجابة...</p>
+        </div>
+
+        <!-- محتوى الإجابة -->
+        <div id="answer" class="hidden">
+            <section class="mb-8">
+                <h2 class="section-title">شرح السؤال</h2>
+                <div class="explanation-box">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <p>السؤال يطلب إيجاد <span class="highlight">آية قرآنية</span> أو <span class="highlight">حديث نبوي شريف</span> يتحدث عن الفرح، مع شرح مبسط للنص وتقديم نصيحة مرتبطة بالموضوع.</p>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="section-title">آية قرآنية عن الفرح</h2>
+                <div class="ayah-box">
+                    <div class="ayah-text">
+                        <i class="fas fa-book-open"></i>
+                        {قُلْ بِفَضْلِ اللَّهِ وَبِرَحْمَتِهِ فَبِذَٰلِكَ فَلْيَفْرَحُوا هُوَ خَيْرٌ مِمَّا يَجْمَعُونَ}
+                    </div>
+                </div>
+                <div class="translation">
+                    "قل بفضل الله وبرحمته فبذلك فليفرحوا هو خير مما يجمعون" (يونس: 58)
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="section-title">حديث عن الفرح</h2>
+                <div class="hadith">
+                    <i class="fas fa-quote-right"></i>
+                    {مَنْ سَرَّهُ أَنْ يُبْسَطَ لَهُ فِي رِزْقِهِ وَيُنْسَأَ لَهُ فِي أَثَرِهِ فَلْيَصِلْ رَحِمَهُ}
+                </div>
+                <div class="translation">
+                    "من سره أن يبسط له في رزقه وينسأ له في أثره فليصل رحمه" (رواه البخاري)
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="section-title">شرح الآية</h2>
+                <div class="explanation-box">
+                    <i class="fas fa-quote-left quote-icon"></i>
+                    <p>الآية الكريمة تحثنا على الفرح بفضل الله ورحمته، وتعتبر هذا الفرح خيرًا من جمع الأموال والمتاع الدنيوي. <span class="highlight">الفرح الحقيقي</span> يكمن في الإيمان والتقرب إلى الله، وليس في accumulating الثروات المادية. فضل الله هو كل ما أنعم به علينا من نعم ظاهرة وباطنة، ورحمته تشمل هدايته لنا إلى الإسلام.</p>
+                </div>
+            </section>
+
+            <section class="advice-box">
+                <h2><i class="icon fas fa-lightbulb"></i>نصيحة وتوجيه</h2>
+                <ul>
+                    <li>لا تجعل الفرح مقتصرًا على الأمور الدنيوية الزائلة، بل اجعل قلبك معلقًا بفضل الله ورحمته.</li>
+                    <li>تفرح بذكره، وتفرح بقربك منه، وتفرح بعطائه الجزيل.</li>
+                    <li>تذكر أن الفرح الحقيقي هو فرح القلب بالإيمان واليقين، وهو فرح دائم لا يزول بزوال الدنيا.</li>
+                </ul>
+            </section>
+
+            <!-- أزرار التنقل -->
+            <div class="flex justify-between items-center mt-8 space-x-4">
+                <button onclick="navigateAnswer('prev')" class="nav-btn bg-teal-600 hover:bg-teal-700">
+                    <i class="fas fa-arrow-right"></i> السابق
+                </button>
+                <button onclick="regenerateAnswer()" class="nav-btn bg-teal-600 hover:bg-teal-700">
+                    <i class="fas fa-sync-alt"></i> إعادة الإجابة
+                </button>
+                <button onclick="navigateAnswer('next')" class="nav-btn bg-teal-600 hover:bg-teal-700">
+                    التالي <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <div class="answer-nav">
+                <div class="copy-btn" onclick="copyAnswer()">
+                    <i class="fas fa-copy"></i> نسخ الإجابة
+                </div>
+                <div class="bookmark-btn" onclick="toggleBookmark()">
+                    <i class="fas fa-bookmark"></i> حفظ الإجابة
+                </div>
+                <div class="share-btn" onclick="shareAnswer()">
+                    <i class="fas fa-share-alt"></i> مشاركة
+                </div>
+            </div>
+        </div>
+        <p id="error" class="text-red-600 text-center mt-6"></p>
+        <button onclick="window.location.href='index2.html'" class="btn-back w-full mt-8">العودة</button>
+    </div>
+
+    <script>
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.from('.glass-effect', {
+            duration: 1,
+            opacity: 0,
+            y: 50,
+            ease: 'power2.out'
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const question = urlParams.get('question');
+
+        // حفظ السؤال والإجابة في localStorage
+        function saveAnswer(question, answer) {
+            const savedAnswers = JSON.parse(localStorage.getItem('answers')) || {};
+            savedAnswers[question] = answer;
+            localStorage.setItem('answers', JSON.stringify(savedAnswers));
+        }
+
+        // التحقق من وجود إجابة محفوظة
+        const savedAnswers = JSON.parse(localStorage.getItem('answers')) || {};
+        if (savedAnswers[question]) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('answer').innerHTML = savedAnswers[question];
+            document.getElementById('answer').classList.remove('hidden');
+        } else {
+            getAnswer();
+        }
+
+        async function getAnswer() {
+            const loading = document.getElementById('loading');
+            const answerSection = document.getElementById('answer');
+            const errorSection = document.getElementById('error');
+
+            try {
+                const apiKey = 'AIzaSyADaEiVHPCdmuFzSYDLBiS4ab0M3WISIF8';
+                if (!apiKey) {
+                    throw new Error('لم يتم تعريف مفتاح API. يرجى التحقق من المفتاح.');
+                }
+                
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyC3MJMChWkFlinTfK3LWUYoaNL_qSRTbzU`;
+
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `أجب على السؤال التالي باستخدام آية قرآنية أو حديث: ${question}\n\n**تنظيم الإجابة:**\n1. ابدأ بشرح مختصر للسؤال.\n2. استخدم آية قرآنية أو حديث كدليل.\n3. قم بشرح الآية أو الحديث بشكل مبسط.\n4. ختم الإجابة بنصيحة أو توجيه.\n\n**ملاحظات مهمة:**\n- ضع الآية القرآنية بين علامات ## مثل: ##آية قرآنية##.\n- ضع الحديث بين علامات ## مثل: ##حديث##.\n- استخدم ** للعناوين الفرعية.\n- تأكد من أن الآية القرآنية مكتوبة بخط يشبه المصحف.\n- تأكد من أن النصوص محاذاة إلى اليمين.\n- استخدم لغة عربية فصيحة وواضحة.`
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`خطأ في الاتصال بالخادم: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.candidates || data.candidates.length === 0) {
+                    throw new Error('لم يتم العثور على إجابة من API');
+                }
+
+                const answer = data.candidates[0].content.parts[0].text;
+
+                // تحويل العلامات إلى تنسيق HTML مع التصميم الجديد
+                const formattedAnswer = answer
+                    .replace(/##(.*?)##/g, (match, p1) => {
+                        if (p1.includes('حديث')) {
+                            return `<div class="hadith">${p1}</div>`;
+                        } else {
+                            return `
+                                <div class="ayah-box">
+                                    <div class="ayah-text">
+                                        <i class="fas fa-book-open"></i>
+                                        ${p1}
+                                    </div>
+                                </div>`;
+                        }
+                    })
+                    .replace(/\*\*(.*?)\*\*/g, '<h2 class="section-title">$1</h2>');
+
+                // إخفاء شاشة التحميل وعرض الإجابة
+                loading.classList.add('hidden');
+                answerSection.innerHTML = formattedAnswer;
+                answerSection.classList.remove('hidden');
+
+                // بعد الحصول على الإجابة
+                saveAnswer(question, formattedAnswer);
+            } catch (error) {
+                // إخفاء شاشة التحميل وعرض الخطأ
+                loading.classList.add('hidden');
+                errorSection.textContent = `حدث خطأ: ${error.message}`;
+                answerSection.textContent = 'تعذر الحصول على إجابة. يرجى المحاولة مرة أخرى.';
+                answerSection.classList.remove('hidden');
+            }
+        }
+
+        // دالة للتنقل بين الإجابات
+        function navigateAnswer(direction) {
+            const savedAnswers = JSON.parse(localStorage.getItem('answers')) || {};
+            const questions = Object.keys(savedAnswers);
+            const currentIndex = questions.indexOf(question);
+            
+            let newIndex = currentIndex;
+            if (direction === 'next' && currentIndex < questions.length - 1) {
+                newIndex = currentIndex + 1;
+            } else if (direction === 'prev' && currentIndex > 0) {
+                newIndex = currentIndex - 1;
+            }
+            
+            if (newIndex !== currentIndex) {
+                window.location.href = `answer2.html?question=${encodeURIComponent(questions[newIndex])}`;
+            }
+        }
+
+        // دالة لإعادة توليد الإجابة
+        async function regenerateAnswer() {
+            const loading = document.getElementById('loading');
+            const answerSection = document.getElementById('answer');
+            const errorSection = document.getElementById('error');
+            
+            loading.classList.remove('hidden');
+            answerSection.classList.add('hidden');
+            errorSection.textContent = '';
+            
+            try {
+                // حذف الإجابة القديمة من localStorage
+                const savedAnswers = JSON.parse(localStorage.getItem('answers')) || {};
+                delete savedAnswers[question];
+                localStorage.setItem('answers', JSON.stringify(savedAnswers));
+                
+                // إعادة توليد الإجابة
+                await getAnswer();
+            } catch (error) {
+                errorSection.textContent = `حدث خطأ: ${error.message}`;
+            }
+        }
+
+        function copyAnswer() {
+            const answerText = document.getElementById('answer').innerText;
+            navigator.clipboard.writeText(answerText)
+                .then(() => alert('تم نسخ الإجابة إلى الحافظة!'))
+                .catch(() => alert('حدث خطأ أثناء النسخ!'));
+        }
+
+        function toggleBookmark() {
+            const btn = document.querySelector('.bookmark-btn');
+            btn.classList.toggle('active');
+            // يمكن إضافة وظيفة حفظ الإجابة في المفضلة هنا
+        }
+
+        function shareAnswer() {
+            const answerText = document.getElementById('answer').innerText;
+            const shareData = {
+                title: 'إجابة عن سؤالك',
+                text: answerText,
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                navigator.share(shareData)
+                    .then(() => console.log('تمت المشاركة بنجاح'))
+                    .catch((error) => console.log('حدث خطأ أثناء المشاركة', error));
+            } else {
+                navigator.clipboard.writeText(answerText + '\n\n' + window.location.href)
+                    .then(() => alert('تم نسخ الإجابة والرابط إلى الحافظة!'));
+            }
+        }
+    </script>
+</body>
+</html>
