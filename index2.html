@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسئلتك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --secondary-color: #DC2626;
+            --accent-color: #1E40AF;
+            --bg-color: #FFFFFF;
+            --text-color: #1E3A8A;
+            --card-bg: #EBF8FF;
+            --border-color: #DBEAFE;
+            --button-text: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Amiri', serif;
+            background: var(--card-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-family: 'El Messiri', sans-serif;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .question-item {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 0.8rem;
+            margin: 0.8rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 3px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .question-item:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .question-text {
+            flex: 1;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
+        .delete-btn {
+            background: var(--secondary-color);
+            color: var(--button-text);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .delete-btn i {
+            font-size: 1rem;
+        }
+
+        .delete-btn:active {
+            opacity: 0.8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: var(--button-text);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .question-item {
+                padding: 1rem;
+                border-radius: 0.6rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .delete-btn {
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+        }
+
+        /* نافذة التأكيد */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confirmation-box {
+            background: var(--bg-color);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .confirmation-modal.active .confirmation-box {
+            transform: scale(1);
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .confirmation-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.1s ease;
+        }
+
+        .confirmation-btn:active {
+            transform: scale(0.95);
+        }
+
+        .confirm-delete {
+            background: var(--secondary-color);
+            color: var(--button-text);
+        }
+
+        .cancel-delete {
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        /* تأثيرات الأزرار */
+        button {
+            transition: transform 0.1s ease;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .fixed-section {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding-bottom: 1rem;
+        }
+
+        .scrollable-section {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+            padding-left: 0.5rem;
+            direction: ltr;
+        }
+
+        .scrollable-section > * {
+            direction: rtl;
+        }
+
+        .scrollable-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable-section::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .scrollable-section::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        .scrollable-section::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        @media (max-width: 480px) {
+            .scrollable-section {
+                max-height: calc(100vh - 250px);
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    
+        <div class="fixed-section">
+            <br>
+            <h1 class="text-4xl font-bold text-center text-teal-700 mb-8">أسئلتك</h1>
+
+                <div class="mb-8">
+                    <textarea id="questionInput" class="w-full p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="ادخل سؤالك هنا..."></textarea>
+                    <button id="askButton" class="btn-primary w-full mt-4">
+                        <i class="fas fa-paper-plane"></i> إرسال السؤال
+                    </button>
+                </div>
+
+                <h2 class="section-title">أسئلتك السابقة</h2>
+            </div>
+
+            <div class="scrollable-section">
+                <div id="questionsList" class="space-y-3">
+                    <div class="empty-state">
+                        <i class="fas fa-comment-alt"></i>
+                        <p>لا يوجد أسئلة سابقة</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التأكيد -->
+    <div class="confirmation-modal">
+        <div class="confirmation-box">
+            <h3 class="text-xl font-bold mb-4">هل أنت متأكد من الحذف؟</h3>
+            <div class="confirmation-buttons">
+                <button class="confirmation-btn confirm-delete">نعم، احذف</button>
+                <button class="confirmation-btn cancel-delete">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentIndexToDelete = null;
+        const confirmationModal = document.querySelector('.confirmation-modal');
+        const confirmDeleteBtn = document.querySelector('.confirm-delete');
+        const cancelDeleteBtn = document.querySelector('.cancel-delete');
+
+        // دالة لعرض الأسئلة السابقة
+        function displayPreviousQuestions() {
+            const questionsList = document.getElementById('questionsList');
+            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            
+            if (savedQuestions.length === 0) {
+                questionsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comment-alt"></i>
+                        <p>لا يوجد أسئلة سابقة</p>
+                    </div>`;
+                return;
+            }
+
+            questionsList.innerHTML = savedQuestions.map((question, index) => `
+                <div class="question-item" onclick="redirectToAnswer('${encodeURIComponent(question)}')">
+                    <div class="question-text">${question}</div>
+                    <button onclick="deleteQuestion(event, ${index})" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // دالة للتحويل إلى صفحة الإجابة
+        function redirectToAnswer(question) {
+            window.location.href = `answer2.html?question=${encodeURIComponent(question)}`;
+        }
+
+        function deleteQuestion(event, index) {
+            event.stopPropagation();
+            currentIndexToDelete = index;
+            confirmationModal.classList.add('active');
+        }
+
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (currentIndexToDelete !== null) {
+                const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+                savedQuestions.splice(currentIndexToDelete, 1);
+                localStorage.setItem('questions', JSON.stringify(savedQuestions));
+                displayPreviousQuestions();
+            }
+            confirmationModal.classList.remove('active');
+        });
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            confirmationModal.classList.remove('active');
+        });
+
+        // إغلاق النافذة عند النقر خارجها
+        window.addEventListener('click', (event) => {
+            if (event.target === confirmationModal) {
+                confirmationModal.classList.remove('active');
+            }
+        });
+
+        // إضافة سؤال جديد
+        document.getElementById('askButton').addEventListener('click', function() {
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+            
+            if (question) {
+                // حفظ السؤال في localStorage
+                const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+                savedQuestions.unshift(question);
+                localStorage.setItem('questions', JSON.stringify(savedQuestions));
+                
+                // تحويل المستخدم إلى صفحة الإجابة
+                redirectToAnswer(question);
+            } else {
+                alert('الرجاء إدخال سؤال');
+            }
+        });
+
+        // عرض الأسئلة عند تحميل الصفحة
+        displayPreviousQuestions();
+    </script>
+</body>
+</html>
