@@ -291,17 +291,39 @@ ${question}
 
         // دالة للتحقق من وجود إجابة سابقة
         function checkForPreviousAnswer(question) {
-            const savedAnswers = JSON.parse(localStorage.getItem('answers')) || [];
+            let savedAnswers;
+            try {
+                savedAnswers = JSON.parse(localStorage.getItem('answers')) || [];
+            } catch (e) {
+                savedAnswers = []; // إذا كان هناك خطأ في التحليل، نعيد تهيئة المصفوفة
+            }
+            // التحقق من أن savedAnswers مصفوفة
+            if (!Array.isArray(savedAnswers)) {
+                savedAnswers = []; // إعادة تهيئة كصفوفة فارغة
+                localStorage.setItem('answers', JSON.stringify(savedAnswers));
+            }
             const previousAnswer = savedAnswers.find(ans => ans.question === question);
             return previousAnswer ? previousAnswer.answer : null;
         }
 
         // دالة لحفظ الإجابة الجديدة
         function saveAnswer(question, answer) {
-            const savedAnswers = JSON.parse(localStorage.getItem('answers')) || [];
+            let savedAnswers;
+            try {
+                savedAnswers = JSON.parse(localStorage.getItem('answers')) || [];
+            } catch (e) {
+                savedAnswers = []; // إذا كان هناك خطأ في التحليل، نعيد تهيئة المصفوفة
+            }
+            // التحقق من أن savedAnswers مصفوفة
+            if (!Array.isArray(savedAnswers)) {
+                savedAnswers = []; // إعادة تهيئة كصفوفة فارغة
+            }
             savedAnswers.push({ question, answer });
             localStorage.setItem('answers', JSON.stringify(savedAnswers));
         }
+
+        const maxRetries = 3; // عدد المحاولات
+        let retryCount = 0;
 
         async function getAnswer() {
             try {
@@ -310,14 +332,13 @@ ${question}
                 if (previousAnswer) {
                     document.getElementById('loading').remove();
                     document.getElementById('answerContainer').innerHTML = `
-                        
                         <div class="answer-content">
                             ${previousAnswer}
                         </div>
                         <hr>
-                        <div class="text-center mt-8">
-        <button onclick="window.location.href='index2.html'" class="btn-primary w-full mt-4">
-            <i class="fas fa-arrow-left mr-2"></i> الرجوع إلى الصفحة الرئيسية
+                        <div>
+                        <button onclick="window.location.href='index2.html'" class="btn-primary w-full mt-4">
+            الرجوع 
         </button>
     </div>`;
                     return;
@@ -338,6 +359,10 @@ ${question}
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
                 const data = await response.json();
                 const answer = data.candidates[0].content.parts[0].text;
 
@@ -350,8 +375,6 @@ ${question}
                     .replace(/!!(.*?)!!/g, '<div class="encouragement">$1</div>')
                     .replace(/\*\*(.*?)\*\*/g, '<h3 class="sub-title">$1</h3>')
                     .replace(/-(.*?)-/g, '<p class="highlight">$1</p>');
-                    
-                    
 
                 // حفظ الإجابة الجديدة
                 saveAnswer(question, formattedAnswer);
@@ -364,13 +387,29 @@ ${question}
                     </div>
                     <div class="answer-content">
                         ${formattedAnswer}
+                    </div>
+                    <div class="text-center mt-8">
+                        <button onclick="window.location.href='index.html'" class="bg-teal-700 text-white px-8 py-3 rounded-full hover:bg-teal-800 transition duration-300 shadow-lg">
+                            <i class="fas fa-arrow-left mr-2"></i> الرجوع إلى الصفحة الرئيسية
+                        </button>
                     </div>`;
             } catch (error) {
-                document.getElementById('loading').innerHTML = `
-                    <div class="error-message text-red-600">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>حدث خطأ أثناء جلب الإجابة. الرجاء المحاولة مرة أخرى.</p>
-                    </div>`;
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    // إعادة المحاولة بعد 3 ثواني
+                    setTimeout(getAnswer, 3000);
+                } else {
+                    // عرض رسالة الخطأ بعد استنفاذ المحاولات
+                    document.getElementById('loading').innerHTML = `
+                        <div class="error-message text-red-600">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>حدث خطأ أثناء جلب الإجابة. الرجاء المحاولة مرة أخرى.</p>
+                            <p class="text-sm text-gray-600 mt-2">تفاصيل الخطأ: ${error.message}</p>
+                            <button onclick="window.location.reload()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition duration-300 mt-4">
+                                <i class="fas fa-redo mr-2"></i> إعادة المحاولة
+                            </button>
+                        </div>`;
+                }
             }
         }
 
