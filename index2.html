@@ -315,52 +315,57 @@
 
         // دالة لعرض الأسئلة السابقة
         function displayPreviousQuestions() {
-            const questionsList = document.getElementById('questionsList');
             const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-            
-            if (savedQuestions.length === 0) {
+            const questionsList = document.getElementById('questionsList');
+
+            if (savedQuestions.length > 0) {
+                questionsList.innerHTML = savedQuestions.map((question, index) => `
+                    <div class="question-item" onclick="window.location.href='answer2.html?question=${encodeURIComponent(question)}'">
+                        <p class="question-text">${question}</p>
+                        <button class="delete-btn" onclick="deleteQuestion(event, ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            } else {
                 questionsList.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-comment-alt"></i>
                         <p>لا يوجد أسئلة سابقة</p>
                     </div>`;
-                return;
             }
-
-            questionsList.innerHTML = savedQuestions.map((question, index) => `
-                <div class="question-item" onclick="redirectToAnswer('${encodeURIComponent(question)}')">
-                    <div class="question-text">${question}</div>
-                    <button onclick="deleteQuestion(event, ${index})" class="delete-btn">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `).join('');
         }
 
-        // دالة للتحويل إلى صفحة الإجابة
-        function redirectToAnswer(question) {
-            window.location.href = `answer2.html?question=${encodeURIComponent(question)}`;
-        }
-
-        function deleteQuestion(event, index) {
-            event.stopPropagation();
+        // دالة لعرض نافذة تأكيد الحذف
+        function showDeleteConfirmation(index) {
             currentIndexToDelete = index;
-            confirmationModal.classList.add('active');
+            document.querySelector('.confirmation-modal').classList.add('active');
         }
 
-        confirmDeleteBtn.addEventListener('click', () => {
+        // دالة لحذف سؤال بعد التأكيد
+        function confirmDelete() {
             if (currentIndexToDelete !== null) {
                 const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
                 savedQuestions.splice(currentIndexToDelete, 1);
                 localStorage.setItem('questions', JSON.stringify(savedQuestions));
                 displayPreviousQuestions();
             }
-            confirmationModal.classList.remove('active');
-        });
+            document.querySelector('.confirmation-modal').classList.remove('active');
+        }
 
-        cancelDeleteBtn.addEventListener('click', () => {
-            confirmationModal.classList.remove('active');
-        });
+        // دالة لإلغاء الحذف
+        function cancelDelete() {
+            document.querySelector('.confirmation-modal').classList.remove('active');
+        }
+
+        // دالة لحذف سؤال
+        function deleteQuestion(event, index) {
+            event.stopPropagation();
+            showDeleteConfirmation(index); // عرض نافذة التأكيد
+        }
+
+        confirmDeleteBtn.addEventListener('click', confirmDelete);
+        cancelDeleteBtn.addEventListener('click', cancelDelete);
 
         // إغلاق النافذة عند النقر خارجها
         window.addEventListener('click', (event) => {
@@ -381,13 +386,13 @@
                 localStorage.setItem('questions', JSON.stringify(savedQuestions));
                 
                 // تحويل المستخدم إلى صفحة الإجابة
-                redirectToAnswer(question);
+                window.location.href = `answer2.html?question=${encodeURIComponent(question)}`;
             } else {
                 alert('الرجاء إدخال سؤال');
             }
         });
 
-        // عرض الأسئلة عند تحميل الصفحة
+        // عرض الأسئلة السابقة عند تحميل الصفحة
         displayPreviousQuestions();
     </script>
 </body>
