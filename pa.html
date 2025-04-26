@@ -1,109 +1,196 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>الهيكل التنظيمي للحزب</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .line-vertical {
-      border-right: 2px solid #ccc;
-      height: 30px;
-      margin: auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السيرة الذاتية - حازم جبريل أمين جاد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 5px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 1.6rem;
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #1a237e;
+        }
+        h2 {
+            font-size: 1.3rem;
+            color: #1a237e;
+            margin-top: 12px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        h2:hover {
+            color: #0d47a1;
+            border-color: #0d47a1;
+        }
+        .section {
+            margin-bottom: 6px;
+            padding: 6px;
+            background: #fafafa;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .section:hover {
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .icon {
+            color: #1a237e;
+            margin-left: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        h2:hover .icon {
+            color: #0d47a1;
+        }
+        .name-highlight {
+            color: #1a237e;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .name-highlight:hover {
+            color: #0d47a1;
+            text-decoration: underline;
+        }
+        .section ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 4px;
+        }
+        .section ul li {
+            margin-bottom: 3px;
+            padding: 3px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            font-size: 0.88rem;
+        }
+        .section ul li:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateX(3px);
+        }
+        .section ul li i {
+            color: #1a237e;
+            margin-left: 6px;
+            transition: all 0.3s ease;
+        }
+        .section ul li:hover i {
+            color: #0d47a1;
+        }
+        .print-button {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .print-button button {
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .print-button button:hover {
+            background-color: #0d47a1;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 p-6 font-sans">
+<body>
+    <div class="container">
+        <h1>السيرة الذاتية</h1>
+        
+        <div class="section">
+            <h2><i class="fas fa-user icon"></i> المعلومات الشخصية</h2>
+            <p>
+                <strong>الاسم:</strong> <span class="name-highlight">حازم جبريل أمين جاد</span>
+                <span style="margin-right: 230px;"></span>
+                <strong>تاريخ الميلاد:</strong><span class="name-highlight"> 27/2/1982 </span>
+            </p>
+        </div>
 
-  <h1 class="text-4xl font-bold text-center mb-10 text-red-700">الهيكل التنظيمي للحزب السياسي</h1>
+        <div class="section">
+            <h2><i class="fas fa-briefcase icon"></i> الوظيفة</h2>
+            <ul>
+                <li><i class="fas fa-check"></i> عضو مكتب الجودة بمنطقة قنا الأزهرية</li>
+                <li><i class="fas fa-check"></i> معلم لغة إنجليزية</li>
+            </ul>
+        </div>
 
-  <!-- رئيس الحزب -->
-  <div class="flex flex-col items-center">
-    <div class="bg-red-600 text-white px-8 py-3 rounded-full shadow-xl font-bold text-lg animate-bounce">
-      🔺 رئيس الحزب
-    </div>
-    <div class="line-vertical"></div>
-  </div>
+        <div class="section">
+            <h2><i class="fas fa-graduation-cap icon"></i> المؤهلات الدراسية والشهادات</h2>
+            <ul>
+                <li><i class="fas fa-check"></i> لسانس آداب وتربية (اللغة الإنجليزية) - دفعة 2005</li>
+                <li><i class="fas fa-check"></i> دبلومة مهنية في طرق التدريس</li>
+                <li><i class="fas fa-check"></i> حاصل على حزم المراجعة الخارجية من الهيئة القومية لضمان جودة التعليم والاعتماد التابعة لمجلس الوزراء (التعليم قبل الجامعي)</li>
+                <li><i class="fas fa-check"></i> حاصل على حزم المراجعة الخارجية من الهيئة القومية لضمان جودة التعليم و الاعتماد التابعة لمجلس الوزراء (رياض الأطفال)</li>
+                <li><i class="fas fa-check"></i> حاصل على IC3</li>
+                <li><i class="fas fa-check"></i> حاصل على TOT</li>
+                <li><i class="fas fa-check"></i> مشرف بفرع الرواق الأزهري بمنطقة قنا الأزهرية</li>
+            </ul>
+            
+        </div>
 
-  <!-- نواب الرئيس والأمانة العامة -->
-  <div class="flex justify-center items-start flex-wrap gap-6 mt-6">
-    <div class="bg-orange-500 text-white px-5 py-3 rounded shadow-lg font-medium relative w-64 text-center hover:scale-105 transition-transform">
-      👥 نواب رئيس الحزب
-      <button onclick="showDetails('نواب الرئيس', 'يساعدون رئيس الحزب في المهام اليومية، مثل متابعة الأمانات والإشراف على الملفات الخاصة بكل نائب، كالشباب أو المرأة.')" class="absolute left-2 top-2 text-white text-xl">ℹ️</button>
-    </div>
-    <div class="bg-yellow-500 text-white px-5 py-3 rounded shadow-lg font-medium relative w-64 text-center hover:scale-105 transition-transform">
-      🏛️ الأمانة العامة
-      <button onclick="showDetails('الأمانة العامة', 'تشرف على التنسيق العام بين كافة أجهزة الحزب الداخلية وتتابع تنفيذ الخطط المركزية. يرأسها أمين عام يساعده عدد من الأمناء.')" class="absolute left-2 top-2 text-white text-xl">ℹ️</button>
-    </div>
-  </div>
+        <div class="section">
+            <h2><i class="fas fa-users icon"></i> الأسرة</h2>
+            <ul>
+                <li><span class="name-highlight">د. محمد جبريل الشريف</span> – طبيب أنف وأذن وحنجرة بنجع حمادي</li>
+                <li><span class="name-highlight">م. هيثم جبريل الشريف</span> – مهندس مدني</li>
+                <li><span class="name-highlight">د. مصطفى جبريل الشريف</span> – مأمور جمارك بمطار القاهرة</li>
+                <li><span class="name-highlight">د. سمر جبريل الشريف</span> – طبيبة نفسية وعصبية بمستشفى الجامعة</li>
+                <li><span class="name-highlight">د. أحمد جبريل الشريف</span> – طبيب أطفال بمستشفى السويس الجامعي</li>
+            </ul>
+        </div>
 
-  <!-- الأمانات النوعية -->
-  <h2 class="text-2xl font-semibold text-center text-blue-700 mt-10 mb-4">الأمانات النوعية</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📂 أمانة التنظيم<button onclick="showDetails('أمانة التنظيم','تنظم الهياكل الداخلية للحزب، وتتابع تكوين أمانات المحافظات، وتعمل على ضبط الانضباط الهيكلي.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🧠 أمانة التثقيف السياسي<button onclick="showDetails('أمانة التثقيف السياسي','تنظم الندوات، وتصدر المطبوعات، وتؤهل الكوادر سياسيًا.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🧒 أمانة الشباب<button onclick="showDetails('أمانة الشباب','تركز على جذب الشباب، تنظيم معسكرات وورش عمل، إعداد قيادات شابة.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">👩‍🦰 أمانة المرأة<button onclick="showDetails('أمانة المرأة','تهدف لتمكين المرأة سياسيًا، تنظيم فعاليات توعوية، وتمثيل النساء في صنع القرار.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📰 أمانة الإعلام<button onclick="showDetails('أمانة الإعلام','تنسيق الحملات الإعلامية، إصدار البيانات الرسمية، متابعة وسائل الإعلام.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📝 أمانة العضوية<button onclick="showDetails('أمانة العضوية','تنظيم قاعدة بيانات العضوية، إصدار البطاقات، مراجعة الطلبات.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">🤝 العلاقات العامة<button onclick="showDetails('العلاقات العامة','تعزيز علاقات الحزب مع المجتمع، عقد لقاءات مع منظمات المجتمع المدني.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">⚖️ الشؤون القانونية<button onclick="showDetails('الشؤون القانونية','تمثيل الحزب قانونيًا، تقديم الاستشارات، متابعة النزاعات.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">💰 الشؤون المالية<button onclick="showDetails('الشؤون المالية','إعداد الميزانيات، متابعة الإيرادات والمصروفات، تقديم تقارير دورية.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-    <div class="bg-blue-100 px-4 py-2 rounded shadow relative hover:bg-blue-200 transition">📊 أمانة التخطيط والمتابعة<button onclick="showDetails('أمانة التخطيط والمتابعة','وضع الخطط، متابعة الأداء، التقييم المرحلي والسنوي.')" class="absolute left-2 top-1 text-blue-500 text-xl">ℹ️</button></div>
-  </div>
+        <div class="section">
+            <h2><i class="fas fa-child icon"></i> الأبناء</h2>
+            <ul>
+                <li><span class="name-highlight">مصطفى حازم جبريل</span>: الصف الثالث الإعدادي، حاصل على المركز الأول بمحافظة قنا ومن أوائل الجمهورية بمبادرة أشبال مصر الرقمية (في البرمجة)، وتم تكريمه عام 2024 من وزير الاتصالات الدكتور عمرو طلعت.</li>
+                <li><span class="name-highlight">عبد الرحمن حازم جبريل</span>: الصف السادس الابتدائي.</li>
+            </ul>
+        </div>
 
-  <!-- اللجان المركزية والهيئات العليا -->
-  <h2 class="text-2xl font-semibold text-center text-green-700 mt-10 mb-4">اللجان المركزية والهيئات العليا</h2>
-  <div class="flex flex-col md:flex-row justify-center gap-6 text-center">
-    <div class="bg-green-200 px-6 py-3 rounded shadow hover:bg-green-300 transition relative w-full md:w-80">
-      🏛️ لجان الحزب (السياسات، التشريع، الشباب، الإعلام...)
-      <button onclick="showDetails('لجان الحزب','تتخصص في ملفات محددة وتقدم توصيات لصناع القرار في الحزب.')" class="absolute left-2 top-2 text-green-700 text-xl">ℹ️</button>
+        <div class="print-button">
+            <button onclick="window.print()">طباعة / حفظ كـ PDF</button>
+        </div>
     </div>
-    <div class="bg-green-300 px-6 py-3 rounded shadow hover:bg-green-400 transition relative w-full md:w-80">
-      🎯 الهيئة العليا (المكتب السياسي/المجلس التنفيذي)
-      <button onclick="showDetails('الهيئة العليا','الجهة المخولة باتخاذ قرارات عليا، مثل اختيار القيادات العليا واعتماد السياسات العامة.')" class="absolute left-2 top-2 text-green-800 text-xl">ℹ️</button>
-    </div>
-  </div>
-
-  <!-- الهياكل الجغرافية -->
-  <h2 class="text-2xl font-semibold text-center text-purple-700 mt-10 mb-4">الهياكل الجغرافية للحزب</h2>
-  <div class="flex flex-col md:flex-row justify-center gap-6 text-center">
-    <div class="bg-purple-300 px-6 py-3 rounded shadow hover:bg-purple-400 transition relative w-full md:w-80">
-      🏘️ أمانات المحافظات
-      <button onclick="showDetails('أمانات المحافظات','تمثل الحزب على مستوى المحافظات، وتتابع تنفيذ التعليمات الصادرة من المركز.')" class="absolute left-2 top-2 text-purple-800 text-xl">ℹ️</button>
-    </div>
-    <div class="bg-purple-200 px-6 py-3 rounded shadow hover:bg-purple-300 transition relative w-full md:w-80">
-      🏙️ أمانات المراكز/المدن
-      <button onclick="showDetails('أمانات المراكز/المدن','تنفذ سياسات الحزب على مستوى المدن والمراكز وتتابع الأداء المحلي.')" class="absolute left-2 top-2 text-purple-700 text-xl">ℹ️</button>
-    </div>
-    <div class="bg-purple-100 px-6 py-3 rounded shadow hover:bg-purple-200 transition relative w-full md:w-80">
-      🏡 أمانات القرى/الأحياء
-      <button onclick="showDetails('أمانات القرى/الأحياء','تمثل الحزب على المستوى القاعدي، وتساهم في التفاعل المباشر مع المواطنين.')" class="absolute left-2 top-2 text-purple-600 text-xl">ℹ️</button>
-    </div>
-  </div>
-
-  <!-- نافذة التفاصيل -->
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center relative">
-      <h2 id="modalTitle" class="text-xl font-bold mb-2"></h2>
-      <p id="modalContent" class="mb-4"></p>
-      <button onclick="closeModal()" class="bg-red-600 text-white px-4 py-2 rounded">إغلاق</button>
-    </div>
-  </div>
-
-  <!-- سكريبت التفاصيل -->
-  <script>
-    function showDetails(title, content) {
-      document.getElementById("modalTitle").textContent = title;
-      document.getElementById("modalContent").textContent = content;
-      document.getElementById("modal").classList.remove("hidden");
-      document.getElementById("modal").classList.add("flex");
-    }
-    function closeModal() {
-      document.getElementById("modal").classList.remove("flex");
-      document.getElementById("modal").classList.add("hidden");
-    }
-  </script>
-
 </body>
 </html>
