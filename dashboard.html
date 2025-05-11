@@ -139,7 +139,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             padding: 1rem;
-            margin-bottom: 4rem;
+            
         }
 
         .dashboard-card {
@@ -805,38 +805,6 @@
             </section>
 
             <div class="dashboard-grid">
-                <!-- الهيكل التنظيمي -->
-                <div class="dashboard-card" style="--i:1">
-                    <i class="fas fa-sitemap"></i>
-                    <h3>الهيكل التنظيمي</h3>
-                    <div class="card-buttons">
-                        <button onclick="navigateToUpload('hierarchy')" class="action-btn upload-btn">
-                            <i class="fas fa-upload"></i>
-                            رفع 
-                        </button>
-                        <button onclick="navigateToGallery('hierarchy')" class="action-btn gallery-btn">
-                            <i class="fas fa-images"></i>
-                            المعرض
-                        </button>
-                    </div>
-                </div>
-
-                <!-- اجتماعات الأسر -->
-                <div class="dashboard-card" style="--i:4">
-                    <i class="fas fa-user-friends"></i>
-                    <h3>اجتماعات الأسر</h3>
-                    <div class="card-buttons">
-                        <button onclick="navigateToUpload('family-meetings')" class="action-btn upload-btn">
-                            <i class="fas fa-upload"></i>
-                            رفع 
-                        </button>
-                        <button onclick="navigateToGallery('family-meetings')" class="action-btn gallery-btn">
-                            <i class="fas fa-images"></i>
-                            المعرض
-                        </button>
-                    </div>
-                </div>
-
                 <!-- اجتماعات القيادة -->
                 <div class="dashboard-card" style="--i:2">
                     <i class="fas fa-users-cog"></i>
@@ -847,21 +815,6 @@
                             رفع 
                         </button>
                         <button onclick="navigateToGallery('leadership-meetings')" class="action-btn gallery-btn">
-                            <i class="fas fa-images"></i>
-                            المعرض
-                        </button>
-                    </div>
-                </div>
-                <!-- أمين المكتبة -->
-                <div class="dashboard-card" style="--i:6">
-                    <i class="fas fa-book-reader"></i>
-                    <h3>أمين المكتبة</h3>
-                    <div class="card-buttons">
-                        <button onclick="navigateToUpload('librarian')" class="action-btn upload-btn">
-                            <i class="fas fa-upload"></i>
-                            رفع 
-                        </button>
-                        <button onclick="navigateToGallery('librarian')" class="action-btn gallery-btn">
                             <i class="fas fa-images"></i>
                             المعرض
                         </button>
@@ -884,7 +837,21 @@
                     </div>
                 </div>
 
-                
+                <!-- اجتماعات الأسر -->
+                <div class="dashboard-card" style="--i:4">
+                    <i class="fas fa-user-friends"></i>
+                    <h3>اجتماعات الأسر</h3>
+                    <div class="card-buttons">
+                        <button onclick="navigateToUpload('family-meetings')" class="action-btn upload-btn">
+                            <i class="fas fa-upload"></i>
+                            رفع 
+                        </button>
+                        <button onclick="navigateToGallery('family-meetings')" class="action-btn gallery-btn">
+                            <i class="fas fa-images"></i>
+                            المعرض
+                        </button>
+                    </div>
+                </div>
 
                 <!-- الأخصائي الاجتماعي -->
                 <div class="dashboard-card" style="--i:5">
@@ -902,7 +869,21 @@
                     </div>
                 </div>
 
-                
+                <!-- أمين المكتبة -->
+                <div class="dashboard-card" style="--i:6">
+                    <i class="fas fa-book-reader"></i>
+                    <h3>أمين المكتبة</h3>
+                    <div class="card-buttons">
+                        <button onclick="navigateToUpload('librarian')" class="action-btn upload-btn">
+                            <i class="fas fa-upload"></i>
+                            رفع 
+                        </button>
+                        <button onclick="navigateToGallery('librarian')" class="action-btn gallery-btn">
+                            <i class="fas fa-images"></i>
+                            المعرض
+                        </button>
+                    </div>
+                </div>
 
                 <!-- سجل التربية الرياضية -->
                 <div class="dashboard-card" style="--i:7">
@@ -914,6 +895,24 @@
                             رفع 
                         </button>
                         <button onclick="navigateToGallery('sports')" class="action-btn gallery-btn">
+                            <i class="fas fa-images"></i>
+                            المعرض
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- الهيكل التنظيمي -->
+                <div class="dashboard-card" style="--i:1">
+                    <i class="fas fa-sitemap"></i>
+                    <h3>الهيكل التنظيمي</h3>
+                    <div class="card-buttons">
+                        <button onclick="navigateToUpload('hierarchy')" class="action-btn upload-btn">
+                            <i class="fas fa-upload"></i>
+                            رفع 
+                        </button>
+                        <button onclick="navigateToGallery('hierarchy')" class="action-btn gallery-btn">
                             <i class="fas fa-images"></i>
                             المعرض
                         </button>
@@ -1063,85 +1062,73 @@
                         </button>
                     </div>
                 </div>
+
                 <!-- قسم قاعدة البيانات -->
-    <div class="dashboard-card">
-        <i class="fas fa-database"></i>
-        <h3>قاعدة البيانات</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=database'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=database'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
+                <div class="dashboard-card">
+                    <i class="fas fa-database"></i>
+                    <h3>قاعدة البيانات</h3>
+                    <div class="card-buttons">
+                        <button class="action-btn upload-btn" onclick="location.href='upload.html?section=database'">
+                            <i class="fas fa-upload"></i> رفع
+                        </button>
+                        <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=database'">
+                            <i class="fas fa-images"></i> معرض
+                        </button>
+                    </div>
+                </div>
 
-    <div class="dashboard-card">
-        <i class="fas fa-map"></i>
-        <h3>خرائط المنهج</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=curriculum-maps'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=curriculum-maps'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
+                <div class="dashboard-card">
+                    <i class="fas fa-map"></i>
+                    <h3>خرائط المنهج</h3>
+                    <div class="card-buttons">
+                        <button class="action-btn upload-btn" onclick="location.href='upload.html?section=curriculum-maps'">
+                            <i class="fas fa-upload"></i> رفع
+                        </button>
+                        <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=curriculum-maps'">
+                            <i class="fas fa-images"></i> معرض
+                        </button>
+                    </div>
+                </div>
 
-    <!-- قسم سجل المعلم -->
-    <div class="dashboard-card">
-        <i class="fas fa-chalkboard-teacher"></i>
-        <h3>سجل المعلم</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=teacher-record'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=teacher-record'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
+                <!-- قسم سجل المعلم -->
+                <div class="dashboard-card">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h3>سجل المعلم</h3>
+                    <div class="card-buttons">
+                        <button class="action-btn upload-btn" onclick="location.href='upload.html?section=teacher-record'">
+                            <i class="fas fa-upload"></i> رفع
+                        </button>
+                        <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=teacher-record'">
+                            <i class="fas fa-images"></i> معرض
+                        </button>
+                    </div>
+                </div>
 
-    <div class="dashboard-card">
-        <i class="fas fa-wheelchair"></i>
-        <h3>سجل ذوي الاحتياجات الخاصة</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=special-needs'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=special-needs'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
+                <div class="dashboard-card">
+                    <i class="fas fa-wheelchair"></i>
+                    <h3>سجل ذوي الاحتياجات الخاصة</h3>
+                    <div class="card-buttons">
+                        <button class="action-btn upload-btn" onclick="location.href='upload.html?section=special-needs'">
+                            <i class="fas fa-upload"></i> رفع
+                        </button>
+                        <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=special-needs'">
+                            <i class="fas fa-images"></i> معرض
+                        </button>
+                    </div>
+                </div>
 
-    <!-- قسم تقارير الموجهين -->
-    <div class="dashboard-card">
-        <i class="fas fa-file-alt"></i>
-        <h3>تقارير الموجهين</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=supervisor-reports'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=supervisor-reports'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
-    <div class="dashboard-card">
-        <i class="fas fa-flask"></i>
-        <h3>معمل العلوم</h3>
-        <div class="card-buttons">
-            <button class="action-btn upload-btn" onclick="location.href='upload.html?section=science-lab'">
-                <i class="fas fa-upload"></i> رفع
-            </button>
-            <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=science-lab'">
-                <i class="fas fa-images"></i> معرض
-            </button>
-        </div>
-    </div>
+                <div class="dashboard-card">
+                    <i class="fas fa-flask"></i>
+                    <h3>معمل العلوم</h3>
+                    <div class="card-buttons">
+                        <button class="action-btn upload-btn" onclick="location.href='upload.html?section=science-lab'">
+                            <i class="fas fa-upload"></i> رفع
+                        </button>
+                        <button class="action-btn gallery-btn" onclick="location.href='gallery.html?section=science-lab'">
+                            <i class="fas fa-images"></i> معرض
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
