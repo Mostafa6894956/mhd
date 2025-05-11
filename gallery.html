@@ -2237,7 +2237,8 @@
                         'الرؤية و الرسالة',
                         'الجداول',
                         'ميثاق شرف المعلم',
-                        'رسم كروكي للمعهد'
+                        'رسم كروكي للمعهد',
+                        'تقارير الموجهين'
                     ],
                     'database': [
                         'قاعدة بيانات أولياء الأمور',
@@ -2512,7 +2513,6 @@
                 'curriculum-maps': 'خرائط المنهج',
                 'teacher-record': 'سجل المعلم',
                 'special-needs': 'سجل ذوي الاحتياجات الخاصة',
-                'supervisor-reports': 'تقارير الموجهين',
                 'science-lab': 'معمل العلوم',
                 'leadership-meetings': 'اجتماعات القيادة',
                 'supervisor-meetings': 'اجتماعات المشرفين',
@@ -2967,11 +2967,6 @@
             });
         }
 
-        function updateImageTransform() {
-            const img = document.getElementById('viewerImage');
-            img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
-        }
-
         // إعداد التحكم بلوحة المفاتيح
         function setupKeyboardControls() {
             document.addEventListener('keydown', (e) => {
@@ -3278,6 +3273,73 @@
             commentInput.style.height = 'auto';
             commentInput.style.height = (commentInput.scrollHeight) + 'px';
         });
+
+        // إضافة متغيرات التحكم
+        let initialDistance = null;
+        let initialScale = 1;
+        let initialX = 0;
+        let initialY = 0;
+
+        // إضافة مستمعي الأحداث لللمس
+        const viewerImage = document.getElementById('viewerImage');
+
+        viewerImage.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                // حساب المسافة الأولية بين الأصابع
+                initialDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                initialScale = currentZoom;
+            } else if (e.touches.length === 1 && currentZoom > 1) {
+                // بدء التحريك
+                initialX = e.touches[0].clientX - viewerImage.offsetLeft;
+                initialY = e.touches[0].clientY - viewerImage.offsetTop;
+            }
+        });
+
+        viewerImage.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            
+            if (e.touches.length === 2) {
+                // حساب المسافة الحالية بين الأصابع
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                
+                // حساب التكبير/التصغير
+                if (initialDistance) {
+                    const scale = (currentDistance / initialDistance) * initialScale;
+                    currentZoom = Math.max(1, Math.min(3, scale));
+                    updateImageTransform();
+                }
+            } else if (e.touches.length === 1 && currentZoom > 1) {
+                // التحريك
+                const x = e.touches[0].clientX - initialX;
+                const y = e.touches[0].clientY - initialY;
+                viewerImage.style.left = `${x}px`;
+                viewerImage.style.top = `${y}px`;
+            }
+        });
+
+        viewerImage.addEventListener('touchend', () => {
+            initialDistance = null;
+            initialX = 0;
+            initialY = 0;
+        });
+
+        // تحديث دالة تحويل الصورة
+        function updateImageTransform() {
+            const img = document.getElementById('viewerImage');
+            img.style.transform = `rotate(${currentRotation}deg) scale(${currentZoom})`;
+            
+            // إعادة تعيين الموضع إذا كان التكبير 1
+            if (currentZoom <= 1) {
+                img.style.left = '0';
+                img.style.top = '0';
+            }
+        }
     </script>
 </body>
 </html> 
