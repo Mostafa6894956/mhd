@@ -2326,9 +2326,40 @@
                         'السجل',
                         'الندوات'
                     ],
-                    'broadcast': 'الإذاعة'  // القسم الجديد بدون أقسام فرعية
+                    'broadcast': 'الإذاعة',  // القسم الجديد بدون أقسام فرعية
+                    'maintenance': [
+                        'سجل المتابعة',
+                        'الصيانة الدورية',
+                        'المشتملات المبنية'
+                    ],
+                    'student-affairs': [
+                        'سجل تحويل الصحة',
+                        'التأمين الصحي',
+                        'قاعدة بيانات التلاميذ',
+                        'نسبة الغياب والانقطاع'
+                    ],
+                    'institution-context': [
+                        'وصف كامل للمؤسسة'
+                    ],
+                    'staff-affairs': [
+                        'قاعدة بيانات العاملين',
+                        'قاعدة بيانات أولياء الأمور',
+                        'دفتر الإجازات',
+                        'سجل العودة'
+                    ],
+                    'remedial-programs': [
+                        'البرامج العلاجية',
+                        'الأنشطة الإثرائية'
+                    ],
+                    'library': [
+                        'قيد الكتب',
+                        'جدول المكتبة',
+                        'لجنة المكتبة'
+                    ],
+                    'complaints': [
+                        'النظام الإلكتروني لتلقي الشكاوي'
+                    ]
                 };
-
                 return subsectionsMap[this.currentSection] || [];
             }
 
@@ -2507,30 +2538,37 @@
             }
 
             getSectionTitle() {
-            const titles = {
-                'hierarchy': 'الهيكل التنظيمي',
-                'database': 'قاعدة البيانات',
-                'curriculum-maps': 'خرائط المنهج',
-                'teacher-record': 'سجل المعلم',
-                'special-needs': 'سجل ذوي الاحتياجات الخاصة',
-                'science-lab': 'معمل العلوم',
-                'leadership-meetings': 'اجتماعات القيادة',
-                'supervisor-meetings': 'اجتماعات المشرفين',
-                'family-meetings': 'اجتماعات الأسر',
-                'social-specialist': 'الأخصائي الاجتماعي',
-                'librarian': 'أمين المكتبة',
-                'sports': 'سجل التربية الرياضية',
-                'general-photos': 'صور عامة ولوحات المعهد',
-                'results': 'النتيجة',
-                'attendance': 'الغياب',
-                'domains': 'المجالات',
-                'notes': 'الملاحظات',
-                'training': 'وحدة التدريب',
-                'committees': 'اللجان',
-                'health-visitor': 'الزائرة الصحية',
-                'broadcast': 'الإذاعة'  // القسم الجديد بدون أقسام فرعية
-            };
-                return this.currentSubsection || titles[this.currentSection] || 'معرض الصور';
+                const titles = {
+                    'hierarchy': 'الهيكل التنظيمي',
+                    'database': 'قاعدة البيانات',
+                    'curriculum-maps': 'خرائط المنهج',
+                    'teacher-record': 'سجل المعلم',
+                    'special-needs': 'سجل ذوي الاحتياجات الخاصة',
+                    'science-lab': 'معمل العلوم',
+                    'leadership-meetings': 'اجتماعات القيادة',
+                    'supervisor-meetings': 'اجتماعات المشرفين',
+                    'family-meetings': 'اجتماعات الأسر',
+                    'social-specialist': 'الأخصائي الاجتماعي',
+                    'librarian': 'أمين المكتبة',
+                    'sports': 'سجل التربية الرياضية',
+                    'general-photos': 'صور عامة ولوحات المعهد',
+                    'results': 'النتيجة',
+                    'attendance': 'الغياب',
+                    'domains': 'المجالات',
+                    'notes': 'الملاحظات',
+                    'training': 'وحدة التدريب',
+                    'committees': 'اللجان',
+                    'health-visitor': 'الزائرة الصحية',
+                    'broadcast': 'الإذاعة',  // القسم الجديد بدون أقسام فرعية
+                    'maintenance': 'سجل المتابعة والصيانة',
+                    'student-affairs': 'شؤون الطلبة',
+                    'institution-context': 'سياق المؤسسة',
+                    'staff-affairs': 'شؤون العاملين',
+                    'remedial-programs': 'البرامج العلاجية',
+                    'library': 'أمين المكتبة',
+                    'complaints': 'لجنة الشكاوي والمقترحات'
+                };
+                return titles[this.currentSection] || 'رفع الملفات';
             }
 
             showLoading() {
