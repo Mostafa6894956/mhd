@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>عرض الملفات</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: #f8fafc;
+      min-height: 100vh;
+      padding-top: 56px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .header {
+      height: 56px;
+      background: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+    }
+
+    .header-content {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: #f8fafc;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:active {
+      background: #e2e8f0;
+      transform: scale(0.95);
+    }
+
+    .welcome-text {
+      font-size: 1rem;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 900px;
+        padding: 2rem;
+      }
+
+      .welcome-section {
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .welcome-section h1 {
+        font-size: 1.8rem;
+      }
+
+      .welcome-section p {
+        font-size: 1.1rem;
+      }
+
+      .search-box {
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stats-card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+      }
+
+      .files-grid {
+        gap: 1.5rem;
+      }
+
+      .file-card {
+        padding: 1.5rem;
+      }
+
+      .file-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.8rem;
+      }
+
+      .file-name {
+        font-size: 1.1rem;
+      }
+
+      .file-meta {
+        font-size: 0.95rem;
+      }
+
+      .btn {
+        padding: 0.85rem;
+        font-size: 1rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        max-width: 1200px;
+      }
+
+      .files-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+    }
+
+    .welcome-section {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+    }
+
+    .welcome-section h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .welcome-section p {
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    .search-box {
+      background: white;
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+      color: #1e293b;
+    }
+
+    .search-box input::placeholder {
+      color: #94a3b8;
+    }
+
+    .search-box i {
+      color: #64748b;
+    }
+
+
+
+    .stats-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3b82f6;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .loading {
+      text-align: center;
+      color: #64748b;
+      font-size: 1rem;
+      margin: 2rem 0;
+      padding: 2rem;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .files-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .file-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    .file-card:active {
+      transform: scale(0.98);
+    }
+
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .file-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .file-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .file-meta {
+      font-size: 0.85rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .file-meta::after {
+      content: '';
+      width: 1px;
+      height: 12px;
+      background: #e2e8f0;
+      margin: 0 0.25rem;
+    }
+
+    .file-meta span:last-child::after {
+      display: none;
+    }
+
+    .file-date {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.5rem;
+      background: #f8fafc;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .file-date i {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #94a3b8;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .file-actions .btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-download:active {
+      transform: scale(0.98);
+    }
+
+    .file-actions .btn:active::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+      to {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+      }
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
+      background: #e2e8f0;
+    }
+
+
+
+    .no-files {
+      text-align: center;
+      color: #64748b;
+      font-size: 1rem;
+      margin: 2rem 0;
+      background: white;
+      padding: 3rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .no-files-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 0.5rem;
+      }
+      
+      .welcome-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .welcome-section h1 {
+        font-size: 1.2rem;
+      }
+      
+      .file-card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="app-info">
+        <a href="dashboard.html" class="back-btn" style="text-decoration: none; color: inherit;">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+        <div class="welcome-text">الملفات المحفوظة</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="welcome-section">
+      <h1>الملفات</h1>
+      <p>جميع الملفات المرفوعة</p>
+    </section>
+
+    <div class="stats-card">
+      <div class="stat-number" id="totalFiles">0</div>
+      <div class="stat-label">إجمالي الملفات</div>
+    </div>
+
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="ابحث عن ملف..." />
+    </div>
+
+    <div id="loading" class="loading">
+      🔄 جاري تحميل الملفات...
+    </div>
+
+    <div id="filesContainer" class="files-grid" style="display: none;">
+      <!-- الملفات ستظهر هنا -->
+    </div>
+
+    <div id="noFiles" class="no-files" style="display: none;">
+      <div class="no-files-icon">📭</div>
+      <div>لا توجد ملفات محفوظة بعد</div>
+    </div>
+  </div>
+
+
+
+   <!-- Firebase SDK -->
+   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase configuration - يجب تغييرها حسب مشروعك
+    const firebaseConfig = {
+            apiKey: "AIzaSyB_e0oD-74pSllN0yivBYiX-4oYbO_1PJ4",
+            authDomain: "learning-8f044.firebaseapp.com",
+            databaseURL: "https://learning-8f044-default-rtdb.firebaseio.com",
+            projectId: "learning-8f044",
+            storageBucket: "learning-8f044.firebasestorage.app",
+            messagingSenderId: "453828841732",
+            appId: "1:453828841732:web:99226149b359d41df64051",
+            measurementId: "G-SCSBHBQM08"
+    };
+
+     // Initialize Firebase
+     if (!firebase.apps.length) {
+       firebase.initializeApp(firebaseConfig);
+     }
+     const database = firebase.database();
+
+    let files = [];
+    let filteredFiles = [];
+    let filesListener = null;
+    const CACHE_KEY = 'viewFilesCache';
+
+    // تحميل الملفات من Firebase مع مراقبة التغييرات
+    function loadFiles() {
+      const loadingEl = document.getElementById('loading');
+      const filesContainer = document.getElementById('filesContainer');
+      const noFilesEl = document.getElementById('noFiles');
+      
+      // Load from cache first for instant display
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const cachedData = JSON.parse(cached);
+          files = cachedData.files || [];
+          filteredFiles = [...files];
+          
+          if (files.length > 0) {
+            loadingEl.style.display = 'none';
+            updateStats();
+            applyFilter();
+            displayFiles();
+            filesContainer.style.display = 'grid';
+          }
+        } catch (e) {
+          console.error('Error loading cache:', e);
+        }
+      }
+
+      try {
+        console.log("بدء مراقبة الملفات من Firebase...");
+        
+        // Remove previous listener if exists
+        if (filesListener) {
+          database.ref('uploaded_files').off('value', filesListener);
+        }
+        
+        // Set up real-time listener
+        filesListener = database.ref('uploaded_files').on('value', (snapshot) => {
+          console.log("تم اكتشاف تغيير في البيانات");
+          
+          const newFiles = [];
+          snapshot.forEach(childSnapshot => {
+            const fileData = childSnapshot.val();
+            newFiles.push({ id: childSnapshot.key, ...fileData });
+          });
+          
+          // ترتيب الملفات حسب تاريخ الرفع (الأحدث أولاً)
+          newFiles.sort((a, b) => (b.uploadDate || 0) - (a.uploadDate || 0));
+          
+          // Check if data changed before updating
+          const hasChanged = JSON.stringify(files) !== JSON.stringify(newFiles);
+          
+          if (hasChanged) {
+            files = newFiles;
+            filteredFiles = [...files];
+            
+            // Save to cache
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+              files: files,
+              lastUpdate: Date.now()
+            }));
+
+            updateStats();
+            applyFilter();
+            displayFiles();
+          }
+          
+          loadingEl.style.display = 'none';
+          
+          if (files.length === 0) {
+            filesContainer.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><div>لا توجد ملفات محفوظة بعد</div></div>';
+            filesContainer.style.display = 'block';
+          } else {
+            filesContainer.style.display = 'grid';
+          }
+        }, (error) => {
+          console.error('خطأ في تحميل الملفات:', error);
+          loadingEl.innerHTML = '❌ حدث خطأ في تحميل الملفات';
+        });
+        
+      } catch (error) {
+        console.error('خطأ في إعداد المراقبة:', error);
+        loadingEl.innerHTML = '❌ حدث خطأ في تحميل الملفات';
+      }
+    }
+
+    // تحديث الإحصائيات
+    function updateStats() {
+      document.getElementById('totalFiles').textContent = files.length;
+    }
+
+    // عرض الملفات
+    function displayFiles() {
+      const container = document.getElementById('filesContainer');
+      container.innerHTML = '';
+
+      if (filteredFiles.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><div>لا توجد ملفات تطابق البحث</div></div>';
+        return;
+      }
+
+      filteredFiles.forEach(file => {
+        const fileCard = createFileCard(file);
+        container.appendChild(fileCard);
+      });
+    }
+
+    // إنشاء بطاقة ملف
+    function createFileCard(file) {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      
+      const isDownloadable = isDownloadableFile(file.fileType);
+      
+      card.innerHTML = `
+        <div class="file-header">
+          <div class="file-icon">${getFileIcon(file.fileType)}</div>
+          <div class="file-details">
+            <div class="file-name">${file.fileName || 'ملف غير معروف'}</div>
+            <div class="file-meta">
+              ${file.uploadDate ? `<span class="file-date"><i class="fas fa-calendar-alt"></i>${formatShortDate(file.uploadDate)}</span>` : ''}
+              <span>${formatFileSize(file.fileSize || 0)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="file-actions">
+          ${isDownloadable ? 
+            `<a href="${file.directLink}" download="${file.fileName}" class="btn btn-download">
+              <i class="fas fa-download"></i>
+              تحميل
+            </a>` : 
+            `<a href="${file.directLink}" target="_blank" class="btn btn-primary">
+              <i class="fas fa-external-link-alt"></i>
+              فتح
+            </a>`
+          }
+          <button onclick="copyToClipboard('${file.directLink}')" class="btn btn-secondary">
+            <i class="fas fa-copy"></i>
+            نسخ
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    // Check if file should be downloaded
+    function isDownloadableFile(fileType) {
+      return fileType?.includes('word') || 
+             fileType?.includes('excel') || 
+             fileType?.includes('powerpoint') ||
+             fileType?.includes('presentation') ||
+             fileType?.includes('application/vnd') ||
+             fileType?.includes('application/msword') || fileType?.includes('spreadsheet') ||
+             fileType?.includes('officedocument.presentationml');
+    }
+
+    // تطبيق الفلتر
+    function applyFilter() {
+      filteredFiles = [...files];
+      displayFiles();
+    }
+
+    // البحث في الملفات
+    function searchFiles(query) {
+      const searchTerm = query.toLowerCase();
+      filteredFiles = files.filter(file => 
+        file.fileName?.toLowerCase().includes(searchTerm)
+      );
+      displayFiles();
+    }
+
+    // الحصول على أيقونة الملف
+    function getFileIcon(fileType) {
+      if (fileType?.includes('pdf')) return '<i class="fas fa-file-pdf"></i>';
+      if (fileType?.includes('image')) return '<i class="fas fa-file-image"></i>';
+      if (fileType?.includes('video')) return '<i class="fas fa-file-video"></i>';
+      if (fileType?.includes('audio')) return '<i class="fas fa-file-audio"></i>';
+      if (fileType?.includes('text')) return '<i class="fas fa-file-alt"></i>';
+      if (fileType?.includes('zip') || fileType?.includes('rar')) return '<i class="fas fa-file-archive"></i>';
+      if (fileType?.includes('word')) return '<i class="fas fa-file-word"></i>';
+      if (fileType?.includes('excel')) return '<i class="fas fa-file-excel"></i>';
+      if (fileType?.includes('powerpoint') || fileType?.includes('presentation') || fileType?.includes('officedocument.presentationml')) return '<i class="fas fa-file-powerpoint"></i>';
+      return '<i class="fas fa-file"></i>';
+    }
+
+    // تنسيق حجم الملف
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 بايت';
+      const k = 1024;
+      const sizes = ['بايت', 'كيلوبايت', 'ميجابايت', 'جيجابايت'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // تنسيق التاريخ (قصير - ميلادي)
+    function formatShortDate(timestamp) {
+      const date = new Date(timestamp);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // تنسيق التاريخ
+    function formatDate(date) {
+      return date.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // نسخ الرابط للحافظة
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showNotification('تم نسخ الرابط بنجاح!');
+      } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('تم نسخ الرابط بنجاح!');
+      }
+    }
+
+    // إظهار إشعار
+    function showNotification(message) {
+      // Remove any existing notifications
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // Add styles for notification
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #3b82f6;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        font-size: 0.9rem;
+        animation: fadeInOut 3s forwards;
+      `;
+      
+      // Add animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInOut {
+          0% { opacity: 0; top: 0; }
+          10% { opacity: 1; top: 20px; }
+          90% { opacity: 1; top: 20px; }
+          100% { opacity: 0; top: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Remove after animation
+      setTimeout(() => {
+        notification.remove();
+        style.remove();
+      }, 3000);
+    }
+
+    // تحميل الملفات عند فتح الصفحة
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFiles();
+      
+      // Search functionality
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+        searchFiles(e.target.value);
+      });
+    });
+  </script>
+</body>
+</html>
