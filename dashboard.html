@@ -385,6 +385,31 @@
             transform: scale(0.95);
         }
 
+        /* File Management Button */
+        .file-management-btn {
+            position: fixed;
+            bottom: 5rem;
+            right: 1rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 90;
+        }
+
+        .file-management-btn:active {
+            transform: scale(0.95);
+        }
+
         @media (min-width: 640px) {
             .dashboard-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -1360,6 +1385,11 @@
             <i class="fas fa-robot"></i>
         </button>
 
+        <!-- إضافة زر إدارة الملفات -->
+        <button class="file-management-btn" onclick="navigateToFileManagement()" title="إدارة الملفات">
+            <i class="fas fa-folder-open"></i>
+        </button>
+
         <!-- تحديث النافذة المنبثقة -->
         
     </div>
@@ -2139,6 +2169,11 @@
         window.navigateToAIChat = function() {
                 window.location.href = 'ai-chat.html';
             }
+
+        // Navigate to file management
+        window.navigateToFileManagement = function() {
+            window.location.href = 'view-files.html';
+        }
     </script>
 </body>
 </html>
